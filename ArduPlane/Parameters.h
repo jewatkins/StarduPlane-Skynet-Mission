@@ -106,6 +106,28 @@ public:
         k_param_flaperon_output,
         k_param_gps,
         k_param_autotune_level,
+        // 70: AA241X
+        k_param_aa241x_1 = 70,   // AA241X parameter #1
+        k_param_aa241x_2,
+        k_param_aa241x_3,
+        k_param_aa241x_4,
+        k_param_aa241x_5,
+        k_param_aa241x_6,
+        k_param_aa241x_7,
+        k_param_aa241x_8,
+        k_param_aa241x_9,
+        k_param_aa241x_10,
+        k_param_aa241x_11,
+        k_param_aa241x_12,
+        k_param_aa241x_13,
+        k_param_aa241x_14,
+        k_param_aa241x_15,
+        k_param_aa241x_16,
+        k_param_aa241x_17,
+        k_param_aa241x_18,
+        k_param_aa241x_19,
+        k_param_aa241x_20,
+        k_param_aa241x_distribution_index,
 
         // 100: Arming parameters
         k_param_arming = 100,
@@ -390,6 +412,29 @@ public:
     AP_Int16 acro_pitch_rate;
     AP_Int8  acro_locking;
 
+    
+    // AA241X parameters
+    AP_Float aa241x_1;
+    AP_Float aa241x_2;
+    AP_Float aa241x_3;
+    AP_Float aa241x_4;
+    AP_Float aa241x_5;
+    AP_Float aa241x_6;
+    AP_Float aa241x_7;
+    AP_Float aa241x_8;
+    AP_Float aa241x_9;
+    AP_Float aa241x_10;
+    AP_Float aa241x_11;
+    AP_Float aa241x_12;
+    AP_Float aa241x_13;
+    AP_Float aa241x_14;
+    AP_Float aa241x_15;
+    AP_Float aa241x_16;
+    AP_Float aa241x_17;
+    AP_Float aa241x_18;
+    AP_Float aa241x_19;
+    AP_Float aa241x_20;
+    AP_Float aa241x_distribution_index;
     // Misc
     //
     AP_Int8 auto_trim;

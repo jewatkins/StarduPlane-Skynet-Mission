@@ -807,6 +807,33 @@ const AP_Param::Info var_info[] PROGMEM = {
     GSCALAR(hil_err_limit,         "HIL_ERR_LIMIT",   5),
 #endif
 
+
+    // @Param: AA241X parameters
+    // @DisplayName: 
+    // @Description: 
+    // @Values: 
+    // @User: 
+    GSCALAR(aa241x_1,     AA241X_1_NAME,    AA241X_1_DEFAULT),
+    GSCALAR(aa241x_2,     AA241X_2_NAME,    AA241X_2_DEFAULT),
+    GSCALAR(aa241x_3,     AA241X_3_NAME,    AA241X_3_DEFAULT),
+    GSCALAR(aa241x_4,     AA241X_4_NAME,    AA241X_4_DEFAULT),
+    GSCALAR(aa241x_5,     AA241X_5_NAME,    AA241X_5_DEFAULT),
+    GSCALAR(aa241x_6,     AA241X_6_NAME,    AA241X_6_DEFAULT),
+    GSCALAR(aa241x_7,     AA241X_7_NAME,    AA241X_7_DEFAULT),
+    GSCALAR(aa241x_8,     AA241X_8_NAME,    AA241X_8_DEFAULT),
+    GSCALAR(aa241x_9,     AA241X_9_NAME,    AA241X_9_DEFAULT),
+    GSCALAR(aa241x_10,    AA241X_10_NAME,    AA241X_10_DEFAULT),
+    GSCALAR(aa241x_11,    AA241X_11_NAME,    AA241X_11_DEFAULT),
+    GSCALAR(aa241x_12,    AA241X_12_NAME,    AA241X_12_DEFAULT),
+    GSCALAR(aa241x_13,    AA241X_13_NAME,    AA241X_13_DEFAULT),
+    GSCALAR(aa241x_14,    AA241X_14_NAME,    AA241X_14_DEFAULT),
+    GSCALAR(aa241x_15,    AA241X_15_NAME,    AA241X_15_DEFAULT),
+    GSCALAR(aa241x_16,    AA241X_16_NAME,    AA241X_16_DEFAULT),
+    GSCALAR(aa241x_17,    AA241X_17_NAME,    AA241X_17_DEFAULT),
+    GSCALAR(aa241x_18,    AA241X_18_NAME,    AA241X_18_DEFAULT),
+    GSCALAR(aa241x_19,    AA241X_19_NAME,    AA241X_19_DEFAULT),
+    GSCALAR(aa241x_20,    AA241X_20_NAME,    AA241X_20_DEFAULT),
+    GSCALAR(aa241x_distribution_index,    "AA241X_PERSONS",   0),
     // barometer ground calibration. The GND_ prefix is chosen for
     // compatibility with previous releases of ArduPlane
     // @Group: GND_

@@ -126,7 +126,10 @@ enum log_messages {
     LOG_SONAR_MSG,
     LOG_COMPASS2_MSG,
     LOG_ARM_DISARM_MSG,
-    LOG_AIRSPEED_MSG
+    LOG_AIRSPEED_MSG, 
+    LOG_AA241X_MF_MSG,
+    LOG_AA241X_HF_MSG,
+    LOG_AA241X_LF_MSG,
 };
 
 #define MASK_LOG_ATTITUDE_FAST          (1<<0)
