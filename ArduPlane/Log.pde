@@ -581,7 +581,7 @@ struct PACKED log_AA241X_MF {
 
 };
 
-// Write a AIRSPEED packet
+
 static void Log_Write_AA241X_MF(void)
 {
   const Location &loc = gps.location(0);
@@ -760,7 +760,7 @@ static const struct LogStructure log_structure[] PROGMEM = {
     { LOG_AIRSPEED_MSG, sizeof(log_AIRSPEED),
       "ARSP",  "Iffc",     "TimeMS,Airspeed,DiffPress,Temp" },
     { LOG_AA241X_MF_MSG, sizeof(log_AA241X_MF),
-      "MF",  "IIfffffBBCCHB",     "CPU_time_ms,roll" },
+      "MF",  "IIfffffBBCCHB",     "CPU_t_ms,GPS_t_ms,X_p,Y_p,Z_p,Gnd_Speed,Gnd_Course,GPS_Fix,GPS_NumSats,Batt_current,Batt_voltage,Batt_energt,Control_mode" },
     { LOG_AA241X_HF_MSG, sizeof(log_AA241X_HF),
       "HF",  "IfffffffffHHHH",     "CPU_time_ms,roll" },
     TECS_LOG_FORMAT(LOG_TECS_MSG)

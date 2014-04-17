@@ -834,6 +834,8 @@ const AP_Param::Info var_info[] PROGMEM = {
     GSCALAR(aa241x_19,    AA241X_19_NAME,    AA241X_19_DEFAULT),
     GSCALAR(aa241x_20,    AA241X_20_NAME,    AA241X_20_DEFAULT),
     GSCALAR(aa241x_distribution_index,    "AA241X_PERSONS",   0),
+    GSCALAR(aa241x_attitude_log_frequency,    "AA241X_ATT_LOG",   0),
+    
     // barometer ground calibration. The GND_ prefix is chosen for
     // compatibility with previous releases of ArduPlane
     // @Group: GND_

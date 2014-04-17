@@ -725,6 +725,12 @@ static const AP_Scheduler::Task scheduler_tasks[] PROGMEM = {
     { compass_save,        3000,   2500 },
     { update_logging1,        5,   1700 },
     { update_logging2,        5,   1700 },
+    { update_AA241X_flight_variables, 1, 4000},
+    { AA241X_AUX_MediumLoop, 5, 1000},
+    { AA241X_AUX_SlowLoop, 50, 1000},
+    { Log_Write_AA241X_MF, 5, 2000},
+    { Log_Write_AA241X_AHF, 1, 2000},
+    { Log_Write_AA241X_AMF, 5, 2000},
 };
 
 // setup the var_info table

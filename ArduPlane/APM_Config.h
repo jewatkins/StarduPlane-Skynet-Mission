@@ -21,3 +21,13 @@
  *
  */
 
+
+# define THROTTLE_FAILSAFE              DISABLED
+
+# define THROTTLE_OUT                   DISABLED
+
+# define CAMERA         DISABLED
+
+# define MOUNT          DISABLED
+
+# define GEOFENCE_ENABLED DISABLED

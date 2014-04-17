@@ -966,6 +966,14 @@ static void set_servos(void)
     }
 #endif
 
+    // AA241X - start
+    if (control_mode==AUTO) {
+      AA241X_AUTO_FastLoop();
+      update_Last_AUTO_time_and_Main_loop_deltaTime();
+      update_servos();
+    }
+    // AA241X - end
+
     // send values to the PWM timers for output
     // ----------------------------------------
     channel_roll->output();

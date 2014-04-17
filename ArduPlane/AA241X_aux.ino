@@ -91,6 +91,20 @@ static void update_Last_AUTO_time_and_Main_loop_deltaTime(void){
  // Main_loop_deltaTime_ms = (float)delta_ms_main_loop;
 }
 
+static void AA241X_AUX_MediumLoop(void){
+  if (control_mode == AUTO)
+  {
+      AA241X_AUTO_MediumLoop();
+  }
+}
+
+static void AA241X_AUX_SlowLoop(void){
+  if (control_mode == AUTO)
+  {
+      AA241X_AUTO_SlowLoop();
+  }
+}
+
 
 // UPDATE FLIGHT VARIABLES used for AA241X Control Law
 static void update_AA241X_flight_variables(void) {
@@ -314,6 +328,22 @@ static void updateScore(float *X_person_truth, float *Y_person_truth){
   
   Score = ALPHA/sum + BETA/t_sight;
 }
+
+
+static void Log_Write_AA241X_AHF(void){
+ if (g.aa241x_attitude_log_frequency == 1)
+ {
+   Log_Write_AA241X_HF();
+ }
+}
+
+static void Log_Write_AA241X_AMF(void){
+ if (g.aa241x_attitude_log_frequency != 1)
+ {
+   Log_Write_AA241X_HF();
+ }
+}
+
 
 // Write an AA241X data packet to memory. Total length : 30 bytes
 static void Log_Write_AA241X(void)
