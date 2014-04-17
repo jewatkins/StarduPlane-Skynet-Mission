@@ -760,9 +760,9 @@ static const struct LogStructure log_structure[] PROGMEM = {
     { LOG_AIRSPEED_MSG, sizeof(log_AIRSPEED),
       "ARSP",  "Iffc",     "TimeMS,Airspeed,DiffPress,Temp" },
     { LOG_AA241X_MF_MSG, sizeof(log_AA241X_MF),
-      "MF",  "IIfffffBBCCHB",     "CPU_t_ms,GPS_t_ms,X_p,Y_p,Z_p,Gnd_Speed,Gnd_Course,GPS_Fix,GPS_NumSats,Batt_current,Batt_voltage,Batt_energt,Control_mode" },
+      "MF",  "IIfffffBBCCHB",     "CP_t,GP_t,X_p,Y_p,Z_pG,Gnd_S,Gnd_C,GP_F,GP_NS,B_c,B_v,B_e,c_m" },
     { LOG_AA241X_HF_MSG, sizeof(log_AA241X_HF),
-      "HF",  "IfffffffffHHHH",     "CPU_time_ms,roll" },
+      "HF",  "IfffffffffHHHH",     "CP_t,Z_pB,Z_v,Asp,fi,theta,psi,p,q,r,CH1,CH2,CH3,CH4" },
     TECS_LOG_FORMAT(LOG_TECS_MSG)
 };
 
