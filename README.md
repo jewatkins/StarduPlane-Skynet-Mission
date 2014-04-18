@@ -23,7 +23,10 @@ The second option is prefered to allow you to pull future updates of the base co
 
 To build this source you will need a Windows operating system with the custom Arduino development environment available.  Instructions on setting this up can be found here -- [Dev.Ardupilot] (http://dev.ardupilot.com/wiki/building-ardupilot-with-arduino-windows/)
 
+## Wiki
+Most or all of the relevant information on how to use StarduPlane will be available at the repositorie's Wiki
+
 
 # Development Team
 
-The StarduPilot project is beasted by Robbie Bunge
+The StarduPilot project is beasted by Robbie Bunge.
