@@ -4,6 +4,8 @@ This is a fork of the ArduPilot project to expose state and control variables fo
 
 You can find lots of development information at the [ArduPilot development site](http://dev.ardupilot.com)
 
+At the moment, this code only builds on a windows machine...
+
 
 ## Getting this source to your machine
 
