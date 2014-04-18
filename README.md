@@ -12,11 +12,7 @@ Two options:
 1. You can download the source using the "ZIP" button at the top
 of the github page.  
 
-2. You can make a clone using git:
-
-```
-git clone git://github.com/diydrones/ardupilot.git
-```
+2. You can make a clone using git, see the instructions here -- [Dev.Ardupilot] (http://dev.ardupilot.com/wiki/building-ardupilot-with-arduino-windows/)
 
 The second option is prefered to allow you to pull future updates of the base code.
 
