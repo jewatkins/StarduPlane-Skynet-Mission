@@ -31,3 +31,5 @@
 # define MOUNT          DISABLED
 
 # define GEOFENCE_ENABLED DISABLED
+
+//#define DEFAULT_LOG_BITMASK   0x0
