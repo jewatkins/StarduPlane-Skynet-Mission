@@ -57,10 +57,10 @@ static float Throttle_servo; // Servo associated with Channel 3
 static float Rudder_servo;   // Servo associated with Channel 4
 
 // Position to which the servos are commanded by the RC Transmitter, in % of full range (i.e. 0.0 = lower physical limit, 100.0 = upper physical limit)
-static float RC_roll;  // Command read on Input 1 or APM 2.5, coming from the RC Transmitter, through the receiver
-static float RC_pitch;  // Command read on Input 1 or APM 2.5, coming from the RC Transmitter, through the receiver
-static float RC_throttle;  // Command read on Input 1 or APM 2.5, coming from the RC Transmitter, through the receiver
-static float RC_rudder;  // Command read on Input 1 or APM 2.5, coming from the RC Transmitter, through the receiver
+static float RC_roll;      // Command read on Input 1, coming from the RC Transmitter, through the receiver
+static float RC_pitch;     // Command read on Input 2, coming from the RC Transmitter, through the receiver
+static float RC_throttle;  // Command read on Input 3, coming from the RC Transmitter, through the receiver
+static float RC_rudder;    // Command read on Input 4, coming from the RC Transmitter, through the receiver
 
 static float RC_Roll_Trim;      // Position of roll stick on RC Transmitter at the instant when control mode switched out of MANUAL, in % of full range. (i.e. 50.0 is halfway, 0.0 all to one side, 100.0 all to the opposite side)
 static float RC_Pitch_Trim;     // Position of pitch stick on RC Transmitter at the instant when control mode switched out of MANUAL, in % of full range
@@ -74,8 +74,8 @@ static float Last_AUTO_stampTime_ms = 0.0; // holds the last CPU time in ms for 
 
 static int   personDistributionIndex = 0; // This selects which of the 10 sample distributions you use for your training runs
 
-static float X_person_estimate[3];  // your estimate of the X_position for each of the 3 lost persons, in meters
-static float Y_person_estimate[3];  // your estimate of the Y_position for each of the 3 lost persons, in meters
+static float X_person_estimate[4];  // your estimate of the X_position for each of the 3 lost persons, in meters
+static float Y_person_estimate[4];  // your estimate of the Y_position for each of the 3 lost persons, in meters
 
 static float CPU_time_mission_ms = 0.0;
 static char in_mission = 0;
@@ -107,15 +107,15 @@ static float WayPointHeading[3];
 struct snapshot{
     char pictureTaken;
     unsigned long timeOfPicture_ms;
-    char personsInPicture[3];
+    char personsInPicture[4];
     
     float centerOfPictureX;
     float centerOfPictureY;
     float diameterOfPicture;
     
-    float centerOfPersonEstimateX[3];
-    float centerOfPersonEstimateY[3];
-    float diameterOfPersonEstimate[3];
+    float centerOfPersonEstimateX[4];
+    float centerOfPersonEstimateY[4];
+    float diameterOfPersonEstimate[4];
 };
 
 static struct snapshot takeASnapshot(){

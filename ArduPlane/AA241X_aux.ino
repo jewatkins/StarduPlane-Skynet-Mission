@@ -23,16 +23,16 @@
 #define MAX_ALTITUDE 121.92 // max altitude in meters above Lake Lag allowed for flight.  Above this altitude, the camera function stops returning snapshots 
 #define MIN_ALTITUDE_SNAPSHOT 30.48  // min altitude in meters above Lake Lag allowed for flight.
 #define ALTITUDE_START 15.24  // min altitude in meters above Lake Lag allowed for flight.
-#define MAX_FOV_DIAM 100.0
-#define MIN_FOV_DIAM 50.0
-#define MAX_ESTIMATE_DIAM 25.0
-#define MIN_ESTIMATE_DIAM 10.0
+#define MAX_FOV_DIAM 60.0
+#define MIN_FOV_DIAM 30.0
+#define MAX_ESTIMATE_DIAM 40.0
+#define MIN_ESTIMATE_DIAM 20.0
 
 #define WAIT_TIME_MS 3000  // wait time between pictures
 
-#define ALPHA 300.0  // weight for position error term
-#define BETA 2000.0  // weight for time of sight term
-#define GAMMA 3.0  // min position error used for score
+#define ALPHA 200.0  // weight for position error term
+#define BETA 5000.0  // weight for time of sight term
+#define GAMMA 1.0  // min position error used for score
 
 #define Z_POS_CONST 0.7  // constant for the Z_position_Baro low pass filter
 #define Z_VEL_CONST 0.7  // constant for the Z_velocity low pass filter
@@ -41,13 +41,6 @@
 
 
 // *****  AA241X AUXILIARY FUNCTIONS - IF BUGS FOUND LET US KNOW ASAP, DO NOT EDIT!   ***** //
-
-// Array with different stranded persons distributions. 
-//const float persons_location[][3][2] = { {{57.75,     100.026},   {-115.5 ,  0.0     },  {57.75,     -100.026}}, 
-//                                         {{32.9899,   78.7251},   {80.6690, -140.6848},  {-18.2864,  -23.8934}},
-//                                         {{70.3668,   22.3351},   {80.0197, -118.3350},  {-115.9529, -73.8221}},
-//                      {{-109.7851, 84.6363},   {-0.6705,   19.6712},  {132.0063,  -2.2230 }} };
-
 
 const int Competition_day = 99;
 
@@ -65,13 +58,13 @@ static struct Location loc;
 static struct Location center_lake_lag;
 
 static char sighted_persons = 0; 
-static char sightedPerson[3] = {0, 0, 0};
+static char sightedPerson[4] = {0, 0, 0};
 static float CPU_time_sight_ms = 0.0;
 
 static float CPU_time_start_ms = 0.0;
 
-static float X_person_truth[3];
-static float Y_person_truth[3];
+static float X_person_truth[4];
+static float Y_person_truth[4];
 
 // UPDAET SERVO POSITIONS
 static void update_servos(void){
@@ -258,11 +251,12 @@ static void update_AA241X_flight_variables(void) {
       sightedPerson[0] = 0;
       sightedPerson[1] = 0;
       sightedPerson[2] = 0;
+      sightedPerson[3] = 0;
       sighted_persons = 0;
       CPU_time_sight_ms = 0.0;
       mission_energy_consumed = 0.0;
       // record true positions of persons
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 4; i++) {
         X_person_truth[i] = persons_location[personDistributionIndex][i][0];
         Y_person_truth[i] = persons_location[personDistributionIndex][i][1];
         X_person_estimate[i] = 1e3;
@@ -289,7 +283,12 @@ static void update_AA241X_flight_variables(void) {
   }
   
   // determine fisrt time of sighting all three persons
-  if (sighted_persons == 0 && sightedPerson[0] == 1 && sightedPerson[1] == 1 && sightedPerson[2] == 1){
+  if ( sighted_persons == 0  && 
+       sightedPerson[0] == 1 && 
+       sightedPerson[1] == 1 && 
+       sightedPerson[2] == 1 && 
+       sightedPerson[3] == 1    )
+  {
       CPU_time_sight_ms = CPU_time_ms - CPU_time_start_ms ;
       sighted_persons = 1;
   }
@@ -318,7 +317,7 @@ static void updateScore(float *X_person_truth, float *Y_person_truth){
   
   if (mission_energy_consumed > ENERGY_LIMIT) return;
   
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 4; i++){
     errX = (X_person_estimate[i] - X_person_truth[i]);
     errY = (Y_person_estimate[i] - Y_person_truth[i]);
     err = sqrt(errX*errX + errY*errY);
@@ -420,6 +419,8 @@ static void Log_Write_AA241X(void)
 //    DataFlash.WriteLong((int32_t)(100.0*(Y_person_estimate[1] - Y_person_truth[1])));
 //    DataFlash.WriteLong((int32_t)(100.0*(X_person_estimate[2] - X_person_truth[2])));
 //    DataFlash.WriteLong((int32_t)(100.0*(Y_person_estimate[2] - Y_person_truth[2])));
+//    DataFlash.WriteLong((int32_t)(100.0*(X_person_estimate[3] - X_person_truth[3])));
+//    DataFlash.WriteLong((int32_t)(100.0*(Y_person_estimate[3] - Y_person_truth[3])));
 //    DataFlash.WriteLong((long)(100.0*Score));
 //    DataFlash.WriteByte((byte)Competition_day);
 //    DataFlash.WriteByte((byte)personDistributionIndex);
@@ -572,17 +573,24 @@ static struct snapshot takeSnapshot(float X_current, float Y_current, float alti
     current_time_ms = millis();
     static uint32_t last_time_ms = 0;
     snapshot mySnap;
-
+    
     mySnap.pictureTaken = 0;
     mySnap.timeOfPicture_ms = 0;
     mySnap.personsInPicture[0] = 0;
     mySnap.personsInPicture[1] = 0;
     mySnap.personsInPicture[2] = 0;
+    mySnap.personsInPicture[3] = 0;
     mySnap.diameterOfPicture = 0.0;
     mySnap.centerOfPictureX = 0.0;
     mySnap.centerOfPictureY = 0.0;
 
-    if ( gpsOK && (current_time_ms - last_time_ms) >= WAIT_TIME_MS  && MIN_ALTITUDE_SNAPSHOT <= altitude && altitude <= MAX_ALTITUDE && mission_energy_consumed < ENERGY_LIMIT){
+    if ( gpsOK                                             && 
+         (current_time_ms - last_time_ms) >= WAIT_TIME_MS  && 
+         MIN_ALTITUDE_SNAPSHOT <= altitude                 && 
+         altitude <= MAX_ALTITUDE                          && 
+         mission_energy_consumed < ENERGY_LIMIT 
+       )
+    {
         mySnap.pictureTaken = 1;
         mySnap.timeOfPicture_ms = CPU_time_mission_ms;
         mySnap.centerOfPictureX = X_current;
@@ -606,15 +614,16 @@ static void personEstimates(snapshot &mySnap, float X_current, float Y_current, 
     pict_radius = 0.5*mySnap.diameterOfPicture;
     
     // check which persons are in the field of view, and get estimate if in FOV
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         X_person_i = persons_location[personDistributionIndex][i][0];
         Y_person_i = persons_location[personDistributionIndex][i][1];
         dX = (X_current - X_person_i);
         dY = (Y_current - Y_person_i);
 
+        // if person is in field of view
         if ((dX*dX + dY*dY) <= pict_radius*pict_radius) {
-          sightedPerson[i] = 1;
-          mySnap.personsInPicture[i] = 1;
+          sightedPerson[i] = 1; // is sighted (for scoring first sight)
+          mySnap.personsInPicture[i] = 1; // is in picture (for snapshot)
           getPersonEstimate(mySnap, X_person_i, Y_person_i, altitude, i);
         }
     }
@@ -623,6 +632,7 @@ static void personEstimates(snapshot &mySnap, float X_current, float Y_current, 
 // Random number generator
 unsigned long GetUint(unsigned long& u, unsigned long& v);
 float GetUniform(unsigned long& u, unsigned long& v);
+float GetNormal(float z);
 
 unsigned long u = 521288629;
 unsigned long v = 362436069;
@@ -642,17 +652,22 @@ float GetUniform(unsigned long& u, unsigned long& v)
     return z*2.328306435996595e-10;
 }
 
+
 static void getPersonEstimate(snapshot &mySnap, float X_person_i, float Y_person_i, float altitude, int i){
-  float diam;
   
-  diam = getDiameterOfPersonEstimate(altitude);
+  float diam = getDiameterOfPersonEstimate(altitude);
   mySnap.diameterOfPersonEstimate[i] = diam;
+
+  // --- Uniform distribution inside circle of radius diam/2
+  // float radius = GetUniform(u,v)*0.5*diam;  // uniform from 0 ~ 0.5*diam
+  // float theta  = GetUniform(u,v)*2*PI;      // uniform from 0 ~ 2*PI
+
+  // --- Bivariate Normal Distribution with 3*sig_r = diam/2
+  float radius = sqrt( -2.0 * log(GetUniform(u,v)) ) * 0.5*diam/3.0;  // exponential in r^2 from 0 ~ inf
+  float theta  = GetUniform(u,v)*2*PI;                                // uniform from 0 ~ 2*PI
   
-  float r = GetUniform(u,v)*0.5*diam;  // uniform from 0 ~ 0.5*diam
-  float theta = GetUniform(u,v)*2*PI;  // uniform from 0 ~ 2*PI
-  
-  mySnap.centerOfPersonEstimateX[i] = r*cos(theta) + X_person_i;
-  mySnap.centerOfPersonEstimateY[i] = r*sin(theta) + Y_person_i;
+  mySnap.centerOfPersonEstimateX[i] = radius*cos(theta) + X_person_i;
+  mySnap.centerOfPersonEstimateY[i] = radius*sin(theta) + Y_person_i;
 }
 
 static float get_diameterOfPicture(float altitude){
