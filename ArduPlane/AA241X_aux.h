@@ -1,6 +1,13 @@
 
 #define ENERGY_LIMIT   0.450*7.4*3600 // max energy in Joules allowed for the mission.  Above this energy consumption, the camera function stops returning snapshots
 
+// ***** Multiplier matrices to convert logged variables in SI, degrees and % of full PWM units  ***** //
+// If you multiply each column of the respective log line (MF or HF) by these coefficients, this should convert the data to SI units, except for angles and angular rates, which are in
+// degrees.  The Servo positions will be expressed in % of full deflection (i.e. the same as RC_roll)
+// MF = [1 1 1/100 1/100 1/100 1/100 1/100 1 1 1/100 1/100 1 1 1/100 1/100] 
+// HF = [1 1/100 1/100 1/100 1/100 1 1 1 1/2 1/2 1/2 1/2]
+
+
 // ***** AA241X FLIGHT VARIABLE DEFINITIONS  *****  //
 // Euler angles, in radians from -PI to PI . Computed using attitude filter
 // compensating for gyro and dead-reckoning drifts using accelerometer,
