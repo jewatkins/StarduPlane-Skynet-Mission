@@ -158,7 +158,7 @@ static void update_AA241X_flight_variables(void) {
   yaw_rate    = angular_vel.z;
   
   // Z_position_Baro and Z_velocity filters
-  Z_position_Baro_raw = -1.0*(relative_altitude() + home.alt - CENTER_LAGUNITA_ALT*100)/100.0;  // Z_position in meters from center of lake lag
+  Z_position_Baro_raw = -1.0*(relative_altitude() + home.alt/100.0 - CENTER_LAGUNITA_ALT);  // Z_position in meters from center of lake lag
   if (Z_filter_flag == 0) {
     Z_position_Baro = Z_position_Baro_raw;
     Z_velocity = 0.0;
@@ -190,7 +190,7 @@ static void update_AA241X_flight_variables(void) {
     
     X_position     = cos(bearing)*dist;
     Y_position     = sin(bearing)*dist;
-    Z_position_GPS = -((float)(gps.location().alt * 10UL)*1000- CENTER_LAGUNITA_ALT)/100.0;  // altitude in MSL
+    Z_position_GPS = -((float)(gps.location().alt * 10UL)/1000.0- CENTER_LAGUNITA_ALT); // altitude in MSL
   
     ground_speed  = ((float) gps.ground_speed())/100.0; 
     ground_course = (((float) gps.ground_course_cd())/100.0)*PI/180;
@@ -330,7 +330,7 @@ static void updateScore(float *X_person_truth, float *Y_person_truth){
 
 
 static void Log_Write_AA241X_AHF(void){
- if (g.aa241x_attitude_log_frequency == 1)
+ if (g.aa241x_attitude_log_frequency == 1 && (-Z_position_Baro - (home.alt/100.0 - CENTER_LAGUNITA_ALT)) > g.aa241x_attitude_log_altitude )
  {
    Log_Write_AA241X_HF();
  }

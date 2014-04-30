@@ -542,7 +542,7 @@ static void Log_Write_Airspeed(void)
 
 struct PACKED log_AA241X_MF {
     LOG_PACKET_HEADER;
-    // Medium Frequency Variables "II fff ff BB CCH B" 
+    // Medium Frequency Variables "II fff ff BB CCH B hH" 
     uint32_t cpu_time_ms;  // I
     uint32_t gps_time_ms;  // I
     
@@ -556,28 +556,14 @@ struct PACKED log_AA241X_MF {
     uint8_t GPS_Fix;      // B
     uint8_t GPS_NumSats;  // B
     
-//    int32_t Latitude;  // L
-//    int32_t Longitude; // L
-//    
-//    int16_t Accel_x;  // c
-//    int16_t Accel_y;  // c 
-//    int16_t Accel_z;  // c
-    
     uint16_t Battery_Current;  // C
     uint16_t Battery_Voltage;   // C
     uint16_t Battery_Energy_Consumed;    // H
     
     uint8_t Control_Mode;  // B
     
-//    uint16_t AA241X_Roll_Servo_Command_PWM;  // H
-//    uint16_t AA241X_Pitch_Servo_Command_PWM;
-//    uint16_t AA241X_Throttle_Servo_Command_PWM;
-//    uint16_t AA241X_Rudder_Servo_Command_PWM;
-//    
-//    uint16_t RC_Roll_Servo_Command_PWM;   // H
-//    uint16_t RC_Pitch_Servo_Command_PWM;
-//    uint16_t RC_Throttle_Servo_Command_PWM;
-//    uint16_t RC_Rudder_Servo_Command_PWM;
+    int16_t Z_Velocity;  // h
+    uint16_t airspeed;   // H
 
 };
 
@@ -600,134 +586,64 @@ static void Log_Write_AA241X_MF(void)
         GPS_Fix       :  gps.status(0),      // B
         GPS_NumSats   :  gps.num_sats(0),  // B
         
-//        Latitude      :  loc.lat,  // L
-//        Longitude     :  loc.lng, // L
-//        
-//        Accel_x : accel_x,  // c
-//        Accel_y : accel_y,  // c 
-//        Accel_z : accel_z,  // c
-        
         Battery_Current  :   battery_current*100,  // C
         Battery_Voltage  :   battery_voltage*100,   // B
         Battery_Energy_Consumed  :  battery_energy_consumed,    // H
         
         Control_Mode   :  control_mode,   // B
         
-//        AA241X_Roll_Servo_Command_PWM        :  AA241X_roll_servo_PWM,  // H
-//        AA241X_Pitch_Servo_Command_PWM       :  AA241X_pitch_servo_PWM,   
-//        AA241X_Throttle_Servo_Command_PWM    :  AA241X_throttle_servo_PWM,
-//        AA241X_Rudder_Servo_Command_PWM      :  AA241X_rudder_servo_PWM,
-//        
-//        RC_Roll_Servo_Command_PWM            :  RC_roll_PWM,   // H
-//        RC_Pitch_Servo_Command_PWM           :  RC_pitch_PWM,
-//        RC_Throttle_Servo_Command_PWM        :  RC_throttle_PWM,
-//        RC_Rudder_Servo_Command_PWM          :  RC_rudder_PWM,
+        Z_Velocity        :  Z_velocity*100,
+        airspeed          :  Air_speed*100,
+
     };
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
 
 struct PACKED log_AA241X_HF {
     LOG_PACKET_HEADER;   
-    // High Frequency Variables  "I fff fff fff HHHH"
-    uint32_t cpu_time_ms;  // I
+    // High Frequency Variables  "H h hhh fff BBBB"
+    uint16_t cpu_time_ms;  // H
     
-    float Z_Position_Baro;
-    float Z_Velocity;
-    float airspeed;
+    int16_t Z_Position_Baro; // h
     
-    float Roll;
-    float Pitch;
-    float Yaw;
+    int16_t Roll;  // h
+    int16_t Pitch; // h
+    int16_t Yaw;   // h
     
-    float Roll_rate;
-    float Pitch_rate;
-    float Yaw_rate;
+    float Roll_rate;     // f
+    float Pitch_rate;    // f
+    float Yaw_rate;      // f
     
-    uint16_t Roll_Servo_Out_PWM;      // H
-    uint16_t Pitch_Servo_Out_PWM;
-    uint16_t Throttle_Servo_Out_PWM;
-    uint16_t Rudder_Servo_Out_PWM;
+    uint8_t Roll_Servo_Out_PWM;      // B
+    uint8_t Pitch_Servo_Out_PWM;     // B
+    uint8_t Throttle_Servo_Out_PWM;  // B
+    uint8_t Rudder_Servo_Out_PWM;    // B
 };
 
 static void Log_Write_AA241X_HF(void)
 {
     struct log_AA241X_HF pkt = {
         LOG_PACKET_HEADER_INIT(LOG_AA241X_HF_MSG),
-        // High Frequency Variables  "I fff fff fff HHHH"
-        cpu_time_ms   :  CPU_time_ms,  // I 
+        // High Frequency Variables 
+        cpu_time_ms   :  CPU_time_ms,  
         
-        Z_Position_Baro   :  Z_position_Baro,
-        Z_Velocity        :  Z_velocity,
-        airspeed          :  Air_speed,
+        Z_Position_Baro   :  Z_position_Baro*100.0, 
         
-        Roll   :  ToDeg(roll),
-        Pitch  :  ToDeg(pitch),
-        Yaw    :  ToDeg(yaw),
+        Roll   :  ToDeg(roll)*100,
+        Pitch  :  ToDeg(pitch)*100,
+        Yaw    :  ToDeg(yaw)*100,
         
         Roll_rate   : ToDeg(roll_rate),
         Pitch_rate  : ToDeg(pitch_rate),
         Yaw_rate    : ToDeg(yaw_rate),
         
-        Roll_Servo_Out_PWM       :   channel_roll->radio_out,      // H
-        Pitch_Servo_Out_PWM      :   channel_pitch->radio_out,
-        Throttle_Servo_Out_PWM   :   channel_throttle->radio_out,
-        Rudder_Servo_Out_PWM     :   channel_rudder->radio_out, 
+        Roll_Servo_Out_PWM       :   200.0*((channel_roll->radio_out  - PWM_MIN))/((float)(PWM_MAX - PWM_MIN)),      
+        Pitch_Servo_Out_PWM      :   200.0*((channel_pitch->radio_out  - PWM_MIN))/((float)(PWM_MAX - PWM_MIN)),
+        Throttle_Servo_Out_PWM   :   200.0*((channel_throttle->radio_out - PWM_MIN))/((float)(PWM_MAX - PWM_MIN)),
+        Rudder_Servo_Out_PWM     :   200.0*((channel_rudder->radio_out - PWM_MIN))/((float)(PWM_MAX - PWM_MIN)), 
     };
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
-
-
-//sruct PACKED log_AA241X_LowFreq {
-//    LOG_PACKET_HEADER; 
-//    CPU_time, 
-//    GPS_time, 
-//    X_position,
-//    Y_position,
-//    Z_position_Baro,
-//    Z_position_GPS,
-//    u_vel, 
-//    v_vel,
-//    w_vel,
-//    X_velocity,
-//    Y_velocity,
-//    Z_velocity,
-//    ground_speed,
-//    ground_course,
-//    roll,
-//    pitch,
-//    yaw,
-//    roll_rate,
-//    pitch_rate,
-//    yaw_rate,
-//    Air_speed,
-//    GPS_Fix,
-//    GPS_NumSats,
-//    Latitude,
-//    Longitude,
-//    battery_current,
-//    battery_voltage,
-//    battery_energy_consumed,
-//    Servos_out,
-//    AA241X_roll_servo,
-//    AA241X_pitch_servo,
-//    AA241X_throttle_servo,
-//    AA241X_rudder_servo,
-//    RC_in,
-//    control_mode,
-//    in_mission,
-//    mission_energy_consumed,
-//    CPU_time_sight_ms.
-//    ErrorX_1,
-//    ErrorY_1,
-//    ErrorX_2,
-//    ErrorY_2,
-//    ErrorX_3,
-//    ErrorY_3,
-//    ErrorX_4,
-//    ErrorY_4,
-//    Score,
-//    personDistributionIndex,
-//};
 
 // AA241X - end
 
@@ -760,9 +676,9 @@ static const struct LogStructure log_structure[] PROGMEM = {
     { LOG_AIRSPEED_MSG, sizeof(log_AIRSPEED),
       "ARSP",  "Iffc",     "TimeMS,Airspeed,DiffPress,Temp" },
     { LOG_AA241X_MF_MSG, sizeof(log_AA241X_MF),
-      "MF",  "IIfffffBBCCHB",     "CP_t,GP_t,X_p,Y_p,Z_pG,Gnd_S,Gnd_C,GP_F,GP_NS,B_c,B_v,B_e,c_m" },
+      "MF",  "IIfffffBBCCHBhH",     "CP_t,GP_t,X_p,Y_p,Z_pG,Gd_S,Gd_C,Fix,NS,B_c,B_v,B_e,c_m,Z_v,AS" },
     { LOG_AA241X_HF_MSG, sizeof(log_AA241X_HF),
-      "HF",  "IfffffffffHHHH",     "CP_t,Z_pB,Z_v,Asp,fi,theta,psi,p,q,r,CH1,CH2,CH3,CH4" },
+      "HF",  "HhhhhfffBBBB",     "CP_t,Z_pB,fi,theta,psi,p,q,r,CH1,CH2,CH3,CH4" },
     TECS_LOG_FORMAT(LOG_TECS_MSG)
 };
 

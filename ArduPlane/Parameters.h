@@ -130,6 +130,7 @@ public:
         k_param_aa241x_20,
         k_param_aa241x_distribution_index,
         k_param_aa241x_attitude_log_frequency,
+        k_param_aa241x_attitude_log_altitude,
 
         // 100: Arming parameters
         k_param_arming = 100,
@@ -438,6 +439,7 @@ public:
     AP_Float aa241x_20;
     AP_Float aa241x_distribution_index;
     AP_Float aa241x_attitude_log_frequency;
+    AP_Float aa241x_attitude_log_altitude;
     // Misc
     //
     AP_Int8 auto_trim;

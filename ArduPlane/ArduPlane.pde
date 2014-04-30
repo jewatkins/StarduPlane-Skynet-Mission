@@ -729,7 +729,7 @@ static const AP_Scheduler::Task scheduler_tasks[] PROGMEM = {
     { AA241X_AUX_MediumLoop, 5, 1000},
     { AA241X_AUX_SlowLoop, 50, 1000},
     { Log_Write_AA241X_MF, 5, 2000},
-    { Log_Write_AA241X_AHF, 1, 2000},
+    { Log_Write_AA241X_AHF, 1, 1000},
     { Log_Write_AA241X_AMF, 5, 2000},
 };
 
