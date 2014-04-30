@@ -542,22 +542,22 @@ static void Log_Write_Airspeed(void)
 
 struct PACKED log_AA241X_MF {
     LOG_PACKET_HEADER;
-    // Medium Frequency Variables "II fff ff BB CCH B hH" 
+    // Medium Frequency Variables "II hhh hh BB HHH B hH" 
     uint32_t cpu_time_ms;  // I
     uint32_t gps_time_ms;  // I
     
-    float x_position;
-    float y_position;
-    float z_position;
+    int16_t x_position;  // h
+    int16_t y_position;  // h
+    int16_t z_position;  // h
     
-    float Ground_speed;
-    float Ground_course;
+    int16_t Ground_speed;  //h
+    int16_t Ground_course;  //h
     
     uint8_t GPS_Fix;      // B
     uint8_t GPS_NumSats;  // B
     
-    uint16_t Battery_Current;  // C
-    uint16_t Battery_Voltage;   // C
+    uint16_t Battery_Current;  // H
+    uint16_t Battery_Voltage;   // H
     uint16_t Battery_Energy_Consumed;    // H
     
     uint8_t Control_Mode;  // B
@@ -573,24 +573,24 @@ static void Log_Write_AA241X_MF(void)
   const Location &loc = gps.location(0);
     struct log_AA241X_MF pkt = {
         LOG_PACKET_HEADER_INIT(LOG_AA241X_MF_MSG),
-        cpu_time_ms   :  CPU_time_ms,  // I
-        gps_time_ms   :  GPS_time_ms,  // I
+        cpu_time_ms   :  CPU_time_ms,  
+        gps_time_ms   :  GPS_time_ms,  
         
-        x_position    :  X_position,
-        y_position    :  Y_position,
-        z_position    :  Z_position_GPS,
+        x_position    :  X_position*100,
+        y_position    :  Y_position*100,
+        z_position    :  Z_position_GPS*100,
         
-        Ground_speed  :  ground_speed,
-        Ground_course :  ground_course,
+        Ground_speed  :  ground_speed*100,
+        Ground_course :  ground_course*100,
         
-        GPS_Fix       :  gps.status(0),      // B
-        GPS_NumSats   :  gps.num_sats(0),  // B
+        GPS_Fix       :  gps.status(0),      
+        GPS_NumSats   :  gps.num_sats(0),  
         
-        Battery_Current  :   battery_current*100,  // C
-        Battery_Voltage  :   battery_voltage*100,   // B
-        Battery_Energy_Consumed  :  battery_energy_consumed,    // H
+        Battery_Current  :   battery_current*100, 
+        Battery_Voltage  :   battery_voltage*100,   
+        Battery_Energy_Consumed  :  battery_energy_consumed,    
         
-        Control_Mode   :  control_mode,   // B
+        Control_Mode   :  control_mode,   
         
         Z_Velocity        :  Z_velocity*100,
         airspeed          :  Air_speed*100,
@@ -676,7 +676,7 @@ static const struct LogStructure log_structure[] PROGMEM = {
     { LOG_AIRSPEED_MSG, sizeof(log_AIRSPEED),
       "ARSP",  "Iffc",     "TimeMS,Airspeed,DiffPress,Temp" },
     { LOG_AA241X_MF_MSG, sizeof(log_AA241X_MF),
-      "MF",  "IIfffffBBCCHBhH",     "CP_t,GP_t,X_p,Y_p,Z_pG,Gd_S,Gd_C,Fix,NS,B_c,B_v,B_e,c_m,Z_v,AS" },
+      "MF",  "IIhhhhhBBHHHBhH",     "CP_t,GP_t,X_p,Y_p,Z_pG,Gd_S,Gd_C,Fix,NS,B_c,B_v,B_e,c_m,Z_v,AS" },
     { LOG_AA241X_HF_MSG, sizeof(log_AA241X_HF),
       "HF",  "HhhhhfffBBBB",     "CP_t,Z_pB,fi,theta,psi,p,q,r,CH1,CH2,CH3,CH4" },
     TECS_LOG_FORMAT(LOG_TECS_MSG)
