@@ -46,32 +46,23 @@ const float airspeedCommandMin = 5;       // 5 meters / second
 #define altitudeController_DEF 3
 #define airspeedController_DEF 4
 #define headingController_DEF  5
+#define numControllers         6
 
 
 /*------------------------------------ Controller Gains --------------------------------------------*/
-const float rollControllerP  = 25.0;
-const float rollControllerI  = 0.0;
-const float rollControllerD  = 0.0;
+#define pGain 0
+#define iGain 1
+#define dGain 2
+#define numGains 3
 
-const float pitchControllerP = 40.0;
-const float pitchControllerI = 0.0;
-const float pitchControllerD = 0.0;
-
-const float rudderControllerP = 0.0;
-const float rudderControllerI = 0.0;
-const float rudderControllerD = 0.0;
-
-const float altitudeControllerP = 1.0;
-const float altitudeControllerI = 0.0;
-const float altitudeControllerD = 0.0;
-
-const float airspeedControllerP = 1.0;
-const float airspeedControllerI = 0.0;
-const float airspeedControllerD = 0.0;
-
-const float headingControllerP = 2.0;
-const float headingControllerI = 0.0;
-const float headingControllerD = 0.0;
+float gains [numControllers][numGains] = {
+                                          {25.0, 0.0, 0.0}, /* roll controller p, i, d */
+                                          {40.0, 0.0, 0.0}, /* pitch controller p, i, d */
+                                          {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
+                                          {1.0, 0.0, 0.0},  /* altitude controller p, i, d */
+                                          {1.0, 0.0, 0.0},  /* airspeed controller p, i, d */
+                                          {2.0, 0.0, 0.0}   /* heading controller p, i, d */
+                                         };
 
 /*------------------------------------- Trim States ------------------------------------------------*/
 
