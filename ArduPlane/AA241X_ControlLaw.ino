@@ -5,7 +5,6 @@
 #include "AA241X_ControlLaw.h"
 #include "AA241X_aux.h"
 
-
 static int8_t     my_signed_8_bit_variable = 10;  // integer numbers between -128 and 127
 static uint8_t    my_unsigned_8_bit_variable = 10;  // positive integer numbers between 0 and 255
 
