@@ -72,7 +72,7 @@ static void AA241X_AUTO_MediumLoop(void)
           
           // Set altitude command to 30 meters if all persons found
           if (sum == Np) {
-            altitudeCommand = 30;
+            altitudeCommand = 30.0;
           }
         }
       }
