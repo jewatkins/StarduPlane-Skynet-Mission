@@ -3,6 +3,7 @@
 #include "defines.h"
 #include "AA241X_ControlLaw.h"
 #include "AA241X_aux.h"
+#include "AA241X_ControllerFunctions.h"
 
 // These functions are executed when control mode is in AUTO
 // Please read AA241X_aux.h for all necessary definitions and interfaces
