@@ -1,3 +1,6 @@
+#ifndef CONTROL_LAW_H
+#define CONTROL_LAW_H
+
 // NOTE: the parameter name has to have less than 14 characters! If not you get the error "initialize-string for array chars is too long"
 // My parameter 1
 #define my_param_1        g.aa241x_1      // Don't change g.aa241x_1 ! Replace my_param_1 with whatever name you want to access the parameter with.  See the example in ControlLaw.ino   
@@ -80,3 +83,4 @@
 #define AA241X_20_NAME     "my_paramName20" 
 #define AA241X_20_DEFAULT  -20.523 
 
+#endif /* CONTROL_LAW_H */
