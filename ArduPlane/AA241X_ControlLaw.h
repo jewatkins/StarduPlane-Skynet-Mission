@@ -2,14 +2,14 @@
 #define CONTROL_LAW_H
 
 // NOTE: the parameter name has to have less than 14 characters! If not you get the error "initialize-string for array chars is too long"
-// My parameter 1
-#define my_param_1        g.aa241x_1      // Don't change g.aa241x_1 ! Replace my_param_1 with whatever name you want to access the parameter with.  See the example in ControlLaw.ino   
-#define AA241X_1_NAME     "my_paramName1" // Don't change AA241X_1_NAME ! Replace my_paramName1 with whateve name you want to see on the Mission Planner GCS 
-#define AA241X_1_DEFAULT  10.0            // replace 10.0 with whatever default value you wante to this parameter to have, when reloading the code 
-// My parameter 2
-#define my_param_2        g.aa241x_2
-#define AA241X_2_NAME     "my_paramName2" 
-#define AA241X_2_DEFAULT  -20.523 
+// My parameter 1: Maximum error in waypoint capture
+#define POSITION_ERROR    g.aa241x_1      // Don't change g.aa241x_1 ! Replace my_param_1 with whatever name you want to access the parameter with.  See the example in ControlLaw.ino   
+#define AA241X_1_NAME     "AA241_Pos_Err" // Don't change AA241X_1_NAME ! Replace my_paramName1 with whateve name you want to see on the Mission Planner GCS 
+#define AA241X_1_DEFAULT  2.0             // replace 10.0 with whatever default value you wante to this parameter to have, when reloading the code 
+// My parameter 2: Proportional gain on change in heading based on heading error
+#define ROUTE_P           g.aa241x_2
+#define AA241X_2_NAME     "AA241_Rte_P" 
+#define AA241X_2_DEFAULT  2.0
 // My parameter 3
 #define my_param_3        g.aa241x_3
 #define AA241X_3_NAME     "my_paramName3" 
