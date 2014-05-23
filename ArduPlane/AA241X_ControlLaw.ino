@@ -6,12 +6,6 @@
 #include "AA241X_ControllerFunctions.h"
 #include "AA241X_WaypointNavigation.h"
 
-/**** Waypoint Navigation ****/
-static const uint32_t Ndim = 2;
-static const uint32_t Nwp = 3;
-static uint32_t iwp = 0;
-static float waypoints[Nwp][Ndim];
-static float Hwp[Nwp];
 static float headingCommand = 0.0;
 static float altitudeCommand = 115.0;
 static float airspeedCommand = 7.0;

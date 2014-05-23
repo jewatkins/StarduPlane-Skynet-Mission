@@ -2,8 +2,6 @@
 #define WAYPOINT_NAVIGATION_H
 
 /**** Waypoint Navigation ****/
-static float headingCommand = 0.0;
-static float altitudeCommand = 0.0;
 static const uint32_t Ndim = 2;                // Dimension of waypoints
 static const uint32_t Np = 4;                  // Number of persons to find
 static char persons_found[Np] = {0,0,0,0};     // Number of persons found
