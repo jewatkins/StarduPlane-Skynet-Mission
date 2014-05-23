@@ -4,6 +4,7 @@
 #include "AA241X_ControlLaw.h"
 #include "AA241X_aux.h"
 #include "AA241X_ControllerFunctions.h"
+#include "AA241X_WaypointNavigation.h"
 
 /**** Waypoint Navigation ****/
 static const uint32_t Ndim = 2;
@@ -74,24 +75,14 @@ static void AA241X_AUTO_MediumLoop(void)
   // Checking if we've just switched to AUTO. If more than 100ms have gone past since last time in AUTO, then we are definitely just entering AUTO
   if (delta_t > 100)
   {
-    // Initialize waypoint data (15 degree route)
-    waypoints[0][0] = 150.0;   waypoints[0][1] = -100.0;
-    waypoints[1][0] = 0.0;     waypoints[1][1] = -100.0;
-    waypoints[2][0] = -150.0;  waypoints[2][1] = -100.0 + 150.0*tan(15*PI/180);
-    
-    // Initialize waypoint data (45 degree route)
-    //waypoints[0][0] = 100.0;  waypoints[0][1] = -150.0;
-    //waypoints[1][0] = -50.0;  waypoints[1][1] = 0.0;
-    //waypoints[2][0] = -50.0;  waypoints[2][1] = 150.0;
-    
     // Compute waypoint headings
     float dx = waypoints[0][0] - X_position;
     float dy = waypoints[0][1] - Y_position;
-    Hwp[0] = atan2(dy,dx);
+    Hwp[0] = atan2(dy,dx) + PI;
     for (uint32_t i=1; i<Nwp; i++) {
       dx = waypoints[i][0] - waypoints[i-1][0];
       dy = waypoints[i][1] - waypoints[i-1][1];
-      Hwp[i] = atan2(dy,dx);
+      Hwp[i] = atan2(dy,dx) + PI;
     }
     
     // Set waypoint iterator
@@ -104,12 +95,33 @@ static void AA241X_AUTO_MediumLoop(void)
     // Compute heading (UAV to waypoint)
     float dx = waypoints[iwp][0] - X_position;
     float dy = waypoints[iwp][1] - Y_position;
-    float Huav = atan2(dy,dx);
+    float Huav = atan2(dy,dx) + PI;
     
-    // Go to next waypoint if current waypoint is found
+    // Check to see if waypoint is found
     float pos_error = sqrt(dx*dx + dy*dy);
     hal.console->printf_P(PSTR("Position Error: %f \n"), pos_error);
     if (pos_error <= POSITION_ERROR) {
+      // Take a snapshot
+      snapshot mySnapShot = takeASnapshot();
+      for (uint32_t i=0; i<Np; i++) {
+        // Check if person found
+        if (mySnapShot.personsInPicture[i] == 1) {
+          persons_found[i] = 1;
+          
+          // Sum all persons found
+          char sum = 0;
+          for (uint32_t ii=0; ii<Np; ii++) {
+            sum += persons_found[ii];
+          }
+          
+          // Set altitude command to 30 meters if all persons found
+          if (sum == Np) {
+            altitudeCommand = 30.0;
+          }
+        }
+      }
+      
+      // Go to next waypoint
       iwp++;
     }
       
@@ -118,13 +130,13 @@ static void AA241X_AUTO_MediumLoop(void)
       iwp = 0;
       dx = waypoints[0][0] - X_position;
       dy = waypoints[0][1] - Y_position;
-      Hwp[0] = atan2(dy,dx);
+      Hwp[0] = atan2(dy,dx) + PI;
     }
         
     // Compute heading (UAV to waypoint)
     dx = waypoints[iwp][0] - X_position;
     dy = waypoints[iwp][1] - Y_position;
-    Huav = atan2(dy,dx);
+    Huav = atan2(dy,dx) + PI;
     
     // Compute heading error (rad)
     float Herr = fabs(Huav - Hwp[iwp]);
@@ -137,7 +149,7 @@ static void AA241X_AUTO_MediumLoop(void)
       Herr = 2*PI - Herr;
       headingCommand = Hwp[iwp] - copysignf(1.0, Huav - Hwp[iwp])*ROUTE_P*Herr;
     }
-        
+    
     // Check radian range of heading command
     if(headingCommand > 2*PI) {
       headingCommand -= 2*PI;
@@ -145,7 +157,6 @@ static void AA241X_AUTO_MediumLoop(void)
     else if(headingCommand < 0) {
       headingCommand += 2*PI;
     }
-    //headingCommand = routeManager.GetHeadingCommand();
     hal.console->printf_P(PSTR("Heading Command: %f \n"), headingCommand);
   }
   
