@@ -21,8 +21,27 @@ void SetReference(uint8_t controller, float newValue);
  */
 void Limit(float &variable, float maximum, float minimum);
 
-/* Controller Variables */
-float references[numControllers];
+// nominal trim states for the controllers
+struct trimState_t
+{
+  float pitch;
+  float roll;
+  float airspeed;
+};
 
+/* blah
+ *
+ */
+struct trimState_t ScheduleTrim(float rollCommand, float airspeedCommand, char phaseOfFlight);
+
+/* blah
+ *
+ */
+char determineTrimState(float rollCommand, float airspeedCommand);
+
+/* Controller Variables */
+static float references[numControllers]; // reference inputs to the controllers
+static float intErrors[numControllers];  // Need to track iterm over multiple iterations
+static float prevErrors[numControllers]; // Need to track integral error over multiple iterations
 
 #endif /* CONTROLLER_FUNCTIONS_H */
