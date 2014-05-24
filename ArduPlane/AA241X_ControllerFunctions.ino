@@ -10,6 +10,8 @@ float StepController(uint8_t controller, float measured, float &delta_t)
 
   float error = references[controller] - measured;
 
+  //hal.console->printf_P(PSTR("\n error: %f \n"), error);
+
   if(controller == headingController_DEF)
   {
 	  if(error >= PI)
@@ -22,7 +24,9 @@ float StepController(uint8_t controller, float measured, float &delta_t)
   }
 
   // Calculate Running Integral of Error
-  intErrors[controller] = ((prevErrors[controller] + error)*.5)/delta_t;
+  intErrors[controller] += ((prevErrors[controller] + error)*.5)/delta_t;
+
+  //hal.console->printf_P(PSTR("\n intError: %f \n"), intErrors[controller]);
 
   // Cut off maximum integral error
   Limit(intErrors[controller], integralLimits[controller], -integralLimits[controller]);
@@ -30,21 +34,39 @@ float StepController(uint8_t controller, float measured, float &delta_t)
   // Calculate derivative error
   float derError = (error - prevErrors[controller])/delta_t;
 
+  //hal.console->printf_P(PSTR("\n derError: %f \n"), derError);
+
+  // Reassign prevErrors
+  prevErrors[controller] = error;
+
   // Put a saturation limit on the derivative error
   Limit(derError, derivativeLimits[controller], -derivativeLimits[controller]);
   
   // Calculate All Controller Terms
   pTerm = gains[controller][pGain]*error;  // Proportional Controller Term
+  
+  //hal.console->printf_P(PSTR("\n pTerm: %f \n"), pTerm);
+
   iTerm = gains[controller][iGain]*intErrors[controller]; // Integral Controller Term
+
+  //hal.console->printf_P(PSTR("\n iTerm: %f \n"), iTerm);
+
   Limit(iTerm, integralTermLimits[controller], -integralTermLimits[controller]);  // Limit the integral controller
   dTerm = gains[controller][dGain]*derError;  // Derivative Term
+
+  //hal.console->printf_P(PSTR("\n dTerm: %f \n"), dTerm);
+
   Limit(dTerm, derivativeTermLimits[controller], -derivativeTermLimits[controller]); // Limit the derivative controller
   
   /* Sum all terms */
   command = pTerm + iTerm + dTerm;
 
+  //hal.console->printf_P(PSTR("\n command: %f \n"), command);
+
   // Put a saturation limit on the output command
-  Limit(command, limits[controller][maximum_DEF], limits[controller][minimum_DEF]);
+  Limit(command, outputLimits[controller], -outputLimits[controller]);
+
+  //hal.console->printf_P(PSTR("\n limited command: %f \n"), command);
     
   return command;
 }
@@ -54,6 +76,9 @@ float StepController(uint8_t controller, float measured, float &delta_t)
  */
 void SetReference(uint8_t controller, float newValue)
 {
+  /* Check that the new reference input to command is within limited commands */
+  Limit(newValue,referenceLimits[controller][maximum_DEF], referenceLimits[controller][minimum_DEF]);
+  
   /* Assumes references is under the total number of controllers */
   references[controller] = newValue;
   
@@ -148,10 +173,10 @@ char determineTrimState(float rollCommand, float airspeedCommand)
 	char trimStateOut = 0;
 
 	// Determine the bounds around the mid roll 
-	float midRoll = limits[rollController_DEF][maximum_DEF]/2.0;
-	//float midRollUpper = midRoll + (limits[rollController_DEF][maximum_DEF] - midRoll)/2.0;
-	//float midRollUpper = midRoll - (limits[rollController_DEF][maximum_DEF] - midRoll)/2.0;
-	float midAirspeed = (limits[airspeedController_DEF][maximum_DEF] - limits[airspeedController_DEF][minimum_DEF])/2.0;
+	float midRoll = referenceLimits[rollController_DEF][maximum_DEF]/2.0;
+	//float midRollUpper = midRoll + (referenceLimits[rollController_DEF][maximum_DEF] - midRoll)/2.0;
+	//float midRollUpper = midRoll - (referenceLimits[rollController_DEF][maximum_DEF] - midRoll)/2.0;
+	float midAirspeed = (referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][minimum_DEF])/2.0;
 
 	// Max Left Bank Case
 	if (rollCommand < -midRoll)

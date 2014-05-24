@@ -46,7 +46,19 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define minimum_DEF 1
 #define minMax      2
 
-const float limits[numControllers][minMax] = {
+// These are the absolute values of the controller deviations (saturates the controller at a limit based on the units of the controller)
+const float outputLimits[numControllers] = {
+											25, // percent of aileron servo
+											20, // percent of elevator servo
+											20, // percent of rudder servo
+											0.174, // pitch angle deviation maximum (radians)
+											0.174, // pitch angle deviation maximum (radians)
+											0.174, // pitch angle deviation maximum (radians)
+											25, // throttle deviation maximum
+											25 // heading angle deviation maximum
+										   };
+
+const float referenceLimits[numControllers][minMax] = {
                                    {0.52 /* 30 degrees max */, -0.52 /* -30 degrees min */ },  /* roll controller */
                                    {0.35 /* 20 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
@@ -110,7 +122,7 @@ const float climbThreshold     = 10;      // 10 meters error in altitude will se
 #define numGains 3
 
 const float gains [numControllers][numGains] = {
-                                          {25.0, 0.0, 0.0}, /* roll controller p, i, d */
+                                          {25.0, .25, 1.0}, /* roll controller p, i, d */
                                           {40.0, 0.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
                                           {1.0, 0.0, 0.0},  /* altitude hold controller p, i, d */
@@ -159,14 +171,14 @@ const float trims [numTrims][numStates] = {
                               {12.0, 0.0, 0.0}, /* Straight and Level 12 m/s flight */
                               {7.0, (20.0/180)*(3.14), 0.0}, /* Max Climb Rate */
                               {7.0, (6.5/180)*(3.14), 0.0}, /* Glide */
-                              {7.0, (7.5/180)*(3.14), limits[rollController_DEF][maximum_DEF]}, /* Max Right Bank 7 m/s */
-                              {7.0, (7.5/180)*(3.14), limits[rollController_DEF][minimum_DEF]}, /* Max Left Bank 7 m/s */
-                              {12.0, (1.5/180)*(3.14), limits[rollController_DEF][maximum_DEF]}, /* Max Right Bank 12 m/s */
-                              {12.0, (1.5/180)*(3.14), limits[rollController_DEF][minimum_DEF]}, /* Max Left Bank 12 m/s */
-                              {7.0, (7.0/180)*(3.14), limits[rollController_DEF][maximum_DEF]/2.0}, /* Mid Right Bank 7 m/s */
-                              {7.0, (7.0/180)*(3.14), limits[rollController_DEF][minimum_DEF]/2.0}, /* Mid Left Bank 7 m/s */
-                              {12.0, (1.0/180)*(3.14), limits[rollController_DEF][maximum_DEF]/2.0}, /* Mid Right Bank 12 m/s */
-                              {12.0, (1.0/180)*(3.14), limits[rollController_DEF][minimum_DEF]/2.0} /* Mid Left Bank 12 m/s */
+                              {7.0, (7.5/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]}, /* Max Right Bank 7 m/s */
+                              {7.0, (7.5/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]}, /* Max Left Bank 7 m/s */
+                              {12.0, (1.5/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]}, /* Max Right Bank 12 m/s */
+                              {12.0, (1.5/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]}, /* Max Left Bank 12 m/s */
+                              {7.0, (7.0/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]/2.0}, /* Mid Right Bank 7 m/s */
+                              {7.0, (7.0/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]/2.0}, /* Mid Left Bank 7 m/s */
+                              {12.0, (1.0/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]/2.0}, /* Mid Right Bank 12 m/s */
+                              {12.0, (1.0/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]/2.0} /* Mid Left Bank 12 m/s */
                              };
 
 /*----------------------------------------- Phase of Flight -------------------------------------------------*/

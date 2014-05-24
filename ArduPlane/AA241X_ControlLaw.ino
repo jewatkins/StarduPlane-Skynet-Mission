@@ -12,6 +12,8 @@ static float airspeedCommand = 7.0;
 static float delta_t = 0.0;
 static char phaseOfFlight = preMissionLoiter; // Waiting to start mission
 
+float variableOfInterest = 0.0;
+
 // These functions are executed when control mode is in AUTO
 // Please read AA241X_aux.h for all necessary definitions and interfaces
 
@@ -25,13 +27,13 @@ static void AA241X_AUTO_FastLoop(void)
   if (delta_t > 100)
   {
 	// Set all references upon initialization of the autonomous mode
-    SetReference(rollController_DEF, 0.0);
-    SetReference(pitchController_DEF, 0.0);
-    SetReference(airspeedController_DEF, 11.0);
-    SetReference(altitudeHoldController_DEF, altitudeCommand);
-    SetReference(climbRateController_DEF, 3.0);
-    SetReference(glideController_DEF, 95.0);
-    SetReference(headingController_DEF, headingCommand);
+    //SetReference(rollController_DEF, 0.0);
+    //SetReference(pitchController_DEF, 0.0);
+    //SetReference(airspeedController_DEF, 11.0);
+    //SetReference(altitudeHoldController_DEF, altitudeCommand);
+    //SetReference(climbRateController_DEF, 3.0);
+    //SetReference(glideController_DEF, 95.0);
+    //SetReference(headingController_DEF, headingCommand);
   }
 
   // Check delta_t before sending it to any step functions for inner loop controls
@@ -41,21 +43,44 @@ static void AA241X_AUTO_FastLoop(void)
   }
 
   // Set Reference for the heading
-  SetReference(headingController_DEF, headingCommand);
+  //SetReference(headingController_DEF, headingCommand);
 
   // Determine the roll command from the ground course error
-  float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-  Limit(rollCommand, limits[rollController_DEF][maximum_DEF], limits[rollController_DEF][minimum_DEF]);
+  //float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
+  //Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
   /* Trim Scheduling */
   // trimState_t trimSetting = ScheduleTrim(rollCommand, airspeedCommand, phaseOfFlight);
 
+
+  // Step through each inner loop controller to get the RC output
+
+  
+  float rollCommand = 0.0;
+  
   SetReference(rollController_DEF, rollCommand);
   float rollControllerOut = StepController(rollController_DEF, roll, delta_t);
-  Limit(rollControllerOut, rollMax_DEF, rollMin_DEF);
+
+  // Aileron Servo Command Out
+  float rollOut    = RC_Roll_Trim + rollControllerOut;
+  Limit(rollOut, rollMax_DEF, rollMin_DEF);
+  Roll_servo       = rollOut;
   
-  // Step through each inner loop controller to get the RC output
+
+  // Elevator Servo Command Out
+  //float pitchOut   = RC_Pitch_Trim + pitchControllerOut;
+  //Limit(pitchOut, pitchMax_DEF, pitchMin_DEF);
+  Pitch_servo      = 50; //pitchOut;
+
+  // Rudder Servo Command Out
+  //float rudderOut  = RC_Rudder_Trim + rudderControllerOut;
+  //Limit(rudderOut, rudderMax_DEF, rudderMin_DEF);
+  Rudder_servo     = 50; //rudderOut;
   
+  // Throttle PWM Command Out
+  //float throttleOut = RC_throttle + airspeedControllerOut;
+  //Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
+  Throttle_servo   = 0; // RC_throttle + airspeedControllerOut; //throttleOut;
   
 };
 
@@ -182,7 +207,26 @@ static void AA241X_AUTO_MediumLoop(void)
 static void AA241X_AUTO_SlowLoop(void){
   // YOUR CODE HERE
   
+  /*
+  float rollCommand = 0.0;
   
+  SetReference(rollController_DEF, rollCommand);
+  float rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+
+  // Aileron Servo Command Out
+  float rollOut    = RC_Roll_Trim + rollControllerOut;
+  Limit(rollOut, rollMax_DEF, rollMin_DEF);
+  Roll_servo       = rollOut;
+  */
+
+  /*
+  hal.console->printf_P(PSTR("Heading Command: %f \n"), headingCommand);
+  hal.console->printf_P(PSTR("Altitude Command: %f \n"), altitudeCommand);
+  hal.console->printf_P(PSTR("Airspeed Command: %f \n"), airspeedCommand);  
+  hal.console->printf_P(PSTR("fabs(RC_roll - RC_Roll_Trim): %f \n"), fabs(RC_roll - RC_Roll_Trim) );
+  hal.console->printf_P(PSTR("pitchCommand: %f \n"), pitchCommand);
+  hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
+  */
   
 };
 

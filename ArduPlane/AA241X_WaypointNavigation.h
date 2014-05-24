@@ -7,7 +7,7 @@ static const uint32_t Np = 4;                  // Number of persons to find
 static char persons_found[Np] = {0,0,0,0};     // Number of persons found
 static uint32_t iwp = 0;                       // Waypoint iterator
 
-/* */
+/* 
 // Waypoint data for first part of mission
 static const uint32_t Nwp = 62;
 static float waypoints[Nwp][Ndim] = {
@@ -74,7 +74,7 @@ static float waypoints[Nwp][Ndim] = {
 {  -9.7828,    3.8258},
 {   9.7828,   -3.8258}
 };
-/* */
+*/
 
 /*
 // Waypoint data for first 15 degree route
@@ -86,7 +86,7 @@ static float waypoints[Nwp][Ndim] = {
 };
 */
 
-/*
+
 // Waypoint data for first 45 degree route
 static const uint32_t Nwp = 3;
 static float waypoints[Nwp][Ndim] = {
@@ -94,7 +94,7 @@ static float waypoints[Nwp][Ndim] = {
 { -50.0,    0.0},
 { -50.0,  150.0}
 };
-*/
+
 
 static float Hwp[Nwp];
 
