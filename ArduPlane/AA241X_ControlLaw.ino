@@ -43,39 +43,38 @@ static void AA241X_AUTO_FastLoop(void)
   }
 
   // Set Reference for the heading
-  //SetReference(headingController_DEF, headingCommand);
+  SetReference(headingController_DEF, headingCommand);
 
   // Determine the roll command from the ground course error
-  //float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-  //Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+  float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
+  Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
   /* Trim Scheduling */
-  // trimState_t trimSetting = ScheduleTrim(rollCommand, airspeedCommand, phaseOfFlight);
-
+  trimState_t trimSetting = ScheduleTrim(rollCommand, airspeedCommand, phaseOfFlight);
 
   // Step through each inner loop controller to get the RC output
-
-  
-  float rollCommand = 0.0;
-  
+  //float rollCommand = 0.0;
   SetReference(rollController_DEF, rollCommand);
   float rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+
+  float pitchCommand = trimSetting.pitch;
+  SetReference(pitchController_DEF, pitchCommand);
+  float pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
 
   // Aileron Servo Command Out
   float rollOut    = RC_Roll_Trim + rollControllerOut;
   Limit(rollOut, rollMax_DEF, rollMin_DEF);
   Roll_servo       = rollOut;
   
-
   // Elevator Servo Command Out
-  //float pitchOut   = RC_Pitch_Trim + pitchControllerOut;
-  //Limit(pitchOut, pitchMax_DEF, pitchMin_DEF);
-  Pitch_servo      = 50; //pitchOut;
+  float pitchOut   = RC_Pitch_Trim + pitchControllerOut;
+  Limit(pitchOut, pitchMax_DEF, pitchMin_DEF);
+  Pitch_servo      = pitchOut;
 
   // Rudder Servo Command Out
   //float rudderOut  = RC_Rudder_Trim + rudderControllerOut;
   //Limit(rudderOut, rudderMax_DEF, rudderMin_DEF);
-  Rudder_servo     = 50; //rudderOut;
+  //Rudder_servo     = 50; //rudderOut;
   
   // Throttle PWM Command Out
   //float throttleOut = RC_throttle + airspeedControllerOut;
