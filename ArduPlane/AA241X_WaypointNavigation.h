@@ -2,7 +2,6 @@
 #define WAYPOINT_NAVIGATION_H
 
 /**** Waypoint Navigation ****/
-#define MISSION 1                              // controlMode for Mission
 #define Ndim 2                                 // Dimension of waypoints
 #define Np 4                                   // Number of persons to find
 static char persons_found[Np] = {0,0,0,0};     // Number of persons found

@@ -35,35 +35,40 @@ static void AA241X_AUTO_FastLoop(void)
   if (delta_t > 100)
   {
 	// Determine control mode from bits in parameter list
-    if(FLIGHT_MODE > .5 && FLIGHT_MODE < 1.5){
+    if(FLIGHT_MODE > .5 && FLIGHT_MODE < 1.5)
+	{
       controlMode = ROLL_STABILIZE_MODE;
-    }else if(FLIGHT_MODE > 1.5 && FLIGHT_MODE < 2.5){
+    }else if(FLIGHT_MODE > 1.5 && FLIGHT_MODE < 2.5)
+	{
       controlMode = STABILIZE_MODE;
-    }else if(FLIGHT_MODE > 2.5 && FLIGHT_MODE < 3.5){
+    }else if(FLIGHT_MODE > 2.5 && FLIGHT_MODE < 3.5)
+	{
       controlMode = HEADING_HOLD_MODE;
-    }else if(FLIGHT_MODE > 3.5 && FLIGHT_MODE < 4.5){
-      controlMode = FBW_MODE;
-      
-      // Set altitude as current altitude
-      altitudeCommand = -Z_position_GPS;
-      SetReference(altitudeController_DEF, altitudeCommand);
-      
-      airspeedCommand = 11.0; // Phase 1 nominal speed
-    }else if(FLIGHT_MODE > 4.5 && FLIGHT_MODE < 5.5){
-      controlMode = ATT_HOLD;
-    }else if(FLIGHT_MODE > 5.5 && FLIGHT_MODE < 6.5){
-      controlMode = WAYPOINT_NAV;
-      
-      airspeedCommand = 11.0;
-    }
-
-	// Set commands upon initialization of the autonomous mode
-    SetReference(altitudeController_DEF, -Z_position_GPS); // Current Altitude
-
-    airspeedCommand = 11.0; // 11.0 m/s
-	SetReference(airspeedController_DEF, airspeedCommand);
-
-	prevAltitude = -Z_position_GPS;
+    }else if(FLIGHT_MODE > 3.5 && FLIGHT_MODE < 4.5)
+	{
+		controlMode = FBW_MODE;
+		// Set altitude as current altitude
+		altitudeCommand = -Z_position_GPS;
+		prevAltitude = -Z_position_GPS;
+		SetReference(altitudeController_DEF, altitudeCommand);
+		airspeedCommand = 11.0; // Phase 1 nominal speed
+    }else if(FLIGHT_MODE > 4.5 && FLIGHT_MODE < 5.5)
+	{
+		controlMode = ATT_HOLD;
+    }else if(FLIGHT_MODE > 5.5 && FLIGHT_MODE < 6.5)
+	{
+		controlMode = WAYPOINT_NAV;
+		airspeedCommand = 11.0;
+		prevAltitude = -Z_position_GPS;
+    }else if(FLIGHT_MODE > 6.5 && FLIGHT_MODE < 7.5)
+	{
+		controlMode = MISSION;
+		// Set commands upon initialization of the autonomous mode
+		SetReference(altitudeController_DEF, -Z_position_GPS); // Current Altitude
+		airspeedCommand = 11.0; // 11.0 m/s
+		SetReference(airspeedController_DEF, airspeedCommand);
+		prevAltitude = -Z_position_GPS;
+	}
   }
 
   // Check delta_t before sending it to any step functions for inner loop controls
@@ -72,60 +77,229 @@ static void AA241X_AUTO_FastLoop(void)
 	  delta_t = 20;
   }
 
-  // Set reference for the heading
-  SetReference(headingController_DEF, headingCommand);
+  // Controller outputs needed for updating servos and throttle
+  float rollControllerOut = 50.0;
+  float pitchControllerOut = 50.0;
+  float airspeedControllerOut = 75.0;
+  float rudderControllerOut = 50.0;
 
-  // Determine the roll command from the heading controller
-  float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-  Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
-
-  // Determine climb rate command from the altitude controller
-  float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
-
-  // Pitch trim scheduling
-  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
-
-  // Augment pitch angle through altitude controller
-  if(fabs(commandedClimbRate) < 0.5)
+  if(controlMode == ROLL_STABILIZE_MODE)
   {
-	  commandedClimbRate = 0.0;
+	  // Keep Roll angle controlled based on RC pilot input (should be zero when stick is in center)
+      float rollCommand = (RC_roll-RC_Roll_Trim)*0.01*PI;
+      SetReference(rollController_DEF, rollCommand);
+      rollControllerOut = StepController(rollController_DEF, roll, delta_t);
   }
-  SetReference(climbRateController_DEF, commandedClimbRate);
+  else if(controlMode == STABILIZE_MODE)
+  {
+	  // Keep Roll angle controlled based on RC pilot input (should be zero when stick is in center)
+      float rollCommand = (RC_roll-RC_Roll_Trim)*0.01*PI;
+      SetReference(rollController_DEF, rollCommand);
+      rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+
+	  // Pitch Commands
+      float pitchCommand = (RC_pitch - RC_Pitch_Trim)*0.01*PI/4.0 + (1.0/180.0)*PI;
+      SetReference(pitchController_DEF, pitchCommand);
+      pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+  }
+  else if (controlMode == HEADING_HOLD_MODE)
+  {
+    // Maintain Heading, RC pilot commands offset from heading that was saved
+      // Heading Commands
+      if (fabs(RC_roll - RC_Roll_Trim) > 5)
+      {
+        // Allow breakout room just in case RC_Roll_Trim is not DEAD on
+        headingCommand += 0.01*(RC_roll - RC_Roll_Trim)/RC_Roll_Trim; // .0872 rad/s change rate based on 50 Hz
+        
+        // Check radian range of heading command
+        if(headingCommand > 2*PI)
+        {
+          headingCommand -= 2*PI;
+        }else if(headingCommand < 0)
+        {
+          headingCommand += 2*PI;
+        }
+        
+        SetReference(headingController_DEF, headingCommand);
+      }
+      float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
+      Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+
+      // Roll Commands
+      SetReference(rollController_DEF, headingControllerOut);
+      rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+  }
+  else if (controlMode == FBW_MODE)
+  {
+    // Maintain heading, altitude, and airspeed RC pilot commands offsets from saved initial conditions
+      
+	  // Airspeed Commands
+	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+	  SetReference(airspeedController_DEF, airspeedCommand);
+	  
+	  // Heading Commands
+      if ( fabs(RC_roll - RC_Roll_Trim) > 5 )
+      {      
+        // Allow breakout room just in case RC_Roll_Trim is not DEAD on
+        headingCommand += 0.025*(RC_roll - RC_Roll_Trim)/RC_Roll_Trim; // .0872 rad/s change rate based on 50 Hz 0.00174
+        
+        // Check radian range of heading command
+        if(headingCommand > 2*PI)
+        {
+          headingCommand -= 2*PI;
+        }else if(headingCommand < 0)
+        {
+          headingCommand += 2*PI;
+        }
+        
+        SetReference(headingController_DEF, headingCommand);
+      }
+      float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
+      Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+
+      // Roll Commands
+      SetReference(rollController_DEF, headingControllerOut);
+      rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+      
+      // Altitude Commands
+      float altitude = 0.0;
+	  if(gpsOK == true)
+        altitude = -Z_position_GPS;
+      else
+        altitude = -Z_position_Baro;
+      
+      if(fabs(RC_pitch - RC_Pitch_Trim) > 5)
+      {
+        altitudeCommand += 0.04*(RC_pitch - RC_Pitch_Trim)/RC_Pitch_Trim; // 2 m/s change rate based on 50 Hz
+        SetReference(altitudeController_DEF, altitudeCommand);
+      }
+
+	  // Determine climb rate command from the altitude controller
+	  float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
+
+	  // Pitch trim scheduling
+	  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
+
+	  // Augment pitch angle through altitude controller
+	  if(fabs(commandedClimbRate) < 0.5)
+	  {
+		  commandedClimbRate = 0.0;
+	  }
+	  SetReference(climbRateController_DEF, commandedClimbRate);
   
-  // Get climb rate
-  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
-  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
+	  // Get climb rate
+	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
+	  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
 
-  // Find value to augment the pitch angle
-  float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
+	  // Find value to augment the pitch angle
+	  float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
 
-  // Step through each inner loop controller to get the RC output
-  SetReference(rollController_DEF, rollCommand);
-  float rollControllerOut = StepController(rollController_DEF, roll, delta_t);
-  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
-  float pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
-  float airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
+	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+
+  }
+  else if(controlMode == MISSION)
+  {
+	  // Airspeed Commands
+	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+	  SetReference(airspeedController_DEF, airspeedCommand);
+
+	  // Set reference for the heading
+	  SetReference(headingController_DEF, headingCommand);
+
+	  // Determine the roll command from the heading controller
+	  float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
+	  Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+
+	  // Determine climb rate command from the altitude controller
+	  float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
+
+	  // Pitch trim scheduling
+	  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
+
+	  // Augment pitch angle through altitude controller
+	  if(fabs(commandedClimbRate) < 0.5)
+	  {
+		  commandedClimbRate = 0.0;
+	  }
+	  SetReference(climbRateController_DEF, commandedClimbRate);
+  
+	  // Get climb rate
+	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
+	  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
+
+	  // Find value to augment the pitch angle
+	  float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
+
+	  // Step through each inner loop controller to get the RC output
+	  SetReference(rollController_DEF, rollCommand);
+	  float rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
+	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+  }
 
   // Aileron Servo Command Out
-  float rollOut    = RC_Roll_Trim + rollControllerOut;
-  Limit(rollOut, rollMax_DEF, rollMin_DEF);
-  Roll_servo       = rollOut;
+  if(controlMode == ROLL_STABILIZE_MODE 
+	  || controlMode == STABILIZE_MODE
+	  || controlMode == FBW_MODE
+	  || controlMode == HEADING_HOLD_MODE
+	  || controlMode == ATT_HOLD
+	  || controlMode == WAYPOINT_NAV
+	  || controlMode == MISSION)
+  {
+	float rollOut    = RC_Roll_Trim + rollControllerOut;
+	Limit(rollOut, rollMax_DEF, rollMin_DEF);
+	Roll_servo       = rollOut;
+  }
+  else
+  {
+    Roll_servo       = RC_roll;
+  }
   
   // Elevator Servo Command Out
-  float pitchOut   = RC_Pitch_Trim + pitchControllerOut;
-  Limit(pitchOut, pitchMax_DEF, pitchMin_DEF);
-  Pitch_servo      = pitchOut;
+  if(controlMode == STABILIZE_MODE
+	  || controlMode == FBW_MODE
+	  || controlMode == ATT_HOLD
+	  || controlMode == WAYPOINT_NAV
+	  || controlMode == MISSION)
+  {
+	float pitchOut   = RC_Pitch_Trim + pitchControllerOut;
+	Limit(pitchOut, pitchMax_DEF, pitchMin_DEF);
+	Pitch_servo      = pitchOut;
+  }
+  else
+  {
+    Pitch_servo      = RC_pitch;
+  }
 
   // Rudder Servo Command Out
-  //float rudderOut  = RC_Rudder_Trim + rudderControllerOut;
-  //Limit(rudderOut, rudderMax_DEF, rudderMin_DEF);
-  //Rudder_servo     = 50; //rudderOut;
-  Rudder_servo     = RC_rudder;
+  /*
+  if(controlMode == STABILIZE_MODE || controlMode == HEADING_HOLD_MODE || controlMode == FBW_MODE || controlMode == ATT_HOLD)
+  {
+    float rudderOut  = RC_Rudder_Trim + rudderControllerOut;
+    Limit(rudderOut, rudderMax_DEF, rudderMin_DEF);
+    Rudder_servo     = rudderOut;
+  } 
+  else
+  {*/
+    Rudder_servo     = RC_rudder;
+  //}
   
   // Throttle PWM Command Out
-  float throttleOut = RC_throttle + airspeedControllerOut;
-  Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
-  Throttle_servo   = throttleOut;
+  if(controlMode == FBW_MODE
+	  || controlMode == WAYPOINT_NAV
+	  || controlMode == MISSION)
+  {
+	float throttleOut = RC_throttle + airspeedControllerOut;
+	Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
+	Throttle_servo   = throttleOut;
+  }
+  else
+  {
+    Throttle_servo   = RC_throttle;
+  }
   
 };
 
@@ -152,7 +326,8 @@ static void AA241X_AUTO_MediumLoop(void)
   }
   
   // Determine heading command based on specified route and current position
-  if (controlMode == MISSION) {
+  if (controlMode == MISSION) 
+  {
     if (gpsOK == true)
     {
       // Check to see if waypoint is found
