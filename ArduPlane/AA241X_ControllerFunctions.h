@@ -29,6 +29,11 @@ float SchedulePitchTrim(float roll, float airspeed, char climbRate);
 /* blah
  *
  */
+float ScheduleThrottleTrim(float airspeedCommand);
+
+/* blah
+ *
+ */
 //char determineTrimState(float rollCommand, float airspeedCommand);
 
 /* Controller Variables */

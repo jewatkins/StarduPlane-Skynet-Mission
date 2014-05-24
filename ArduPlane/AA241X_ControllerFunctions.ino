@@ -141,6 +141,18 @@ float SchedulePitchTrim(float roll, float airspeed, float climbRate)
 /* blah
  *
  */
+float ScheduleThrottleTrim(float airspeedCommand)
+{
+	float throttleTrim = 0.0;
+
+	throttleTrim = 50.0 + (50.0/(referenceLimits[airspeedController_DEF][maximum_DEF]-referenceLimits[airspeedController_DEF][minimum_DEF]))*(airspeedCommand-referenceLimits[airspeedController_DEF][minimum_DEF]);
+
+	return throttleTrim;
+}
+
+/* blah
+ *
+ */
 /*
 char determineTrimState(float rollCommand, float airspeedCommand)
 {

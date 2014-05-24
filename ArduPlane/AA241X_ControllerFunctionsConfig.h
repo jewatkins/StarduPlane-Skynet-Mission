@@ -27,8 +27,8 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define rollMin_DEF      0    // Roll Right Aileron
 #define rudderMax_DEF    100  // Left Rudder
 #define rudderMin_DEF    0    // Right Rudder
-#define throttleMax_DEF  100  // Throttle Up
-#define throttleMin_DEF  0    // Throttle Down
+#define throttleMax_DEF  95   // Throttle Up
+#define throttleMin_DEF  20   // Throttle Down
 
 /*------------------------------------ Controllers -------------------------------------------------*/
 #define rollController_DEF         0
@@ -119,15 +119,15 @@ const float derivativeTermLimits[numControllers] = {
 #define dGain 2
 #define numGains 3
 
-const float gains [numControllers][numGains] = {
-                                          {25.0, .25, 1.0}, /* roll controller p, i, d */
-                                          {40.0, 0.0, 0.0}, /* pitch controller p, i, d */
+float gains [numControllers][numGains] = {
+                                          {25.0, .5, 0.0}, /* roll controller p, i, d */
+                                          {40.0, 1.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
                                           {0.1, 0.0, 0.0},  /* altitude controller p, i, d */
-                                          {0.01, 0.0, 0.0},  /* climb rate controller p, i, d */
+                                          {0.5, 0.0, 0.0},  /* climb rate controller p, i, d */
                                           {1.0, 0.0, 0.0},  /* glide controller p, i, d */                                          
-                                          {1.0, 0.0, 0.0},  /* airspeed controller p, i, d */
-                                          {2.0, 0.0, 0.0}   /* heading controller p, i, d */
+                                          {10.0, 0.1, 0.0},  /* airspeed controller p, i, d */
+                                          {1.0, 0.01, 0.0}   /* heading controller p, i, d */
                                          };
 
 /*------------------------------------- Trim States ------------------------------------------------*/
@@ -138,7 +138,7 @@ const float gains [numControllers][numGains] = {
  * States
  */
 
-#define SEVEN_MPS_PITCH_DEF   0.1134f     // 6.5 degrees
+#define SEVEN_MPS_PITCH_DEF   0.1308f     // 7.5 degrees
 #define TWELVE_MPS_PITCH_DEF  0.0f        // 0 degrees
 #define PITCH_TRIM_SLOPE_DEF  -0.02267f   // -1.3 degrees per mps
 

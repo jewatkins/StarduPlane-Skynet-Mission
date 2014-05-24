@@ -22,6 +22,8 @@ static float airspeedCommand = 7.0;
 static char phaseOfFlight = preMissionLoiter; // Waiting to start mission
 static float prevAltitude = 0.0;
 
+static float variableOfInterest = 0.0;
+
 // These functions are executed when control mode is in AUTO
 // Please read AA241X_aux.h for all necessary definitions and interfaces
 
@@ -34,6 +36,10 @@ static void AA241X_AUTO_FastLoop(void)
   // Checking if we've just switched to AUTO. If more than 100ms have gone past since last time in AUTO, then we are definitely just entering AUTO
   if (delta_t > 100)
   {
+	gains [altitudeController_DEF][pGain] = ALTITUDE_P;
+	gains [climbRateController_DEF][pGain] = CLIMB_RATE_P;
+	gains [airspeedController_DEF][pGain] = AIRSPEED_P;
+	  
 	// Determine control mode from bits in parameter list
     if(FLIGHT_MODE > .5 && FLIGHT_MODE < 1.5)
 	{
@@ -134,7 +140,7 @@ static void AA241X_AUTO_FastLoop(void)
     // Maintain heading, altitude, and airspeed RC pilot commands offsets from saved initial conditions
       
 	  // Airspeed Commands
-	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+	  airspeedCommand = 11.0; // 7.0 + 5.0*RC_throttle*.01;
 	  SetReference(airspeedController_DEF, airspeedCommand);
 	  
 	  // Heading Commands
@@ -197,20 +203,29 @@ static void AA241X_AUTO_FastLoop(void)
 	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+
+	  variableOfInterest = airspeedControllerOut;
 
   }
   else if(controlMode == MISSION)
   {
 	  // Airspeed Commands
-	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+	  airspeedCommand = 11.0; // 7.0 + 5.0*RC_throttle*.01;
 	  SetReference(airspeedController_DEF, airspeedCommand);
 
 	  // Set reference for the heading
 	  SetReference(headingController_DEF, headingCommand);
+	  float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
+      Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
 	  // Determine the roll command from the heading controller
 	  float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
 	  Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+
+	  // Roll Commands
+	  SetReference(rollController_DEF, headingControllerOut);
+	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
 	  // Determine climb rate command from the altitude controller
 	  float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
@@ -219,7 +234,7 @@ static void AA241X_AUTO_FastLoop(void)
 	  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
 
 	  // Augment pitch angle through altitude controller
-	  if(fabs(commandedClimbRate) < 0.5)
+	  if(fabs(commandedClimbRate) < 0.2)
 	  {
 		  commandedClimbRate = 0.0;
 	  }
@@ -232,12 +247,13 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Find value to augment the pitch angle
 	  float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
 
-	  // Step through each inner loop controller to get the RC output
-	  SetReference(rollController_DEF, rollCommand);
-	  float rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+	  // Pitch Command	  
 	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+	  
+	  // Airspeed Command
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
   }
 
   // Aileron Servo Command Out
@@ -428,6 +444,8 @@ static void AA241X_AUTO_SlowLoop(void){
   hal.console->printf_P(PSTR("pitchCommand: %f \n"), pitchCommand);
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
+
+  hal.console->printf_P(PSTR("Throtte Percentage Out: %f \n"), variableOfInterest);
 
   /*
   gcs_send_text_P(SEVERITY_LOW, PSTR("Test Statement"));
