@@ -6,7 +6,7 @@
 #include "AA241X_ControllerFunctions.h"
 #include "AA241X_WaypointNavigation.h"
 
-static uint32_t controlMode = MISSION;
+static uint16_t controlMode = MISSION;
 static float headingCommand = 0.0;
 static float altitudeCommand = 115.0;
 static float airspeedCommand = 7.0;
@@ -94,19 +94,16 @@ static void AA241X_AUTO_MediumLoop(void)
   // Checking if we've just switched to AUTO. If more than 1000ms have gone past since last time in AUTO, then we are definitely just entering AUTO
   if (delta_t > 1000)
   {
-    // Compute waypoint headings
-    float dx = waypoints[0][0] - X_position;
-    float dy = waypoints[0][1] - Y_position;
-    Hwp[0] = WrapAngle(atan2f(dy,dx));
-    uint32_t i;
-    for (i=1; i<Nwp; i++) {
-      dx = waypoints[i][0] - waypoints[i-1][0];
-      dy = waypoints[i][1] - waypoints[i-1][1];
-      Hwp[i] = WrapAngle(atan2f(dy,dx));
-    }
-    
     // Set waypoint iterator
     iwp = 0;
+    
+    // Get first waypoint
+    GetWaypoint(iwp, &xwp, &ywp);
+    
+    // Compute waypoint heading
+    float dx = xwp - X_position;
+    float dy = ywp - Y_position;
+    Hwp = WrapAngle(atan2f(dy,dx));
   }
   
   // Determine heading command based on specified route and current position
@@ -114,20 +111,20 @@ static void AA241X_AUTO_MediumLoop(void)
     if (gpsOK == true)
     {
       // Check to see if waypoint is found
-      float dx = waypoints[iwp][0] - X_position;
-      float dy = waypoints[iwp][1] - Y_position;
+      float dx = xwp - X_position;
+      float dy = ywp - Y_position;
       float pos_error = sqrtf(dx*dx + dy*dy);
       if (pos_error <= POSITION_ERROR) {
         // Take a snapshot
         snapshot mySnapShot = takeASnapshot();
-        uint32_t i;
+        uint16_t i;
         for (i=0; i<Np; i++) {
           // Check if person found
           if (mySnapShot.personsInPicture[i] == 1) {
             persons_found[i] = 1;
             
             // Sum all persons found
-            uint32_t ii;
+            uint16_t ii;
             char sum = 0;
             for (ii=0; ii<Np; ii++) {
               sum += persons_found[ii];
@@ -142,31 +139,40 @@ static void AA241X_AUTO_MediumLoop(void)
         
         // Go to next waypoint
         iwp++;
-      }
-      
-      // If all waypoints complete, restart route
-      if (iwp == Nwp) {
-        iwp = 0;
-        dx = waypoints[0][0] - X_position;
-        dy = waypoints[0][1] - Y_position;
-        Hwp[0] = WrapAngle(atan2f(dy,dx));
+        
+        // If all waypoints complete, restart route
+        if (iwp == Nwp) {
+          iwp = 0;
+          GetWaypoint(iwp, &xwp, &ywp);
+          dx = xwp - X_position;
+          dy = ywp - Y_position;
+          Hwp = WrapAngle(atan2f(dy,dx));
+        }
+        
+        // Else compute new waypoint heading
+        else {
+          float xwp_old = xwp; float ywp_old = ywp;
+          GetWaypoint(iwp, &xwp, &ywp);
+          dx = xwp - xwp_old;
+          dy = ywp - ywp_old;
+          Hwp = WrapAngle(atan2f(dy,dx));
+        }
       }
       
       // Compute heading (UAV to waypoint)
-      dx = waypoints[iwp][0] - X_position;
-      dy = waypoints[iwp][1] - Y_position;
+      dx = xwp - X_position;
+      dy = ywp - Y_position;
       float Huav = WrapAngle(atan2f(dy,dx));
       
       // Compute heading error (rad)
-      float Herr = (float)fabs(Huav - Hwp[iwp]);
-      
+      float Herr = (float)fabs(Huav - Hwp);
       // Determine shortest angle and compute heading command
       if (Herr < (2*PI - Herr)) {
-        headingCommand = WrapAngle(Hwp[iwp] + copysignf(1.0, Huav - Hwp[iwp])*ROUTE_P*Herr);
+        headingCommand = WrapAngle(Hwp + copysignf(1.0, Huav - Hwp)*ROUTE_P*Herr);
       }
       else {
         Herr = 2*PI - Herr;
-        headingCommand = WrapAngle(Hwp[iwp] - copysignf(1.0, Huav - Hwp[iwp])*ROUTE_P*Herr);
+        headingCommand = WrapAngle(Hwp - copysignf(1.0, Huav - Hwp)*ROUTE_P*Herr);
       }
       
       // If Herr is too large, fly towards waypoint
