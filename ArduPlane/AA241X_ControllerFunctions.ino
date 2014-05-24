@@ -1,7 +1,7 @@
 #include "AA241X_ControllerFunctions.h"
 #include "AA241X_ControllerFunctionsConfig.h"
 
-float StepController(uint8_t controller, float measured, float &delta_t)
+float StepController(unsigned char controller, float measured, float &delta_t)
 {
   float command = 0.0;
   float pTerm = 0.0;
@@ -74,7 +74,7 @@ float StepController(uint8_t controller, float measured, float &delta_t)
 /* blah
  *
  */
-void SetReference(uint8_t controller, float newValue)
+void SetReference(unsigned char controller, float newValue)
 {
   /* Check that the new reference input to command is within limited commands */
   Limit(newValue,referenceLimits[controller][maximum_DEF], referenceLimits[controller][minimum_DEF]);

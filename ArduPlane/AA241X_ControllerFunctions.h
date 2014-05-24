@@ -9,12 +9,12 @@
  * run through the FAST LOOP in the ControlLaw.ino file. The function will determine the error, the derivative error,
  * and the integral error and then determine the controller output to send out to aircraft controls.
  */
-float StepController(uint8_t controller, float measured, float &delta_t);
+float StepController(unsigned char controller, float measured, float &delta_t);
 
 /* blah
  *
  */
-void SetReference(uint8_t controller, float newValue);
+void SetReference(unsigned char controller, float newValue);
 
 /* blah
  *
