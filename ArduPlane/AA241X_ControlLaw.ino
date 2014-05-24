@@ -9,10 +9,8 @@
 static float headingCommand = 0.0;
 static float altitudeCommand = 115.0;
 static float airspeedCommand = 7.0;
-static float delta_t = 0.0;
 static char phaseOfFlight = preMissionLoiter; // Waiting to start mission
-
-float variableOfInterest = 0.0;
+static float prevAltitude = 0.0;
 
 // These functions are executed when control mode is in AUTO
 // Please read AA241X_aux.h for all necessary definitions and interfaces
@@ -21,19 +19,46 @@ float variableOfInterest = 0.0;
 static void AA241X_AUTO_FastLoop(void) 
 {
   // Get the delta time between function calls
-  delta_t = CPU_time_ms - Last_AUTO_stampTime_ms;
+  float delta_t = CPU_time_ms - Last_AUTO_stampTime_ms;
 
   // Checking if we've just switched to AUTO. If more than 100ms have gone past since last time in AUTO, then we are definitely just entering AUTO
   if (delta_t > 100)
   {
-	// Set all references upon initialization of the autonomous mode
-    //SetReference(rollController_DEF, 0.0);
-    //SetReference(pitchController_DEF, 0.0);
-    //SetReference(airspeedController_DEF, 11.0);
-    //SetReference(altitudeHoldController_DEF, altitudeCommand);
-    //SetReference(climbRateController_DEF, 3.0);
-    //SetReference(glideController_DEF, 95.0);
-    //SetReference(headingController_DEF, headingCommand);
+	// Determine control mode from bits in parameter list
+    if(FLIGHT_MODE > .5 && FLIGHT_MODE < 1.5){
+      controlMode = ROLL_STABILIZE_MODE;
+    }else if(FLIGHT_MODE > 1.5 && FLIGHT_MODE < 2.5){
+      controlMode = STABILIZE_MODE;
+    }else if(FLIGHT_MODE > 2.5 && FLIGHT_MODE < 3.5){
+      controlMode = HEADING_HOLD_MODE;
+    }else if(FLIGHT_MODE > 3.5 && FLIGHT_MODE < 4.5){
+      controlMode = FBW_MODE;
+      
+      // Set altitude as current altitude
+      altitudeCommand = -Z_position_GPS;
+      altitudeController241X.SetReference(altitudeCommand);
+      
+      airspeedCommand = 11.0; // Phase 1 nominal speed
+      
+      // Mission Planner based pitch command rather than hard coded up top
+      pitchCommand = (THETA_COMMAND/180.0)*PI;
+    }else if(FLIGHT_MODE > 4.5 && FLIGHT_MODE < 5.5){
+      controlMode = ATT_HOLD;
+    }else if(FLIGHT_MODE > 5.5 && FLIGHT_MODE < 6.5){
+      controlMode = WAYPOINT_NAV;
+      
+      airspeedCommand = 11.0;
+      // Mission Planner based pitch command until trim settings determined
+      pitchCommand = (THETA_COMMAND/180.0)*PI;      
+    }
+
+	// Set commands upon initialization of the autonomous mode
+    SetReference(altitudeController_DEF, -Z_position_GPS); // Current Altitude
+
+	airspeedCommand = 11.0; // 11.0 m/s
+	SetReference(airspeedController_DEF, airspeedCommand);
+
+	prevAltitude = -Z_position_GPS;
   }
 
   // Check delta_t before sending it to any step functions for inner loop controls
@@ -42,25 +67,39 @@ static void AA241X_AUTO_FastLoop(void)
 	  delta_t = 20;
   }
 
-  // Set Reference for the heading
+  // Set reference for the heading
   SetReference(headingController_DEF, headingCommand);
 
-  // Determine the roll command from the ground course error
+  // Determine the roll command from the heading controller
   float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
   Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
-  /* Trim Scheduling */
-  trimState_t trimSetting = ScheduleTrim(rollCommand, airspeedCommand, phaseOfFlight);
+  // Determine climb rate command from the altitude controller
+  float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
+
+  // Pitch trim scheduling
+  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
+
+  // Augment pitch angle through altitude controller
+  if(fabs(commandedClimbRate) < 0.5)
+  {
+	  commandedClimbRate = 0.0;
+  }
+  SetReference(climbRateController_DEF, commandedClimbRate);
+  
+  // Get climb rate
+  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
+  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
+
+  // Find value to augment the pitch angle
+  float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
 
   // Step through each inner loop controller to get the RC output
-  //float rollCommand = 0.0;
   SetReference(rollController_DEF, rollCommand);
   float rollControllerOut = StepController(rollController_DEF, roll, delta_t);
-
-  float pitchCommand = trimSetting.pitch;
-  SetReference(pitchController_DEF, pitchCommand);
+  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
   float pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
-  g.aa241x_3 = pitchControllerOut;
+  float airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
 
   // Aileron Servo Command Out
   float rollOut    = RC_Roll_Trim + rollControllerOut;
@@ -76,11 +115,12 @@ static void AA241X_AUTO_FastLoop(void)
   //float rudderOut  = RC_Rudder_Trim + rudderControllerOut;
   //Limit(rudderOut, rudderMax_DEF, rudderMin_DEF);
   //Rudder_servo     = 50; //rudderOut;
+  Rudder_servo     = RC_rudder;
   
   // Throttle PWM Command Out
-  //float throttleOut = RC_throttle + airspeedControllerOut;
-  //Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
-  Throttle_servo   = 0; // RC_throttle + airspeedControllerOut; //throttleOut;
+  float throttleOut = RC_throttle + airspeedControllerOut;
+  Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
+  Throttle_servo   = throttleOut;
   
 };
 
@@ -177,30 +217,9 @@ static void AA241X_AUTO_MediumLoop(void)
       headingCommand += 2*PI;
     }
     hal.console->printf_P(PSTR("Heading Command: %f \n"), headingCommand);
-  }
-  
-  /* Longitudinal Control */
-  float altitudeError = altitudeCommand - (-Z_position_GPS); // Get altitude error to see if we need to climb
-  
-  /*
-  if (fabs(altitudeError) > climbThreshold)
-  {
-    // Large discrepancy in altitude, use climb rate control
-    longitudinalController = climbRateController_DEF;
-  }
-  else
-  {
-    // Not a big discrepancy in altitude, use altitude hold
-    longitudinalController = altitudeHoldController_DEF; 
-  }
-  */
-  
-    
+  }  
   
 };
-
-
-
 
 
 // *****   AA241X Slow Loop - @ ~1Hz  *****  //
@@ -228,8 +247,10 @@ static void AA241X_AUTO_SlowLoop(void){
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
 
-  gcs_send_text_P(SEVERITY_LOW,PSTR("Printing Message"));
-  
+  /*
+  gcs_send_text_P(SEVERITY_LOW, PSTR("Test Statement"));
+  gcs_send_text_fmt(PSTR("Test Float = %f \n"), 25.5);
+  */
 };
 
 

@@ -11,9 +11,9 @@
 #define AA241X_2_NAME     "AA241_Rte_P" 
 #define AA241X_2_DEFAULT  2.0
 // My parameter 3
-#define my_param_3        g.aa241x_3
-#define AA241X_3_NAME     "my_paramName3" 
-#define AA241X_3_DEFAULT  10.0 
+#define FLIGHT_MODE       g.aa241x_3
+#define AA241X_3_NAME     "AA241_FltMode" 
+#define AA241X_3_DEFAULT  1.0 
 // My parameter 4
 #define my_param_4        g.aa241x_4
 #define AA241X_4_NAME     "my_paramName4" 

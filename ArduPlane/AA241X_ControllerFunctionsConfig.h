@@ -34,7 +34,7 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define rollController_DEF         0
 #define pitchController_DEF        1
 #define rudderController_DEF       2
-#define altitudeHoldController_DEF 3
+#define altitudeController_DEF     3
 #define climbRateController_DEF    4
 #define glideController_DEF        5
 #define airspeedController_DEF     6
@@ -51,8 +51,8 @@ const float outputLimits[numControllers] = {
 											25, // percent of aileron servo
 											20, // percent of elevator servo
 											20, // percent of rudder servo
-											0.174, // pitch angle deviation maximum (radians)
-											0.174, // pitch angle deviation maximum (radians)
+											3,  // altitude controller m/s
+											0.05, // pitch angle deviation maximum ~3 degrees (radians)
 											0.174, // pitch angle deviation maximum (radians)
 											25, // throttle deviation maximum
 											25 // heading angle deviation maximum
@@ -62,8 +62,8 @@ const float referenceLimits[numControllers][minMax] = {
                                    {0.52 /* 30 degrees max */, -0.52 /* -30 degrees min */ },  /* roll controller */
                                    {0.35 /* 20 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
-                                   {0.122 /* 7 degrees max */, -0.122 /* -7 degrees min */ },  /* altitude hold controller */
-                                   {4.5 /* 4.5 m/s max */, 0.0 /* 0.0 m/s min */ }, /* climb rate controller */
+                                   {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */
+                                   {3.0 /* 3.0 m/s max */, -3.0 /* 0.0 m/s min */ }, /* climb rate controller */
                                    {0.122 /* 7 degrees max */, 0.0 /* 0.0 degrees min */ }, /* glide controller */
                                    {12.0 /* 12 m/s max */, 6.0 /* 6.0 m/s min */}, /* airspeed controller */
                                    {6.30 /* 2 PI max */, -0.1 /* -0.1 min */} /* heading controller */
@@ -73,8 +73,8 @@ const float integralLimits[numControllers] = {
 											  1, /* roll controller */
 											  1, /* pitch controller */
 											  1, /* rudder controller */
-											  5, /* altitude hold controller */
-											  1, /* climb rate controller */
+											  0.5, /* altitude controller */
+											  .01, /* climb rate controller */
 											  1, /* glide controller */
 											  10, /* airspeed controller */
 											  1 /* heading controller */
@@ -84,8 +84,8 @@ const float derivativeLimits[numControllers] = {
 											   3, /* roll controller */
 											   3, /* pitch controller */
 											   3, /* rudder controller */
-											   3, /* altitude hold controller */
-											   3, /* climb rate controller */
+											   0.5, /* altitude controller */
+											   .01, /* climb rate controller */
 											   3, /* glide controller */
 											   3, /* airspeed controller */
 											   3 /* heading controller */
@@ -95,8 +95,8 @@ const float integralTermLimits[numControllers] = {
 											   5, /* roll controller */
 											   5, /* pitch controller */
 											   5, /* rudder controller */
-											   5, /* altitude hold controller */
-											   5, /* climb rate controller */
+											   0.5, /* altitude controller */
+											   .01, /* climb rate controller */
 											   5, /* glide controller */
 											   5, /* airspeed controller */
 											   5 /* heading controller */
@@ -106,14 +106,12 @@ const float derivativeTermLimits[numControllers] = {
 											   5, /* roll controller */
 											   5, /* pitch controller */
 											   5, /* rudder controller */
-											   5, /* altitude hold controller */
-											   5, /* climb rate controller */
+											   0.5, /* altitude controller */
+											   .01, /* climb rate controller */
 											   5, /* glide controller */
 											   5, /* airspeed controller */
 											   5 /* heading controller */
 											  };
-
-const float climbThreshold     = 10;      // 10 meters error in altitude will send plane into climb rate mode
 
 /*------------------------------------ Controller Gains --------------------------------------------*/
 #define pGain 0
@@ -125,8 +123,8 @@ const float gains [numControllers][numGains] = {
                                           {25.0, .25, 1.0}, /* roll controller p, i, d */
                                           {40.0, 0.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
-                                          {1.0, 0.0, 0.0},  /* altitude hold controller p, i, d */
-                                          {1.0, 0.0, 0.0},  /* climb rate controller p, i, d */
+                                          {0.1, 0.0, 0.0},  /* altitude controller p, i, d */
+                                          {0.01, 0.0, 0.0},  /* climb rate controller p, i, d */
                                           {1.0, 0.0, 0.0},  /* glide controller p, i, d */                                          
                                           {1.0, 0.0, 0.0},  /* airspeed controller p, i, d */
                                           {2.0, 0.0, 0.0}   /* heading controller p, i, d */
@@ -139,6 +137,20 @@ const float gains [numControllers][numGains] = {
  * roll angle
  * States
  */
+
+#define SEVEN_MPS_PITCH_DEF   0.1134f     // 6.5 degrees
+#define TWELVE_MPS_PITCH_DEF  0.0f        // 0 degrees
+#define PITCH_TRIM_SLOPE_DEF  -0.02267f   // -1.3 degrees per mps
+
+#define PITCH_TRIM_BANK_MAX_DEF   0.05233f    // 3 degrees added to pitch for a maximum bank angle
+
+#define MAX_CLIMB_RATE_DEF   3.0f  // 3 m/s
+#define MIN_CLIMB_RATE_DEF   -3.0f // -3 m/s
+
+#define MAX_CLIMB_RATE_PITCH_DEF 0.2616f  // 15 degrees maximum
+#define MIN_CLIMB_RATE_PITCH_DEF -0.1221f // -7 degrees minimum
+
+/*
 #define SEVEN_MPS_DEF                 0
 #define EIGHT_MPS_DEF                 1
 #define NINE_MPS_DEF                  2
@@ -163,23 +175,24 @@ const float gains [numControllers][numGains] = {
 #define numStates    3
 
 const float trims [numTrims][numStates] = {
-                              {7.0, (6.5/180)*(3.14), 0.0}, /* Straight and Level 7 m/s flight */
-                              {8.0, (5.0/180)*(3.14), 0.0}, /* Straight and Level 8 m/s flight */
-                              {9.0, (3.5/180)*(3.14), 0.0}, /* Straight and Level 9 m/s flight */
-                              {10.0, (2.0/180)*(3.14), 0.0}, /* Straight and Level 10 m/s flight */
-                              {11.0, (0.5/180)*(3.14), 0.0}, /* Straight and Level 11 m/s flight */
-                              {12.0, 0.0, 0.0}, /* Straight and Level 12 m/s flight */
-                              {7.0, (20.0/180)*(3.14), 0.0}, /* Max Climb Rate */
-                              {7.0, (6.5/180)*(3.14), 0.0}, /* Glide */
-                              {7.0, (7.5/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]}, /* Max Right Bank 7 m/s */
-                              {7.0, (7.5/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]}, /* Max Left Bank 7 m/s */
-                              {12.0, (1.5/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]}, /* Max Right Bank 12 m/s */
-                              {12.0, (1.5/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]}, /* Max Left Bank 12 m/s */
-                              {7.0, (7.0/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]/2.0}, /* Mid Right Bank 7 m/s */
-                              {7.0, (7.0/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]/2.0}, /* Mid Left Bank 7 m/s */
-                              {12.0, (1.0/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]/2.0}, /* Mid Right Bank 12 m/s */
-                              {12.0, (1.0/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]/2.0} /* Mid Left Bank 12 m/s */
+                              {7.0, (6.5/180)*(3.14), 0.0}, // Straight and Level 7 m/s flight
+                              {8.0, (5.0/180)*(3.14), 0.0}, // Straight and Level 8 m/s flight 
+                              {9.0, (3.5/180)*(3.14), 0.0}, // Straight and Level 9 m/s flight 
+                              {10.0, (2.0/180)*(3.14), 0.0}, // Straight and Level 10 m/s flight 
+                              {11.0, (0.5/180)*(3.14), 0.0}, // Straight and Level 11 m/s flight 
+                              {12.0, 0.0, 0.0}, // Straight and Level 12 m/s flight 
+                              {7.0, (20.0/180)*(3.14), 0.0}, // Max Climb Rate 
+                              {7.0, (6.5/180)*(3.14), 0.0}, // Glide 
+                              {7.0, (7.5/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]}, // Max Right Bank 7 m/s 
+                              {7.0, (7.5/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]}, // Max Left Bank 7 m/s 
+                              {12.0, (1.5/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]}, // Max Right Bank 12 m/s 
+                              {12.0, (1.5/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]}, // Max Left Bank 12 m/s 
+                              {7.0, (7.0/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]/2.0}, // Mid Right Bank 7 m/s 
+                              {7.0, (7.0/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]/2.0}, // Mid Left Bank 7 m/s 
+                              {12.0, (1.0/180)*(3.14), referenceLimits[rollController_DEF][maximum_DEF]/2.0}, // Mid Right Bank 12 m/s 
+                              {12.0, (1.0/180)*(3.14), referenceLimits[rollController_DEF][minimum_DEF]/2.0} // Mid Left Bank 12 m/s 
                              };
+							 */
 
 /*----------------------------------------- Phase of Flight -------------------------------------------------*/
 /* The phase of flight will help determine the trim schedule. There are a finite number of flight phases for this
