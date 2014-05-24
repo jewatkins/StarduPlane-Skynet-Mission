@@ -60,6 +60,7 @@ static void AA241X_AUTO_FastLoop(void)
   float pitchCommand = trimSetting.pitch;
   SetReference(pitchController_DEF, pitchCommand);
   float pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+  g.aa241x_3 = pitchControllerOut;
 
   // Aileron Servo Command Out
   float rollOut    = RC_Roll_Trim + rollControllerOut;
@@ -226,6 +227,8 @@ static void AA241X_AUTO_SlowLoop(void){
   hal.console->printf_P(PSTR("pitchCommand: %f \n"), pitchCommand);
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
+
+  gcs_send_text_P(SEVERITY_LOW,PSTR("Printing Message"));
   
 };
 
