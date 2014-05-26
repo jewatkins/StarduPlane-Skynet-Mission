@@ -21,23 +21,20 @@ void SetReference(unsigned char controller, float newValue);
  */
 void Limit(float &variable, float maximum, float minimum);
 
-// nominal trim states for the controllers
-struct trimState_t
-{
-  float pitch;
-  float roll;
-  float airspeed;
-};
+/* blah
+ *
+ */
+float SchedulePitchTrim(float roll, float airspeed, char climbRate);
 
 /* blah
  *
  */
-struct trimState_t ScheduleTrim(float rollCommand, float airspeedCommand, char phaseOfFlight);
+float ScheduleThrottleTrim(float airspeedCommand);
 
 /* blah
  *
  */
-char determineTrimState(float rollCommand, float airspeedCommand);
+//char determineTrimState(float rollCommand, float airspeedCommand);
 
 /* Controller Variables */
 static float references[numControllers]; // reference inputs to the controllers

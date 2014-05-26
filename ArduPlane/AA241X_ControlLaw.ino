@@ -168,7 +168,7 @@ static void AA241X_AUTO_MediumLoop(void)
       dx = xwp - X_position;
       dy = ywp - Y_position;
       float ds = sqrtf(dx*dx + dy*dy);
-      float dt = TIME_ESTIMATE - (CPU_time_ms - t0);
+      float dt = TIME_ESTIMATE - (CPU_time_ms - t0)/1000;
       airspeedCommand = ds/dt;
       
       // Airspeed limiter

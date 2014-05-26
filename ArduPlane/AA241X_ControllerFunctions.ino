@@ -77,7 +77,7 @@ float StepController(unsigned char controller, float measured, float &delta_t)
 void SetReference(unsigned char controller, float newValue)
 {
   /* Check that the new reference input to command is within limited commands */
-  Limit(newValue,referenceLimits[controller][maximum_DEF], referenceLimits[controller][minimum_DEF]);
+  Limit(newValue, referenceLimits[controller][maximum_DEF], referenceLimits[controller][minimum_DEF]);
   
   /* Assumes references is under the total number of controllers */
   references[controller] = newValue;
@@ -102,72 +102,58 @@ void Limit(float &variable, float maximum, float minimum)
   return;
 }
 
-/* blah
- *
+/* This function looks at the current roll state, airspeed state, and desired climb rate. It
+ * then outputs a nominal pitch angle for the pitch controller to hold. The altitude controller
+ * will augment this nominal pitch angle with a value to perturb this prescribed trim angle depending
+ * on the commanded climb rate. In essence, this is just acting as a feed forward controller by knowing
+ * a little about the system characteristics.
  */
-struct trimState_t ScheduleTrim(float rollCommand, float airspeedCommand, char phaseOfFlight)
+float SchedulePitchTrim(float roll, float airspeed, float climbRate)
 {
-  trimState_t trimCondition;
-  char trimSetting = 0; // used in some of the switch cases
+  float pitchAngleOut = 0.0; // pitch angle trim state (radians)
 
-  // Determine what phase of flight we're in and what needs to be set as trim state / reference
-  switch (phaseOfFlight)
+  // Straight and level flight, airspeed dependent component
+  pitchAngleOut = SEVEN_MPS_PITCH_DEF + PITCH_TRIM_SLOPE_DEF*airspeed;
+
+  // Limit the pitch trim so that it doesn't become unstable in straight and level flight
+  if(pitchAngleOut < 0.0)
   {
-	  case preMissionLoiter:
-		  // Set Trim State
-		  trimCondition.pitch = trims[SEVEN_MPS_DEF][pitch_DEF];
-          trimCondition.roll  = trims[SEVEN_MPS_DEF][roll_DEF];
-          trimCondition.airspeed  = trims[SEVEN_MPS_DEF][airspeed_DEF];		  
-		  break;
+	  pitchAngleOut = 0.0;
+  }
 
-	  case climb:
-		  // Set Trim State - max climb controller puts the aircraft in a huge climb for the beginning of the mission  
-		  trimCondition.pitch = trims[MAX_CLIMB_DEF][pitch_DEF];
-          trimCondition.roll  = trims[MAX_CLIMB_DEF][roll_DEF];
-          trimCondition.airspeed  = trims[MAX_CLIMB_DEF][airspeed_DEF];
-		  break;
+  // Take into account bank angle
+  pitchAngleOut += (fabs(roll)/referenceLimits[rollController_DEF][maximum_DEF])*PITCH_TRIM_BANK_MAX_DEF;
 
-	  case tSight:
-		  // Set Trim State
-		  trimCondition.pitch = trims[ELEVEN_MPS_DEF][pitch_DEF];
-          trimCondition.roll  = trims[ELEVEN_MPS_DEF][roll_DEF];
-          trimCondition.airspeed  = trims[ELEVEN_MPS_DEF][airspeed_DEF];
-		  break;
-
-	  case refinement:
-		  // Set Trim State
-		  trimSetting = determineTrimState(rollCommand, airspeedCommand);
-
-		  trimCondition.pitch = trims[trimSetting][pitch_DEF];
-          trimCondition.roll  = trims[trimSetting][roll_DEF];
-          trimCondition.airspeed  = trims[trimSetting][airspeed_DEF];
-
-		  break;
-		  
-	  case glide:
-		  // Set Trim State
-		  trimCondition.pitch = trims[GLIDE_DEF][pitch_DEF];
-          trimCondition.roll  = trims[GLIDE_DEF][roll_DEF];
-          trimCondition.airspeed  = trims[GLIDE_DEF][airspeed_DEF];
-
-		  break;
-
-	  case postMissionLoiter:
-		  // Set Trim State
-		  trimCondition.pitch = trims[SEVEN_MPS_DEF][pitch_DEF];
-          trimCondition.roll  = trims[SEVEN_MPS_DEF][roll_DEF];
-          trimCondition.airspeed  = trims[SEVEN_MPS_DEF][airspeed_DEF];		  
-		  
-		  break;
-  } // end switch
-  
-  return trimCondition;
+  // Take into account climb rate
+  if(climbRate > 0.0)
+  {
+	  pitchAngleOut += (climbRate/MAX_CLIMB_RATE_DEF)*MAX_CLIMB_RATE_PITCH_DEF;
+  }
+  else if(climbRate < 0.0)
+  {
+	  pitchAngleOut += (climbRate/MIN_CLIMB_RATE_DEF)*MIN_CLIMB_RATE_PITCH_DEF;
+  }
+	
+  return pitchAngleOut;
   
 }
 
 /* blah
  *
  */
+float ScheduleThrottleTrim(float airspeedCommand)
+{
+	float throttleTrim = 0.0;
+
+	throttleTrim = 50.0 + (50.0/(referenceLimits[airspeedController_DEF][maximum_DEF]-referenceLimits[airspeedController_DEF][minimum_DEF]))*(airspeedCommand-referenceLimits[airspeedController_DEF][minimum_DEF]);
+
+	return throttleTrim;
+}
+
+/* blah
+ *
+ */
+/*
 char determineTrimState(float rollCommand, float airspeedCommand)
 {
 	char trimStateOut = 0;
@@ -252,4 +238,4 @@ char determineTrimState(float rollCommand, float airspeedCommand)
 
 		return trimStateOut;
 	}
-}
+}*/
