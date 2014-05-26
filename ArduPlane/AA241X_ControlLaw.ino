@@ -61,7 +61,6 @@ static void AA241X_AUTO_FastLoop(void)
   float pitchCommand = trimSetting.pitch;
   SetReference(pitchController_DEF, pitchCommand);
   float pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
-  g.aa241x_3 = pitchControllerOut;
 
   // Aileron Servo Command Out
   float rollOut    = RC_Roll_Trim + rollControllerOut;
@@ -95,16 +94,17 @@ static void AA241X_AUTO_MediumLoop(void)
   // Checking if we've just switched to AUTO. If more than 1000ms have gone past since last time in AUTO, then we are definitely just entering AUTO
   if (delta_t > 1000)
   {
+    // Start timer
+    t0 = CPU_time_ms;
+    
     // Set waypoint iterator
     iwp = 0;
     
     // Get first waypoint
     GetWaypoint(iwp, &xwp, &ywp);
     
-    // Compute waypoint heading
-    float dx = xwp - X_position;
-    float dy = ywp - Y_position;
-    Hwp = WrapAngle(atan2f(dy,dx));
+    // Compute heading (waypoint tangent line)
+    Hwp = WrapAngle(atan2f(ywp,xwp) + PI/4);
   }
   
   // Determine heading command based on specified route and current position
@@ -118,55 +118,73 @@ static void AA241X_AUTO_MediumLoop(void)
       if (pos_error <= POSITION_ERROR) {
         // Take a snapshot
         snapshot mySnapShot = takeASnapshot();
-        uint16_t i;
-        for (i=0; i<Np; i++) {
-          // Check if person found
-          if (mySnapShot.personsInPicture[i] == 1) {
-            persons_found[i] = 1;
-            
-            // Sum all persons found
-            uint16_t ii;
-            char sum = 0;
-            for (ii=0; ii<Np; ii++) {
-              sum += persons_found[ii];
-            }
-            
-            // Set altitude command to 30 meters if all persons found
-            if (sum == Np) {
-              altitudeCommand = 30.0;
+        
+        // Post process results and go to next waypoint if snapshot is taken
+        if (mySnapShot.pictureTaken == 1) {
+          uint16_t i;
+          for (i=0; i<Np; i++) {
+            // Check if person found
+            if (mySnapShot.personsInPicture[i] == 1) {
+              persons_found[i] = 1;
+              gcs_send_text_fmt(PSTR("Person %d found"),i+1);
+              
+              // Sum all persons found
+              uint16_t ii;
+              char sum = 0;
+              for (ii=0; ii<Np; ii++) {
+                sum += persons_found[ii];
+              }
+              
+              // Display message if all persons found
+              if (sum == Np) {
+                gcs_send_text_P(SEVERITY_LOW, PSTR("All Persons found!"));
+              }
             }
           }
-        }
-        
-        // Go to next waypoint
-        iwp++;
-        
-        // If all waypoints complete, restart route
-        if (iwp == Nwp) {
-          iwp = 0;
-          GetWaypoint(iwp, &xwp, &ywp);
-          dx = xwp - X_position;
-          dy = ywp - Y_position;
-          Hwp = WrapAngle(atan2f(dy,dx));
-        }
-        
-        // Else compute new waypoint heading
-        else {
-          float xwp_old = xwp; float ywp_old = ywp;
-          GetWaypoint(iwp, &xwp, &ywp);
-          dx = xwp - xwp_old;
-          dy = ywp - ywp_old;
-          Hwp = WrapAngle(atan2f(dy,dx));
+          
+          // Go to next waypoint
+          iwp++;
+          
+          // If all waypoints complete, restart route
+          if (iwp == Nwp) {
+            iwp = 0;
+            GetWaypoint(iwp, &xwp, &ywp);
+          }
+          
+          // Else compute new waypoint heading
+          else {
+            GetWaypoint(iwp, &xwp, &ywp);
+          }
+          
+          // Compute heading (waypoint tangent line)
+          Hwp = WrapAngle(atan2f(ywp,xwp) + PI/4);
+          
+          // Start timer
+          t0 = CPU_time_ms;
         }
       }
       
-      // Compute heading (UAV to waypoint)
+      // Estimate needed airspeed to reach waypoint at correct time
       dx = xwp - X_position;
       dy = ywp - Y_position;
+      float ds = sqrtf(dx*dx + dy*dy);
+      float dt = TIME_ESTIMATE - (CPU_time_ms - t0);
+      airspeedCommand = ds/dt;
+      
+      // Airspeed limiter
+      if (airspeedCommand < 0.0 || airspeedCommand > 14.0) {
+        airspeedCommand = 14.0;
+      }
+      else if (airspeedCommand < 7.0) {
+        airspeedCommand = 7.0;
+      }
+      
+      // Compute heading (UAV to waypoint)
       float Huav = WrapAngle(atan2f(dy,dx));
       
       // Compute heading error (rad)
       float Herr = (float)fabs(Huav - Hwp);
+      
       // Determine shortest angle and compute heading command
       if (Herr < (2*PI - Herr)) {
         headingCommand = WrapAngle(Hwp + copysignf(1.0, Huav - Hwp)*ROUTE_P*Herr);
@@ -212,8 +230,6 @@ static void AA241X_AUTO_SlowLoop(void){
   hal.console->printf_P(PSTR("pitchCommand: %f \n"), pitchCommand);
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
-
-  gcs_send_text_P(SEVERITY_LOW,PSTR("Printing Message"));
   
 };
 
