@@ -1,7 +1,14 @@
 #include "AA241X_ControllerFunctions.h"
 #include "AA241X_ControllerFunctionsConfig.h"
 
-float StepController(unsigned char controller, float measured, float &delta_t)
+
+/* Controller Variables */
+static float references[numControllers]; // reference inputs to the controllers
+static float intErrors[numControllers];  // Need to track iterm over multiple iterations
+static float prevErrors[numControllers]; // Need to track integral error over multiple iterations
+
+
+float StepController(unsigned int controller, float measured, float &delta_t)
 {
   float command = 0.0;
   float pTerm = 0.0;
@@ -74,7 +81,7 @@ float StepController(unsigned char controller, float measured, float &delta_t)
 /* blah
  *
  */
-void SetReference(unsigned char controller, float newValue)
+void SetReference(unsigned int controller, float newValue)
 {
   /* Check that the new reference input to command is within limited commands */
   Limit(newValue, referenceLimits[controller][maximum_DEF], referenceLimits[controller][minimum_DEF]);

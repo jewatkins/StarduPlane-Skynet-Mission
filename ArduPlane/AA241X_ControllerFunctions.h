@@ -9,12 +9,12 @@
  * run through the FAST LOOP in the ControlLaw.ino file. The function will determine the error, the derivative error,
  * and the integral error and then determine the controller output to send out to aircraft controls.
  */
-float StepController(unsigned char controller, float measured, float &delta_t);
+float StepController(unsigned int controller, float measured, float &delta_t);
 
 /* blah
  *
  */
-void SetReference(unsigned char controller, float newValue);
+void SetReference(unsigned int controller, float newValue);
 
 /* blah
  *
@@ -24,7 +24,7 @@ void Limit(float &variable, float maximum, float minimum);
 /* blah
  *
  */
-float SchedulePitchTrim(float roll, float airspeed, char climbRate);
+float SchedulePitchTrim(float roll, float airspeed, float climbRate);
 
 /* blah
  *
@@ -35,10 +35,5 @@ float ScheduleThrottleTrim(float airspeedCommand);
  *
  */
 //char determineTrimState(float rollCommand, float airspeedCommand);
-
-/* Controller Variables */
-static float references[numControllers]; // reference inputs to the controllers
-static float intErrors[numControllers];  // Need to track iterm over multiple iterations
-static float prevErrors[numControllers]; // Need to track integral error over multiple iterations
 
 #endif /* CONTROLLER_FUNCTIONS_H */

@@ -187,7 +187,7 @@ static void AA241X_AUTO_FastLoop(void)
 	  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
 
 	  // Augment pitch angle through altitude controller
-	  if(fabs(commandedClimbRate) < 0.5)
+	  if(fabs(commandedClimbRate) < 0.1)
 	  {
 		  commandedClimbRate = 0.0;
 	  }
@@ -203,9 +203,7 @@ static void AA241X_AUTO_FastLoop(void)
 	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
-
-	  variableOfInterest = airspeedControllerOut;
+	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
   }
   else if(controlMode == MISSION)
@@ -241,7 +239,7 @@ static void AA241X_AUTO_FastLoop(void)
 	  SetReference(climbRateController_DEF, commandedClimbRate);
   
 	  // Get climb rate
-	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
+	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t * 1000;
 	  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
 
 	  // Find value to augment the pitch angle
@@ -253,8 +251,12 @@ static void AA241X_AUTO_FastLoop(void)
 	  
 	  // Airspeed Command
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
   }
+  
+  
+  // Store the previous altitude in order to track the climb rate error
+  prevAltitude = -Z_position_GPS;
 
   // Aileron Servo Command Out
   if(controlMode == ROLL_STABILIZE_MODE 
@@ -308,8 +310,11 @@ static void AA241X_AUTO_FastLoop(void)
 	  || controlMode == WAYPOINT_NAV
 	  || controlMode == MISSION)
   {
-	float throttleOut = RC_throttle + airspeedControllerOut;
-	Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
+	float throttleOut = airspeedControllerOut;
+	Limit(throttleOut, throttleMax_DEF, throttleMin_DEF);
+	
+	variableOfInterest = throttleOut;
+
 	Throttle_servo   = throttleOut;
   }
   else
