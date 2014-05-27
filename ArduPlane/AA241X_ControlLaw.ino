@@ -387,10 +387,14 @@ static void AA241X_AUTO_MediumLoop(void)
   float delta_t = (CPU_time_ms - Last_AUTO_stampTime_ms); // Get delta time between AUTO_FastLoop calls  
   
   // Checking if we've just switched to AUTO. If more than 1000ms have gone past since last time in AUTO, then we are definitely just entering AUTO
-  if (delta_t > 1000)
+  if (delta_t > 1000 && controlMode == MISSION)
   {
     // Start timer
-    t0 = CPU_time_ms;
+    t_init = CPU_time_ms;
+    
+    // Set initial start position
+    x_init = X_position;
+    y_init = Y_position;
     
     // Set waypoint iterator
     iwp = 0;
@@ -399,7 +403,7 @@ static void AA241X_AUTO_MediumLoop(void)
     GetWaypoint(iwp, &xwp, &ywp);
     
     // Compute heading (waypoint tangent line)
-    Hwp = WrapAngle(atan2f(ywp,xwp) + PI/4);
+    Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
   }
   
   // Determine heading command based on specified route and current position
@@ -452,10 +456,10 @@ static void AA241X_AUTO_MediumLoop(void)
           }
           
           // Compute heading (waypoint tangent line)
-          Hwp = WrapAngle(atan2f(ywp,xwp) + PI/4);
+          Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
           
           // Start timer
-          t0 = CPU_time_ms;
+          t_init = CPU_time_ms;
         }
       }
       
@@ -463,7 +467,7 @@ static void AA241X_AUTO_MediumLoop(void)
       dx = xwp - X_position;
       dy = ywp - Y_position;
       float ds = sqrtf(dx*dx + dy*dy);
-      float dt = TIME_ESTIMATE - (CPU_time_ms - t0)/1000;
+      float dt = TIME_ESTIMATE - (CPU_time_ms - t_init)/1000;
       airspeedCommand = ds/dt;
       
       // Airspeed limiter

@@ -1,10 +1,11 @@
 #ifndef WAYPOINT_NAVIGATION_H
 #define WAYPOINT_NAVIGATION_H
 
+#include <math.h>
+
 /**** Waypoint Navigation ****/
 #define MISSION 1                              // controlMode for Mission
 #define TIME_ESTIMATE 3.2f                     // Time estimate between waypoints (s)
-#define Ndim 2                                 // Dimension of waypoints
 #define Np 4                                   // Number of persons to find
 static char persons_found[Np] = {0,0,0,0};     // Number of persons found
 
@@ -17,10 +18,11 @@ static float WrapAngle(float angle) {
 // Returns waypoint number 'wp' for phase-1 assuming that the airspeed is
 // maintained at 11 m/s and there are 62 waypoints
 #define Nwp 62
-static float t0 = 0;      // Initial time between waypoints
-static uint16_t iwp = 0;  // Waypoint iterator
-static float xwp = 0.0f; static float ywp = 0.0f;
-static float Hwp = 0.0f;
+static float t_init = 0;                                 // Initial time between waypoints
+static uint16_t iwp = 0;                                 // Waypoint iterator
+static float x_init = 0.0f; static float y_init = 0.0f;  // Initial start position
+static float xwp = 0.0f;    static float ywp = 0.0f;     // Waypoint
+static float Hwp = 0.0f;                                 // Heading: waypoint tangent line
 static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
   // Set parameters
   wp = wp + 1;
@@ -30,6 +32,7 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
   float tau[4] = {0.1500f, 0.2667f, 0.3833f, 0.5000f};
   float theta = 1.7146f;
   float offset = 1.6756f;
+  float rotation = WrapAngle(atan2f(y_init,x_init) - theta);
   
   // Circle 1
   float omega = v/RC[0];
@@ -38,6 +41,7 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
   float ang;
   if ((float)wp <= nTp) {
       ang = theta + omega*ts*(float)wp;
+      ang += rotation;
       *xpos = RC[0]*cosf(ang);
       *ypos = RC[0]*sinf(ang);
       return;
@@ -56,6 +60,7 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
     if ((float)wp <= nTp) {
         rad = (RC[iC-1] + (RC[iC]-RC[iC-1])*((float)wp-nTm)/ (nTp-nTm));
         ang = theta + omega*ts*((float)wp-nTm);
+        ang += rotation;
         *xpos = rad*cosf(ang);
         *ypos = rad*sinf(ang);
         return;
@@ -71,6 +76,7 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
     if ((float)wp <= nTp) {
         rad = RC[iC];
         ang = theta + omega*ts*((float)wp-nTm);
+        ang += rotation;
         *xpos = rad*cosf(ang);
         *ypos = rad*sinf(ang);
         return;
