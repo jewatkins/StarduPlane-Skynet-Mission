@@ -125,7 +125,7 @@ static void AA241X_AUTO_FastLoop(void)
   }
   else if (controlMode == HEADING_HOLD_MODE)
   {
-    // Maintain Heading, RC pilot commands offset from heading that was saved
+      // Maintain Heading, RC pilot commands offset from heading that was saved
       // Heading Commands
       if (fabs(RC_roll - RC_Roll_Trim) > 5)
       {
@@ -218,10 +218,10 @@ static void AA241X_AUTO_FastLoop(void)
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
 
 	  // Airspeed Control
-	  airspeedCommand = 11.0; // 7.0 + 5.0*RC_throttle*.01;
+	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
 	  SetReference(airspeedController_DEF, airspeedCommand);
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
   }
   else if(controlMode == MISSION)
@@ -246,14 +246,14 @@ static void AA241X_AUTO_FastLoop(void)
         altitude = -Z_position_GPS;
       else
         altitude = -Z_position_Baro;
-      /*
+      
       if(fabs(RC_pitch - RC_Pitch_Trim) > 5)
       {
         altitudeCommand += 0.04*(RC_pitch - RC_Pitch_Trim)/RC_Pitch_Trim; // 2 m/s change rate based on 50 Hz
         SetReference(altitudeController_DEF, altitudeCommand);
       }
-	  */
-	  altitudeCommand = 115;
+	  
+	  altitudeCommand = altitude;
 	  SetReference(altitudeController_DEF, altitudeCommand);
 
 	  // Determine climb rate command from the altitude controller
@@ -286,7 +286,7 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Airspeed Control
 	  SetReference(airspeedController_DEF, airspeedCommand);
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
   }else if(controlMode == MAX_CLIMB)
   {
@@ -327,6 +327,9 @@ static void AA241X_AUTO_FastLoop(void)
   {
 	float rollOut    = RC_Roll_Trim + rollControllerOut;
 	Limit(rollOut, rollMax_DEF, rollMin_DEF);
+	
+	variableOfInterest = rollOut;
+	
 	Roll_servo       = rollOut;
   }
   else
@@ -372,7 +375,7 @@ static void AA241X_AUTO_FastLoop(void)
 	  || controlMode == MAX_CLIMB
 	  || controlMode == GLIDE)
   {
-	float throttleOut = RC_throttle + airspeedControllerOut;
+	float throttleOut = airspeedControllerOut;
 	Limit(throttleOut, throttleMax_DEF, throttleMin_DEF);
 	Throttle_servo   = throttleOut;
   }
@@ -391,7 +394,7 @@ static void AA241X_AUTO_MediumLoop(void)
   float delta_t = (CPU_time_ms - Last_AUTO_stampTime_ms); // Get delta time between AUTO_FastLoop calls  
   
   // Checking if we've just switched to AUTO. If more than 1000ms have gone past since last time in AUTO, then we are definitely just entering AUTO
-  if (delta_t > 1000 && controlMode == MISSION)
+  if (delta_t > 200)
   {
     // Start timer
     t_init = CPU_time_ms;
@@ -399,6 +402,9 @@ static void AA241X_AUTO_MediumLoop(void)
     // Set initial start position
     x_init = X_position;
     y_init = Y_position;
+
+	// Set init flag
+	init_flag = 1;
     
     // Set waypoint iterator
     iwp = 0;
@@ -510,7 +516,17 @@ static void AA241X_AUTO_MediumLoop(void)
 
 
 // *****   AA241X Slow Loop - @ ~1Hz  *****  //
-static void AA241X_AUTO_SlowLoop(void){
+static void AA241X_AUTO_SlowLoop(void)
+{	
+	if (init_flag == 1) {
+		gcs_send_text_fmt(PSTR("%f"),x_init);
+
+		init_flag = 0;
+		for(int i = 0; i<12000;i++){}
+
+		gcs_send_text_fmt(PSTR("%f"),y_init);
+	}
+
   // YOUR CODE HERE
   
   /*
@@ -534,7 +550,7 @@ static void AA241X_AUTO_SlowLoop(void){
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
 
-  // hal.console->printf_P(PSTR("Throtte Percentage Out: %f \n"), variableOfInterest);
+  hal.console->printf_P(PSTR("rollOut: %f \n"), variableOfInterest);
 
   /*
   gcs_send_text_P(SEVERITY_LOW, PSTR("Test Statement"));
