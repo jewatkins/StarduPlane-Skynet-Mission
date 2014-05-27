@@ -14,6 +14,8 @@
 #define ATT_HOLD            5
 #define WAYPOINT_NAV        6
 #define MISSION             7  // controlMode for Mission
+#define MAX_CLIMB           8
+#define GLIDE               9
 static uint16_t controlMode = ROLL_STABILIZE_MODE;
 
 static float headingCommand = 0.0;
@@ -74,7 +76,19 @@ static void AA241X_AUTO_FastLoop(void)
 		airspeedCommand = 11.0; // 11.0 m/s
 		SetReference(airspeedController_DEF, airspeedCommand);
 		prevAltitude = -Z_position_GPS;
-	}
+	}else if(FLIGHT_MODE > 7.5 && FLIGHT_MODE < 8.5)
+	{
+      controlMode = MAX_CLIMB;
+	  // Set pitch angle
+	  float pitchCommand = MAX_CLIMB_PITCH;
+	  SetReference(pitchController_DEF, pitchCommand);
+    }else if(FLIGHT_MODE > 8.5 && FLIGHT_MODE < 9.5)
+	{
+      controlMode = GLIDE;
+	  // Set pitch angle
+	  float pitchCommand = GLIDE_PITCH;
+	  SetReference(pitchController_DEF, pitchCommand);
+    }
   }
 
   // Check delta_t before sending it to any step functions for inner loop controls
@@ -89,6 +103,7 @@ static void AA241X_AUTO_FastLoop(void)
   float airspeedControllerOut = 75.0;
   float rudderControllerOut = 50.0;
 
+  /*
   if(controlMode == ROLL_STABILIZE_MODE)
   {
 	  // Keep Roll angle controlled based on RC pilot input (should be zero when stick is in center)
@@ -135,14 +150,9 @@ static void AA241X_AUTO_FastLoop(void)
       SetReference(rollController_DEF, headingControllerOut);
       rollControllerOut = StepController(rollController_DEF, roll, delta_t);
   }
-  else if (controlMode == FBW_MODE)
+  else */ if (controlMode == FBW_MODE)
   {
-    // Maintain heading, altitude, and airspeed RC pilot commands offsets from saved initial conditions
-      
-	  // Airspeed Commands
-	  airspeedCommand = 11.0; // 7.0 + 5.0*RC_throttle*.01;
-	  SetReference(airspeedController_DEF, airspeedCommand);
-	  
+	  // Maintain heading, altitude, and airspeed RC pilot commands offsets from saved initial conditions
 	  // Heading Commands
       if ( fabs(RC_roll - RC_Roll_Trim) > 5 )
       {      
@@ -160,14 +170,14 @@ static void AA241X_AUTO_FastLoop(void)
         
         SetReference(headingController_DEF, headingCommand);
       }
-      float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-      Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+      float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
+      Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
-      // Roll Commands
-      SetReference(rollController_DEF, headingControllerOut);
+      // Roll Control
+      SetReference(rollController_DEF, rollCommand);
       rollControllerOut = StepController(rollController_DEF, roll, delta_t);
       
-      // Altitude Commands
+      // Altitude Control
       float altitude = 0.0;
 	  if(gpsOK == true)
         altitude = -Z_position_GPS;
@@ -181,12 +191,13 @@ static void AA241X_AUTO_FastLoop(void)
       }
 
 	  // Determine climb rate command from the altitude controller
-	  float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
+	  // float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
 
 	  // Pitch trim scheduling
-	  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
+	  float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
 
 	  // Augment pitch angle through altitude controller
+	  /*
 	  if(fabs(commandedClimbRate) < 0.5)
 	  {
 		  commandedClimbRate = 0.0;
@@ -196,24 +207,26 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Get climb rate
 	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
 	  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
+	  */
 
 	  // Find value to augment the pitch angle
-	  float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
+	  //float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
 
+	  // Pitch Angle Control
+	  float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
 	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
-	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
-	  variableOfInterest = airspeedControllerOut;
+	  // Airspeed Control
+	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+	  SetReference(airspeedController_DEF, airspeedCommand);
+	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
   }
   else if(controlMode == MISSION)
   {
-	  // Airspeed Commands
-	  airspeedCommand = 11.0; // 7.0 + 5.0*RC_throttle*.01;
-	  SetReference(airspeedController_DEF, airspeedCommand);
-
+	  // This mode is for flying the actual mission. It will have mission phase logic included soon enough.
 	  // Set reference for the heading
 	  SetReference(headingController_DEF, headingCommand);
 	  float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
@@ -223,18 +236,32 @@ static void AA241X_AUTO_FastLoop(void)
 	  float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
 	  Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
-	  // Roll Commands
+	  // Roll Control
 	  SetReference(rollController_DEF, headingControllerOut);
 	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
+      // Altitude Control
+      float altitude = 0.0;
+	  if(gpsOK == true)
+        altitude = -Z_position_GPS;
+      else
+        altitude = -Z_position_Baro;
+      
+      if(fabs(RC_pitch - RC_Pitch_Trim) > 5)
+      {
+        altitudeCommand += 0.04*(RC_pitch - RC_Pitch_Trim)/RC_Pitch_Trim; // 2 m/s change rate based on 50 Hz
+        SetReference(altitudeController_DEF, altitudeCommand);
+      }
+
 	  // Determine climb rate command from the altitude controller
-	  float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
+	  // float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
 
 	  // Pitch trim scheduling
-	  float pitchTrim = SchedulePitchTrim(roll, Air_speed, commandedClimbRate);
+	  float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
 
 	  // Augment pitch angle through altitude controller
-	  if(fabs(commandedClimbRate) < 0.2)
+	  /*
+	  if(fabs(commandedClimbRate) < 0.5)
 	  {
 		  commandedClimbRate = 0.0;
 	  }
@@ -243,17 +270,44 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Get climb rate
 	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
 	  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
+	  */
 
 	  // Find value to augment the pitch angle
-	  float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
+	  //float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
 
-	  // Pitch Command	  
+	  // Pitch Angle Control
+	  float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
 	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
 	  
-	  // Airspeed Command
+	  // Airspeed Control
+	  SetReference(airspeedController_DEF, airspeedCommand);
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+  }else if(controlMode == MAX_CLIMB)
+  {
+	  // Set roll angle at zero degrees, keep wings level at max climb
+	  float rollCommand = 0.0;
+	  SetReference(rollController_DEF, rollCommand);
+	  StepController(rollController_DEF, roll, delta_t);
+
+	  // Set maximum throttle
+	  airspeedControllerOut = 100.0;
+
+	  // Keep pitch angle constant
+	  StepController(pitchController_DEF, pitch, delta_t);
+  }else if(controlMode == GLIDE)
+  {
+	  // Set roll angle at zero degrees, keep wings level at max climb
+	  float rollCommand = 0.0;
+	  SetReference(rollController_DEF, rollCommand);
+	  StepController(rollController_DEF, roll, delta_t);
+
+	  // Set maximum throttle
+	  airspeedControllerOut = 0.0;
+
+	  // Keep pitch angle constant
+	  StepController(pitchController_DEF, pitch, delta_t);
   }
 
   // Aileron Servo Command Out
@@ -263,7 +317,9 @@ static void AA241X_AUTO_FastLoop(void)
 	  || controlMode == HEADING_HOLD_MODE
 	  || controlMode == ATT_HOLD
 	  || controlMode == WAYPOINT_NAV
-	  || controlMode == MISSION)
+	  || controlMode == MISSION
+	  || controlMode == MAX_CLIMB
+	  || controlMode == GLIDE)
   {
 	float rollOut    = RC_Roll_Trim + rollControllerOut;
 	Limit(rollOut, rollMax_DEF, rollMin_DEF);
@@ -279,7 +335,9 @@ static void AA241X_AUTO_FastLoop(void)
 	  || controlMode == FBW_MODE
 	  || controlMode == ATT_HOLD
 	  || controlMode == WAYPOINT_NAV
-	  || controlMode == MISSION)
+	  || controlMode == MISSION
+	  || controlMode == MAX_CLIMB
+	  || controlMode == GLIDE)
   {
 	float pitchOut   = RC_Pitch_Trim + pitchControllerOut;
 	Limit(pitchOut, pitchMax_DEF, pitchMin_DEF);
@@ -306,9 +364,11 @@ static void AA241X_AUTO_FastLoop(void)
   // Throttle PWM Command Out
   if(controlMode == FBW_MODE
 	  || controlMode == WAYPOINT_NAV
-	  || controlMode == MISSION)
+	  || controlMode == MISSION
+	  || controlMode == MAX_CLIMB
+	  || controlMode == GLIDE)
   {
-	float throttleOut = RC_throttle + airspeedControllerOut;
+	float throttleOut = airspeedControllerOut;
 	Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
 	Throttle_servo   = throttleOut;
   }
@@ -466,7 +526,7 @@ static void AA241X_AUTO_SlowLoop(void){
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
 
-  hal.console->printf_P(PSTR("Throtte Percentage Out: %f \n"), variableOfInterest);
+  // hal.console->printf_P(PSTR("Throtte Percentage Out: %f \n"), variableOfInterest);
 
   /*
   gcs_send_text_P(SEVERITY_LOW, PSTR("Test Statement"));

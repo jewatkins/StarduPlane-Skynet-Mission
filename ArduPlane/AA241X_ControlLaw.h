@@ -23,17 +23,17 @@
 #define AA241X_5_NAME     "AA241_Clmb_P" 
 #define AA241X_5_DEFAULT  1.0 
 // My parameter 6
-#define AIRSPEED_P       g.aa241x_6
+#define AIRSPEED_P        g.aa241x_6
 #define AA241X_6_NAME     "AA241_Spd_P" 
 #define AA241X_6_DEFAULT  10.0 
 // My parameter 7
-#define my_param_7        g.aa241x_7
-#define AA241X_7_NAME     "my_paramName7" 
-#define AA241X_7_DEFAULT  10.0 
+#define MAX_CLIMB_PITCH   g.aa241x_7
+#define AA241X_7_NAME     "AA241_MaxClmb" 
+#define AA241X_7_DEFAULT  0.349
 // My parameter 8
-#define my_param_8        g.aa241x_8
-#define AA241X_8_NAME     "my_paramName8" 
-#define AA241X_8_DEFAULT  -20.523 
+#define GLIDE_PITCH        g.aa241x_8
+#define AA241X_8_NAME     "AA241_GldPtch" 
+#define AA241X_8_DEFAULT   0.122
 // My parameter 9
 #define my_param_9        g.aa241x_9
 #define AA241X_9_NAME     "my_paramName9" 
