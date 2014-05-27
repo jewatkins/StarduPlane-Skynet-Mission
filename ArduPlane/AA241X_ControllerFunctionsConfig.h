@@ -73,7 +73,7 @@ const float integralLimits[numControllers] = {
 											  1, /* roll controller */
 											  1, /* pitch controller */
 											  1, /* rudder controller */
-											  0.5, /* altitude controller */
+											  5.0, /* altitude controller */
 											  .01, /* climb rate controller */
 											  1, /* glide controller */
 											  10, /* airspeed controller */
@@ -84,7 +84,7 @@ const float derivativeLimits[numControllers] = {
 											   3, /* roll controller */
 											   3, /* pitch controller */
 											   3, /* rudder controller */
-											   0.5, /* altitude controller */
+											   5.0, /* altitude controller */
 											   .01, /* climb rate controller */
 											   3, /* glide controller */
 											   3, /* airspeed controller */
@@ -95,7 +95,7 @@ const float integralTermLimits[numControllers] = {
 											   5, /* roll controller */
 											   5, /* pitch controller */
 											   5, /* rudder controller */
-											   0.5, /* altitude controller */
+											   0.01, /* altitude controller */
 											   .01, /* climb rate controller */
 											   5, /* glide controller */
 											   5, /* airspeed controller */
@@ -106,7 +106,7 @@ const float derivativeTermLimits[numControllers] = {
 											   5, /* roll controller */
 											   5, /* pitch controller */
 											   5, /* rudder controller */
-											   0.5, /* altitude controller */
+											   0.01, /* altitude controller */
 											   .01, /* climb rate controller */
 											   5, /* glide controller */
 											   5, /* airspeed controller */
@@ -123,7 +123,7 @@ float gains [numControllers][numGains] = {
                                           {25.0, .5, 0.0}, /* roll controller p, i, d */
                                           {40.0, 1.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
-                                          {0.1, 0.0, 0.0},  /* altitude controller p, i, d */
+                                          {0.1, 0.005, 0.0},  /* altitude controller p, i, d */
                                           {0.5, 0.0, 0.0},  /* climb rate controller p, i, d */
                                           {1.0, 0.0, 0.0},  /* glide controller p, i, d */                                          
                                           {10.0, 0.1, 0.0},  /* airspeed controller p, i, d */
