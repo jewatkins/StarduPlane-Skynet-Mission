@@ -218,10 +218,10 @@ static void AA241X_AUTO_FastLoop(void)
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
 
 	  // Airspeed Control
-	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+	  airspeedCommand = 11.0; // 7.0 + 5.0*RC_throttle*.01;
 	  SetReference(airspeedController_DEF, airspeedCommand);
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
   }
   else if(controlMode == MISSION)
@@ -246,12 +246,15 @@ static void AA241X_AUTO_FastLoop(void)
         altitude = -Z_position_GPS;
       else
         altitude = -Z_position_Baro;
-      
+      /*
       if(fabs(RC_pitch - RC_Pitch_Trim) > 5)
       {
         altitudeCommand += 0.04*(RC_pitch - RC_Pitch_Trim)/RC_Pitch_Trim; // 2 m/s change rate based on 50 Hz
         SetReference(altitudeController_DEF, altitudeCommand);
       }
+	  */
+	  altitudeCommand = 115;
+	  SetReference(altitudeController_DEF, altitudeCommand);
 
 	  // Determine climb rate command from the altitude controller
 	  // float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
@@ -283,7 +286,8 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Airspeed Control
 	  SetReference(airspeedController_DEF, airspeedCommand);
 	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  //airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+
   }else if(controlMode == MAX_CLIMB)
   {
 	  // Set roll angle at zero degrees, keep wings level at max climb
@@ -368,8 +372,8 @@ static void AA241X_AUTO_FastLoop(void)
 	  || controlMode == MAX_CLIMB
 	  || controlMode == GLIDE)
   {
-	float throttleOut = airspeedControllerOut;
-	Limit(throttleOut, throttleMin_DEF, throttleMax_DEF);
+	float throttleOut = RC_throttle + airspeedControllerOut;
+	Limit(throttleOut, throttleMax_DEF, throttleMin_DEF);
 	Throttle_servo   = throttleOut;
   }
   else
