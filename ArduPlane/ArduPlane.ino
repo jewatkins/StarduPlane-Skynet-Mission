@@ -1181,7 +1181,7 @@ static void update_flight_mode(void)
     case AUTO:
         handle_auto_mode();
         break;
-
+/*
     case RTL:
     case LOITER:
     case GUIDED:
@@ -1264,13 +1264,13 @@ static void update_flight_mode(void)
         nav_roll_cd = channel_roll->norm_input() * roll_limit_cd;
         update_fbwb_speed_height();
         break;
-        
+
     case CRUISE:
-        /*
-          in CRUISE mode we use the navigation code to control
-          roll when heading is locked. Heading becomes unlocked on
-          any aileron or rudder input
-        */
+        
+        //  in CRUISE mode we use the navigation code to control
+        //  roll when heading is locked. Heading becomes unlocked on
+        //  any aileron or rudder input
+        
         if ((channel_roll->control_in != 0 ||
              channel_rudder->control_in != 0)) {                
             cruise_state.locked_heading = false;
@@ -1300,7 +1300,7 @@ static void update_flight_mode(void)
         calc_nav_pitch();
         calc_throttle();
         break;
-
+*/
     case MANUAL:
         // servo_out is for Sim control only
         // ---------------------------------
@@ -1326,7 +1326,7 @@ static void update_navigation()
     case AUTO:
         update_commands();
         break;
-            
+ /*           
     case LOITER:
     case RTL:
     case GUIDED:
@@ -1354,6 +1354,7 @@ static void update_navigation()
     case CIRCLE:
         // nothing to do
         break;
+*/
     }
 }
 

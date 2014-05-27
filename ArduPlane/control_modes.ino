@@ -6,6 +6,13 @@ static void read_control_switch()
     static bool switch_debouncer;
     uint8_t switchPosition = readSwitch();
 
+	// DEBUG ONLY!!!
+	//switchPosition = 2;
+	//set_mode((enum FlightMode)(flight_modes[switchPosition].get()));
+	//return;
+	// DEBUG ONLY!!!
+
+
     // If switchPosition = 255 this indicates that the mode control channel input was out of range
     // If we get this value we do not want to change modes.
     if(switchPosition == 255) return;

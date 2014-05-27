@@ -293,25 +293,25 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Set roll angle at zero degrees, keep wings level at max climb
 	  float rollCommand = 0.0;
 	  SetReference(rollController_DEF, rollCommand);
-	  StepController(rollController_DEF, roll, delta_t);
+	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
 	  // Set maximum throttle
 	  airspeedControllerOut = 100.0;
 
 	  // Keep pitch angle constant
-	  StepController(pitchController_DEF, pitch, delta_t);
+	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
   }else if(controlMode == GLIDE)
   {
 	  // Set roll angle at zero degrees, keep wings level at max climb
 	  float rollCommand = 0.0;
 	  SetReference(rollController_DEF, rollCommand);
-	  StepController(rollController_DEF, roll, delta_t);
+	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
 	  // Set maximum throttle
 	  airspeedControllerOut = 0.0;
 
 	  // Keep pitch angle constant
-	  StepController(pitchController_DEF, pitch, delta_t);
+	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
   }
 
   // Aileron Servo Command Out
