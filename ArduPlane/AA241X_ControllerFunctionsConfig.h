@@ -109,7 +109,7 @@ float gains [numControllers][numGains] = {
                                           {25.0, .5, 0.0}, /* roll controller p, i, d */
                                           {40.0, 1.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
-                                          {0.1, 0.005, 0.0},  /* altitude controller p, i, d */                                        
+                                          {0.1, 0.007, 0.0},  /* altitude controller p, i, d */                                        
                                           {10.0, 0.1, 0.0},  /* airspeed controller p, i, d */
                                           {1.0, 0.01, 0.0}   /* heading controller p, i, d */
                                          };

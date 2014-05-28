@@ -262,7 +262,8 @@ static void AA241X_AUTO_FastLoop(void)
 	  
 	  if(phaseOfFlight == CLIMBING)
 	  {
-			// Climb to 115 meters
+			float altitude = -Z_position_GPS;
+		    // Climb to 115 meters
 			if(initFastLoopPhase == true)
 			{
 				initFastLoopPhase = false;
@@ -272,11 +273,12 @@ static void AA241X_AUTO_FastLoop(void)
 				SetReference(airspeedController_DEF, airspeedCommand);
 			}
 
-			if(-Z_position_GPS >= SIGHTING_ALTITUDE)
+			if(-Z_position_GPS >= altitude/*SIGHTING_ALTITUDE*/)
 			{
 				phaseOfFlight = SIGHTING;
 				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
-				initFastLoopPhase = true;		
+				initFastLoopPhase = true;
+				return;
 			}
 
 			// Step the PID controllers to keep max climb trim
@@ -316,9 +318,6 @@ static void AA241X_AUTO_FastLoop(void)
 				altitude = -Z_position_GPS;
 			else
 				altitude = -Z_position_Baro;
-	  
-			altitudeCommand = altitude;
-			SetReference(altitudeController_DEF, altitudeCommand);
 
 			// Pitch trim scheduling
 			float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
@@ -456,6 +455,7 @@ static void AA241X_AUTO_MediumLoop(void)
       float dy = ywp - Y_position;
       float pos_error = sqrtf(dx*dx + dy*dy);
       if (pos_error <= SNAPSHOT_ERROR) {
+		/*
         // Take a snapshot
         snapshot mySnapShot = takeASnapshot();
         
@@ -481,7 +481,12 @@ static void AA241X_AUTO_MediumLoop(void)
               }
             }
           }
+		  */
           
+		  // Output time of waypoint capture
+		  float dt = (CPU_time_ms - t_init)/1000;
+		  gcs_send_text_fmt(PSTR("Waypoint found: %f sec"),dt);
+
           // Go to next waypoint
           iwp++;
           
@@ -501,15 +506,18 @@ static void AA241X_AUTO_MediumLoop(void)
           
           // Start timer
           t_init = CPU_time_ms;
+		  /*
         }
         else {
           gcs_send_text_P(SEVERITY_LOW, PSTR("Snapshot could not be taken!"));
         }
+		*/
       }
       
       // Estimate needed airspeed to reach waypoint at correct time
       dx = xwp - X_position;
       dy = ywp - Y_position;
+	  /*
       float ds = sqrtf(dx*dx + dy*dy);
       float dt = TIME_ESTIMATE - (CPU_time_ms - t_init)/1000;
       airspeedCommand = ds/dt;
@@ -521,6 +529,8 @@ static void AA241X_AUTO_MediumLoop(void)
       else if (airspeedCommand < 7.0) {
         airspeedCommand = 7.0;
       }
+	  */
+	  airspeedCommand = 11.0;
       
       // Compute heading (UAV to waypoint)
       float Huav = WrapAngle(atan2f(dy,dx));
