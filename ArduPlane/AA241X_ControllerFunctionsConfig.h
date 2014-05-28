@@ -135,17 +135,6 @@ float gains [numControllers][numGains] = {
 #define MIN_CLIMB_RATE_PITCH_DEF -0.1221f // -7 degrees minimum
 
 
-/*----------------------------------------- Phase of Flight -------------------------------------------------*/
-/* The phase of flight will help determine the trim schedule. There are a finite number of flight phases for this
- * mission.
- *
- */
 
-#define	preMissionLoiter  0 // Hang out around 90 feet waiting for the mission start event
-#define climb             1 // Climb to the maximum altitude to get the widest field of view with the camera
-#define	tSight            2 // Cruise at highest altitude until all persons have been seen
-#define refinement        3 // Algorithm based waypoint nav (still in cruise mode)
-#define	glide             4 // Battery power is running low, lose altitude and refine as much as possible
-#define	postMissionLoiter 5 // Hang out and wait for pilot to switch back into manual mode
 
 #endif /* CONTROLLER_FUNCTIONS_CONFIG_H */

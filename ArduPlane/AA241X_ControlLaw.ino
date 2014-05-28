@@ -6,7 +6,10 @@
 #include "AA241X_ControllerFunctions.h"
 #include "AA241X_WaypointNavigation.h"
 
-/***** Flight Modes *****/
+/*----------------------------------------- Flight Modes ----------------------------------------------------*/
+/* The different flight modes are good for characterizing and testing different components of the aircraft's performance.
+ *
+ */
 #define ROLL_STABILIZE_MODE 1
 #define STABILIZE_MODE      2
 #define HEADING_HOLD_MODE   3
@@ -18,12 +21,37 @@
 #define GLIDE               9
 static uint16_t controlMode = ROLL_STABILIZE_MODE;
 
+/*----------------------------------------- Phase of Flight -------------------------------------------------*/
+/* The phase of flight will help determine the trim schedule. There are a finite number of flight phases for this
+ * mission.
+ *
+ */
+
+#define	LOITERING            0 // Hang out at current altitude, airspeed, and heading
+#define CLIMBING             1 // Climb to the maximum altitude to get the widest field of view with the camera
+#define	SIGHTING             2 // Cruise at highest altitude until all persons have been seen
+#define REFINING             3 // Algorithm based waypoint nav (still in cruise mode)
+#define	GLIDING              4 // Battery power is running low, lose altitude and refine as much as possible
+#define	CELEBRATING          5 // Let's do some loops and fun crap here!
+static char phaseOfFlight = LOITERING; // Waiting to start mission
+
+/*----------------------------------------- Mission Planning Variables ----------------------------------------*/
+#define SIGHTING_ALTITUDE 115.0f
+#define MAX_CLIMB_AIRSPEED 15.0f
+
+static bool initFastLoopPhase = true;
+
+/*----------------------------------------- Outer Loop Control References -------------------------------------*/
+/* These variables are the outer loop controllers' input to the inner loops to attain complete autonomous navigation.
+ * Given a heading command, the inner loop will track that heading as best it can; likewise for airspeed and altitude.
+ *
+ */
+
 static float headingCommand = 0.0;
 static float altitudeCommand = 115.0;
 static float airspeedCommand = 7.0;
-static char phaseOfFlight = preMissionLoiter; // Waiting to start mission
-static float prevAltitude = 0.0;
 
+// Debug variable
 static float variableOfInterest = 0.0;
 
 // These functions are executed when control mode is in AUTO
@@ -38,6 +66,7 @@ static void AA241X_AUTO_FastLoop(void)
   // Checking if we've just switched to AUTO. If more than 100ms have gone past since last time in AUTO, then we are definitely just entering AUTO
   if (delta_t > 100)
   {
+	// Adjust gains based on mission planner parameter input
 	gains [altitudeController_DEF][pGain] = ALTITUDE_P;
 	gains [airspeedController_DEF][pGain] = AIRSPEED_P;
 	  
@@ -56,7 +85,6 @@ static void AA241X_AUTO_FastLoop(void)
 		controlMode = FBW_MODE;
 		// Set altitude as current altitude
 		altitudeCommand = -Z_position_GPS;
-		prevAltitude = -Z_position_GPS;
 		SetReference(altitudeController_DEF, altitudeCommand);
 		airspeedCommand = 11.0; // Phase 1 nominal speed
     }else if(FLIGHT_MODE > 4.5 && FLIGHT_MODE < 5.5)
@@ -66,15 +94,20 @@ static void AA241X_AUTO_FastLoop(void)
 	{
 		controlMode = WAYPOINT_NAV;
 		airspeedCommand = 11.0;
-		prevAltitude = -Z_position_GPS;
     }else if(FLIGHT_MODE > 6.5 && FLIGHT_MODE < 7.5)
 	{
+		// This is probably the most important control mode, it is what will be used to fly the mission
 		controlMode = MISSION;
+		
 		// Set commands upon initialization of the autonomous mode
-		SetReference(altitudeController_DEF, -Z_position_GPS); // Current Altitude
-		airspeedCommand = 11.0; // 11.0 m/s
+		SetReference(altitudeController_DEF, 115.0); // Altitude needed for phase 1 of mission
+		airspeedCommand = 15.0; // As fast as we can go
 		SetReference(airspeedController_DEF, airspeedCommand);
-		prevAltitude = -Z_position_GPS;
+
+		// Set the phase of flight
+		phaseOfFlight = CLIMBING; // Climb as fast as possible to 115 meters
+		initFastLoopPhase = true;
+
 	}else if(FLIGHT_MODE > 7.5 && FLIGHT_MODE < 8.5)
 	{
       controlMode = MAX_CLIMB;
@@ -102,7 +135,6 @@ static void AA241X_AUTO_FastLoop(void)
   float airspeedControllerOut = 75.0;
   float rudderControllerOut = 50.0;
 
-  /*
   if(controlMode == ROLL_STABILIZE_MODE)
   {
 	  // Keep Roll angle controlled based on RC pilot input (should be zero when stick is in center)
@@ -149,7 +181,7 @@ static void AA241X_AUTO_FastLoop(void)
       SetReference(rollController_DEF, headingControllerOut);
       rollControllerOut = StepController(rollController_DEF, roll, delta_t);
   }
-  else */ if (controlMode == FBW_MODE)
+  else if (controlMode == FBW_MODE)
   {
 	  // Maintain heading, altitude, and airspeed RC pilot commands offsets from saved initial conditions
 	  // Heading Commands
@@ -207,48 +239,95 @@ static void AA241X_AUTO_FastLoop(void)
   else if(controlMode == MISSION)
   {
 	  // This mode is for flying the actual mission. It will have mission phase logic included soon enough.
-	  // Set reference for the heading
-	  SetReference(headingController_DEF, headingCommand);
-	  float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-      Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
-
-	  // Determine the roll command from the heading controller
-	  float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-	  Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
-
-	  // Roll Control
-	  SetReference(rollController_DEF, headingControllerOut);
-	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
-
-      // Altitude Control
-      float altitude = 0.0;
-	  if(gpsOK == true)
-        altitude = -Z_position_GPS;
-      else
-        altitude = -Z_position_Baro;
-      
-      if(fabs(RC_pitch - RC_Pitch_Trim) > 5)
-      {
-        altitudeCommand += 0.04*(RC_pitch - RC_Pitch_Trim)/RC_Pitch_Trim; // 2 m/s change rate based on 50 Hz
-        SetReference(altitudeController_DEF, altitudeCommand);
-      }
 	  
-	  altitudeCommand = altitude;
-	  SetReference(altitudeController_DEF, altitudeCommand);
+	  if(phaseOfFlight == CLIMBING)
+	  {
+			// Climb to 115 meters
+			if(initFastLoopPhase == true)
+			{
+				initFastLoopPhase = false;
+				SetReference(pitchController_DEF, MAX_CLIMB_PITCH);
+				SetReference(rollController_DEF, 0.0);
+				airspeedCommand = MAX_CLIMB_AIRSPEED;
+				SetReference(airspeedController_DEF, airspeedCommand);
+			}
 
-	  // Pitch trim scheduling
-	  float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
+			if(-Z_position_GPS >= SIGHTING_ALTITUDE)
+			{
+				phaseOfFlight = SIGHTING;
+				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
+				initFastLoopPhase = true;		
+			}
 
-	  // Pitch Angle Control
-	  float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
-	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
-	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+			// Step the PID controllers to keep max climb trim
+			pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+			rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+			airspeedControllerOut = ScheduleThrottleTrim(airspeedCommand) + StepController(airspeedController_DEF, Air_speed, delta_t); // Add the trim depending on the desired airspeed
+	  }else if(phaseOfFlight == SIGHTING)
+	  {		
+			// Use waypoint navigation while in altitude hold, airspeed hold, and heading hold inner loop controllers
+			// In this phase, inner loop controllers are assuming:
+			// 1. headingCommand is given by the outer loop
+			// 2. airspeedCommand is given by the outer loop
+			// 3. altitudeCommand remains static at SIGHTING_ALTITUDE during the entire phase
+
+			if(initFastLoopPhase == true)
+			{
+				initFastLoopPhase = false;
+				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
+			}
+			
+			// Set reference for the heading
+			SetReference(headingController_DEF, headingCommand);
+			float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
+			Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+
+			// Determine the roll command from the heading controller
+			float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
+			Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+			
+			// Roll Control
+			SetReference(rollController_DEF, headingControllerOut);
+			rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+
+			// Altitude Control
+			float altitude = 0.0;
+			if(gpsOK == true)
+				altitude = -Z_position_GPS;
+			else
+				altitude = -Z_position_Baro;
 	  
-	  // Airspeed Control
-	  SetReference(airspeedController_DEF, airspeedCommand);
-	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+			altitudeCommand = altitude;
+			SetReference(altitudeController_DEF, altitudeCommand);
 
+			// Pitch trim scheduling
+			float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
+
+			// Pitch Angle Control
+			float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
+			SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
+			pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+	  
+			// Airspeed Control
+			SetReference(airspeedController_DEF, airspeedCommand);
+			airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+			airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  }
+	  /*
+		case REFINING :
+			// Use waypoint navigation while in altitude hold, airspeed hold, and heading hold inner loop controllers
+			break;
+		case GLIDING :
+			// Out of power, need to glide to waypoints until lower limit of altitude is reached
+			break;
+		case CELEBRATING :
+			// We have to do something fun here...
+			break;
+		case LOITERING :
+			// Just hang out and circle, altitude hold, airspeed hold, roll angle hold
+			break;
+	  }*/
+	  
   }else if(controlMode == MAX_CLIMB)
   {
 	  // Set roll angle at zero degrees, keep wings level at max climb
@@ -363,6 +442,9 @@ static void AA241X_AUTO_MediumLoop(void)
     // Set initial start position
     x_init = X_position;
     y_init = Y_position;
+
+	hal.console->printf_P(PSTR("x_init: %f \n"), x_init);
+	hal.console->printf_P(PSTR("y_init: %f \n"), y_init);
 
 	// Set init flag
 	init_flag = 1;
