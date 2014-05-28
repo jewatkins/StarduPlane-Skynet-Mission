@@ -39,7 +39,6 @@ static void AA241X_AUTO_FastLoop(void)
   if (delta_t > 100)
   {
 	gains [altitudeController_DEF][pGain] = ALTITUDE_P;
-	gains [climbRateController_DEF][pGain] = CLIMB_RATE_P;
 	gains [airspeedController_DEF][pGain] = AIRSPEED_P;
 	  
 	// Determine control mode from bits in parameter list
@@ -190,27 +189,8 @@ static void AA241X_AUTO_FastLoop(void)
         SetReference(altitudeController_DEF, altitudeCommand);
       }
 
-	  // Determine climb rate command from the altitude controller
-	  // float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
-
 	  // Pitch trim scheduling
 	  float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
-
-	  // Augment pitch angle through altitude controller
-	  /*
-	  if(fabs(commandedClimbRate) < 0.5)
-	  {
-		  commandedClimbRate = 0.0;
-	  }
-	  SetReference(climbRateController_DEF, commandedClimbRate);
-  
-	  // Get climb rate
-	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
-	  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
-	  */
-
-	  // Find value to augment the pitch angle
-	  //float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
 
 	  // Pitch Angle Control
 	  float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
@@ -256,27 +236,8 @@ static void AA241X_AUTO_FastLoop(void)
 	  altitudeCommand = altitude;
 	  SetReference(altitudeController_DEF, altitudeCommand);
 
-	  // Determine climb rate command from the altitude controller
-	  // float commandedClimbRate = StepController(altitudeController_DEF, -Z_position_GPS, delta_t);
-
 	  // Pitch trim scheduling
 	  float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
-
-	  // Augment pitch angle through altitude controller
-	  /*
-	  if(fabs(commandedClimbRate) < 0.5)
-	  {
-		  commandedClimbRate = 0.0;
-	  }
-	  SetReference(climbRateController_DEF, commandedClimbRate);
-  
-	  // Get climb rate
-	  float climbRate = (-Z_position_GPS - prevAltitude) / delta_t;
-	  Limit(climbRate, MAX_CLIMB_RATE_DEF, MIN_CLIMB_RATE_DEF);
-	  */
-
-	  // Find value to augment the pitch angle
-	  //float pitchDeviation = StepController(climbRateController_DEF, climbRate, delta_t);
 
 	  // Pitch Angle Control
 	  float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
@@ -550,7 +511,7 @@ static void AA241X_AUTO_SlowLoop(void)
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
 
-  hal.console->printf_P(PSTR("rollOut: %f \n"), variableOfInterest);
+  //hal.console->printf_P(PSTR("rollOut: %f \n"), variableOfInterest);
 
   /*
   gcs_send_text_P(SEVERITY_LOW, PSTR("Test Statement"));

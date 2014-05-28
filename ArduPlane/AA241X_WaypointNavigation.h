@@ -86,4 +86,6 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
     nTm = nTp;
   }
 }
+
+
 #endif /* WAYPOINT_NAVIGATION_H */
