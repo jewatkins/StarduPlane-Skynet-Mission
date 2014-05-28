@@ -110,15 +110,13 @@ static void AA241X_AUTO_FastLoop(void)
 		initFastLoopPhase = true;
 
 		// Medium Loop Initialization
-	    // Start timer
 		{
+  	                // Start timer
 			t_init = CPU_time_ms;
     
 			// Set initial start position
 			x_init = X_position;
 			y_init = Y_position;
-
-			airspeedCommand = 1150.00;
 
 			// Set waypoint iterator
 			iwp = 0;
@@ -457,7 +455,7 @@ static void AA241X_AUTO_MediumLoop(void)
       float dx = xwp - X_position;
       float dy = ywp - Y_position;
       float pos_error = sqrtf(dx*dx + dy*dy);
-      if (pos_error <= POSITION_ERROR) {
+      if (pos_error <= SNAPSHOT_ERROR) {
         // Take a snapshot
         snapshot mySnapShot = takeASnapshot();
         
@@ -504,6 +502,9 @@ static void AA241X_AUTO_MediumLoop(void)
           // Start timer
           t_init = CPU_time_ms;
         }
+        else {
+          gcs_send_text_P(SEVERITY_LOW, PSTR("Snapshot could not be taken!"));
+        }
       }
       
       // Estimate needed airspeed to reach waypoint at correct time
@@ -525,27 +526,24 @@ static void AA241X_AUTO_MediumLoop(void)
       float Huav = WrapAngle(atan2f(dy,dx));
       
       // Compute heading error (rad)
-      float Herr = (float)fabs(Huav - Hwp);
+      float Herr = Huav - Hwp;
       
-      // Determine shortest angle and compute heading command
-      if (Herr < (2*PI - Herr)) {
-        headingCommand = WrapAngle(Hwp + copysignf(1.0, Huav - Hwp)*ROUTE_P*Herr);
+      // Compute heading command
+      // Note: A line tracking gain of "ROUTE_P = 1" means set heading to waypoint.
+      //       If Herr is too large, set heading to waypoint.
+      //       If pos_error is small enough, set heading to waypoint.
+      if (fabs(Herr) >= PI/4 || pos_error <= POSITION_ERROR) {
+        headingCommand = Huav;
       }
       else {
-        Herr = 2*PI - Herr;
-        headingCommand = WrapAngle(Hwp - copysignf(1.0, Huav - Hwp)*ROUTE_P*Herr);
+        headingCommand = WrapAngle(Hwp + ROUTE_P*Herr);
       }
-      
-      // If Herr is too large, fly towards waypoint
-      if (Herr > PI/4) {
-        headingCommand = Huav;	
-      }
-
+      /*
 	  hal.console->printf_P(PSTR("\nHwp: %f \n"), (Hwp/PI)*180);
 	  hal.console->printf_P(PSTR("Huav: %f \n"), (Huav/PI)*180);
 	  hal.console->printf_P(PSTR("headingCommand: %f \n"), (headingCommand/PI)*180);
 	  hal.console->printf_P(PSTR("posErr: %f \n"), pos_error);
-
+      */
     }
   }
 };

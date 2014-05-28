@@ -5,39 +5,39 @@
 // My parameter 1: Maximum error in waypoint capture
 #define POSITION_ERROR    g.aa241x_1      // Don't change g.aa241x_1 ! Replace my_param_1 with whatever name you want to access the parameter with.  See the example in ControlLaw.ino   
 #define AA241X_1_NAME     "AA241_Pos_Err" // Don't change AA241X_1_NAME ! Replace my_paramName1 with whateve name you want to see on the Mission Planner GCS 
-#define AA241X_1_DEFAULT  10.0             // replace 10.0 with whatever default value you wante to this parameter to have, when reloading the code 
-// My parameter 2: Proportional gain on change in heading based on heading error
-#define ROUTE_P           g.aa241x_2
-#define AA241X_2_NAME     "AA241_Rte_P" 
-#define AA241X_2_DEFAULT  1.3
-// My parameter 3
-#define FLIGHT_MODE       g.aa241x_3
-#define AA241X_3_NAME     "AA241_FltMode" 
-#define AA241X_3_DEFAULT  1.0 
+#define AA241X_1_DEFAULT  20.0             // replace 10.0 with whatever default value you wante to this parameter to have, when reloading the code 
+// My parameter 2: Maximum error in snapshot capture
+#define SNAPSHOT_ERROR    g.aa241x_2
+#define AA241X_2_NAME     "AA241_Snp_Err" 
+#define AA241X_2_DEFAULT  10.0
+// My parameter 3: Proportional gain on line tracking, "ROUTE_P = 1" means set heading to waypoint
+#define ROUTE_P           g.aa241x_3
+#define AA241X_3_NAME     "AA241_Rte_P" 
+#define AA241X_3_DEFAULT  1.0
 // My parameter 4
-#define ALTITUDE_P        g.aa241x_4
-#define AA241X_4_NAME     "AA241_Alt_P" 
-#define AA241X_4_DEFAULT  0.1 
+#define FLIGHT_MODE       g.aa241x_4
+#define AA241X_4_NAME     "AA241_FltMode" 
+#define AA241X_4_DEFAULT  1.0 
 // My parameter 5
-#define CLIMB_RATE_P      g.aa241x_5
-#define AA241X_5_NAME     "AA241_Clmb_P" 
-#define AA241X_5_DEFAULT  1.0 
+#define ALTITUDE_P        g.aa241x_5
+#define AA241X_5_NAME     "AA241_Alt_P" 
+#define AA241X_5_DEFAULT  0.1 
 // My parameter 6
-#define AIRSPEED_P        g.aa241x_6
-#define AA241X_6_NAME     "AA241_Spd_P" 
-#define AA241X_6_DEFAULT  10.0 
+#define CLIMB_RATE_P      g.aa241x_6
+#define AA241X_6_NAME     "AA241_Clmb_P" 
+#define AA241X_6_DEFAULT  1.0 
 // My parameter 7
-#define MAX_CLIMB_PITCH   g.aa241x_7
-#define AA241X_7_NAME     "AA241_MaxClmb" 
-#define AA241X_7_DEFAULT  0.349
+#define AIRSPEED_P        g.aa241x_7
+#define AA241X_7_NAME     "AA241_Spd_P" 
+#define AA241X_7_DEFAULT  10.0 
 // My parameter 8
-#define GLIDE_PITCH        g.aa241x_8
-#define AA241X_8_NAME     "AA241_GldPtch" 
-#define AA241X_8_DEFAULT   0.122
+#define MAX_CLIMB_PITCH   g.aa241x_8
+#define AA241X_8_NAME     "AA241_MaxClmb" 
+#define AA241X_8_DEFAULT  0.349
 // My parameter 9
-#define my_param_9        g.aa241x_9
-#define AA241X_9_NAME     "my_paramName9" 
-#define AA241X_9_DEFAULT  10.0 
+#define GLIDE_PITCH        g.aa241x_9
+#define AA241X_9_NAME     "AA241_GldPtch" 
+#define AA241X_9_DEFAULT   0.122
 // My parameter 10
 #define my_param_10        g.aa241x_10
 #define AA241X_10_NAME     "my_paramName10" 
