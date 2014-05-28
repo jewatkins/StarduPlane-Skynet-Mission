@@ -526,24 +526,22 @@ static void AA241X_AUTO_MediumLoop(void)
       float Huav = WrapAngle(atan2f(dy,dx));
       
       // Compute heading error (rad)
-      float Herr = Huav - Hwp;
+      float Herr = (float)fabs(Huav - Hwp);
       
-      // Compute heading command
+      // Determine shortest angle and compute heading command
       // Note: A line tracking gain of "ROUTE_P = 1" means set heading to waypoint.
-      //       If Herr is too large, set heading to waypoint.
-      //       If pos_error is small enough, set heading to waypoint.
-      if (fabs(Herr) >= PI/4 || pos_error <= POSITION_ERROR) {
-        headingCommand = Huav;
+      if (Herr < (2*PI - Herr)) {
+        headingCommand = WrapAngle(Hwp + copysignf(1.0, Huav - Hwp)*ROUTE_P*Herr);
       }
       else {
-        headingCommand = WrapAngle(Hwp + ROUTE_P*Herr);
+        Herr = 2*PI - Herr;
+        headingCommand = WrapAngle(Hwp - copysignf(1.0, Huav - Hwp)*ROUTE_P*Herr);
       }
-      /*
-	  hal.console->printf_P(PSTR("\nHwp: %f \n"), (Hwp/PI)*180);
-	  hal.console->printf_P(PSTR("Huav: %f \n"), (Huav/PI)*180);
-	  hal.console->printf_P(PSTR("headingCommand: %f \n"), (headingCommand/PI)*180);
-	  hal.console->printf_P(PSTR("posErr: %f \n"), pos_error);
-      */
+      
+      // If Herr is too large or if pos_error is small enough, set heading to waypoint.
+      if (Herr >= PI/4 || pos_error <= POSITION_ERROR) {
+        headingCommand = Huav;
+      }
     }
   }
 };
