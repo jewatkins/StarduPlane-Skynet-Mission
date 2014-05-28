@@ -52,7 +52,8 @@ static float altitudeCommand = 115.0;
 static float airspeedCommand = 7.0;
 
 // Debug variable
-static float variableOfInterest = 0.0;
+static float variableOfInterest1 = 0.0;
+static float variableOfInterest2 = 0.0;
 
 // These functions are executed when control mode is in AUTO
 // Please read AA241X_aux.h for all necessary definitions and interfaces
@@ -107,6 +108,27 @@ static void AA241X_AUTO_FastLoop(void)
 		// Set the phase of flight
 		phaseOfFlight = CLIMBING; // Climb as fast as possible to 115 meters
 		initFastLoopPhase = true;
+
+		// Medium Loop Initialization
+	    // Start timer
+		{
+			t_init = CPU_time_ms;
+    
+			// Set initial start position
+			x_init = X_position;
+			y_init = Y_position;
+
+			airspeedCommand = 1150.00;
+
+			// Set waypoint iterator
+			iwp = 0;
+    
+			// Get first waypoint
+			GetWaypoint(iwp, &xwp, &ywp);
+    
+			// Compute heading (waypoint tangent line)
+			Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
+		}
 
 	}else if(FLIGHT_MODE > 7.5 && FLIGHT_MODE < 8.5)
 	{
@@ -367,9 +389,6 @@ static void AA241X_AUTO_FastLoop(void)
   {
 	float rollOut    = RC_Roll_Trim + rollControllerOut;
 	Limit(rollOut, rollMax_DEF, rollMin_DEF);
-	
-	variableOfInterest = rollOut;
-	
 	Roll_servo       = rollOut;
   }
   else
@@ -430,35 +449,6 @@ static void AA241X_AUTO_FastLoop(void)
 // *****   AA241X Medium Loop - @ ~10Hz  *****  //
 static void AA241X_AUTO_MediumLoop(void)
 {
-  // Time between function calls
-  float delta_t = (CPU_time_ms - Last_AUTO_stampTime_ms); // Get delta time between AUTO_FastLoop calls  
-  
-  // Checking if we've just switched to AUTO. If more than 1000ms have gone past since last time in AUTO, then we are definitely just entering AUTO
-  if (delta_t > 200)
-  {
-    // Start timer
-    t_init = CPU_time_ms;
-    
-    // Set initial start position
-    x_init = X_position;
-    y_init = Y_position;
-
-	hal.console->printf_P(PSTR("x_init: %f \n"), x_init);
-	hal.console->printf_P(PSTR("y_init: %f \n"), y_init);
-
-	// Set init flag
-	init_flag = 1;
-    
-    // Set waypoint iterator
-    iwp = 0;
-    
-    // Get first waypoint
-    GetWaypoint(iwp, &xwp, &ywp);
-    
-    // Compute heading (waypoint tangent line)
-    Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
-  }
-  
   // Determine heading command based on specified route and current position
   if (controlMode == MISSION) {
     if (gpsOK == true)
@@ -548,8 +538,14 @@ static void AA241X_AUTO_MediumLoop(void)
       
       // If Herr is too large, fly towards waypoint
       if (Herr > PI/4) {
-        headingCommand = Huav;
+        headingCommand = Huav;	
       }
+
+	  hal.console->printf_P(PSTR("\nHwp: %f \n"), (Hwp/PI)*180);
+	  hal.console->printf_P(PSTR("Huav: %f \n"), (Huav/PI)*180);
+	  hal.console->printf_P(PSTR("headingCommand: %f \n"), (headingCommand/PI)*180);
+	  hal.console->printf_P(PSTR("posErr: %f \n"), pos_error);
+
     }
   }
 };
@@ -561,14 +557,6 @@ static void AA241X_AUTO_MediumLoop(void)
 // *****   AA241X Slow Loop - @ ~1Hz  *****  //
 static void AA241X_AUTO_SlowLoop(void)
 {	
-	if (init_flag == 1) {
-		gcs_send_text_fmt(PSTR("%f"),x_init);
-
-		init_flag = 0;
-		for(int i = 0; i<12000;i++){}
-
-		gcs_send_text_fmt(PSTR("%f"),y_init);
-	}
 
   // YOUR CODE HERE
   
@@ -593,8 +581,10 @@ static void AA241X_AUTO_SlowLoop(void)
   hal.console->printf_P(PSTR("rollCommand: %f \n"), rollCommand);
   */
 
-  //hal.console->printf_P(PSTR("rollOut: %f \n"), variableOfInterest);
-
+  //hal.console->printf_P(PSTR("\nx_init slow: %f \n"), x_init);
+  //hal.console->printf_P(PSTR("y_init slow: %f \n"), y_init);
+  //hal.console->printf_P(PSTR("xwp: %f \n"), xwp);
+  //hal.console->printf_P(PSTR("ywp: %f \n"), ywp);
   /*
   gcs_send_text_P(SEVERITY_LOW, PSTR("Test Statement"));
   gcs_send_text_fmt(PSTR("Test Float = %f \n"), 25.5);
