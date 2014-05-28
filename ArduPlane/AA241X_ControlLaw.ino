@@ -122,7 +122,7 @@ static void AA241X_AUTO_FastLoop(void)
 			iwp = 0;
     
 			// Get first waypoint
-			GetWaypoint(iwp, &xwp, &ywp);
+			GetWaypoint();
     
 			// Compute heading (waypoint tangent line)
 			Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
@@ -493,13 +493,8 @@ static void AA241X_AUTO_MediumLoop(void)
           // If all waypoints complete, restart route
           if (iwp == Nwp) {
             iwp = 0;
-            GetWaypoint(iwp, &xwp, &ywp);
           }
-          
-          // Else compute new waypoint heading
-          else {
-            GetWaypoint(iwp, &xwp, &ywp);
-          }
+          GetWaypoint();
           
           // Compute heading (waypoint tangent line)
           Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);

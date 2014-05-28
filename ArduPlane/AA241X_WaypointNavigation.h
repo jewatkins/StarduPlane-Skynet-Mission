@@ -23,9 +23,9 @@ static uint16_t iwp = 0;                                 // Waypoint iterator
 static float x_init = 0.0f; static float y_init = 0.0f;  // Initial start position
 static float xwp = 0.0f;    static float ywp = 0.0f;     // Waypoint
 static float Hwp = 0.0f;                                 // Heading: waypoint tangent line
-static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
+static void GetWaypoint() {
   // Set parameters
-  wp = wp + 1;
+  uint16_t wp = iwp + 1;
   float ts = 3.0;
   float v = 11.0;
   float RC[4] = {150.8251f, 101.0875f, 52.0025f, 10.5042f};
@@ -42,8 +42,8 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
   if ((float)wp <= nTp) {
       ang = theta + omega*ts*(float)wp;
       ang += rotation;
-      *xpos = RC[0]*cosf(ang);
-      *ypos = RC[0]*sinf(ang);
+      xwp = RC[0]*cosf(ang);
+      ywp = RC[0]*sinf(ang);
       return;
   }
   ang = theta + omega*ts*nTp;
@@ -61,8 +61,8 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
         rad = (RC[iC-1] + (RC[iC]-RC[iC-1])*((float)wp-nTm)/ (nTp-nTm));
         ang = theta + omega*ts*((float)wp-nTm);
         ang += rotation;
-        *xpos = rad*cosf(ang);
-        *ypos = rad*sinf(ang);
+        xwp = rad*cosf(ang);
+        ywp = rad*sinf(ang);
         return;
     }
     ang = theta + omega*ts*(nTp-nTm);
@@ -77,8 +77,8 @@ static void GetWaypoint(uint16_t wp, float *xpos, float *ypos) {
         rad = RC[iC];
         ang = theta + omega*ts*((float)wp-nTm);
         ang += rotation;
-        *xpos = rad*cosf(ang);
-        *ypos = rad*sinf(ang);
+        xwp = rad*cosf(ang);
+        ywp = rad*sinf(ang);
         return;
     }
     ang = theta + omega*ts*(nTp-nTm);
