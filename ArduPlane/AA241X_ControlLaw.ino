@@ -37,7 +37,7 @@ static char phaseOfFlight = LOITERING; // Waiting to start mission
 
 /*----------------------------------------- Mission Planning Variables ----------------------------------------*/
 #define SIGHTING_ALTITUDE 115.0f
-#define MAX_CLIMB_AIRSPEED 15.0f
+#define MAX_CLIMB_AIRSPEED 7.5f
 
 static bool initFastLoopPhase = true;
 
@@ -293,10 +293,16 @@ static void AA241X_AUTO_FastLoop(void)
 			// 2. airspeedCommand is given by the outer loop
 			// 3. altitudeCommand remains static at SIGHTING_ALTITUDE during the entire phase
 
-			if(initFastLoopPhase == true)
+		  	float altitude = 0.0;
+			if(gpsOK == true)
+				altitude = -Z_position_GPS;
+			else
+				altitude = -Z_position_Baro;
+		  
+		    if(initFastLoopPhase == true)
 			{
 				initFastLoopPhase = false;
-				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
+				SetReference(altitudeController_DEF, altitude/*SIGHTING_ALTITUDE*/);
 			}
 			
 			// Set reference for the heading
@@ -312,13 +318,14 @@ static void AA241X_AUTO_FastLoop(void)
 			SetReference(rollController_DEF, headingControllerOut);
 			rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
+			/*
 			// Altitude Control
 			float altitude = 0.0;
 			if(gpsOK == true)
 				altitude = -Z_position_GPS;
 			else
 				altitude = -Z_position_Baro;
-
+			*/
 			// Pitch trim scheduling
 			float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
 

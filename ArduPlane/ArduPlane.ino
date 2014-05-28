@@ -1181,7 +1181,7 @@ static void update_flight_mode(void)
     case AUTO:
         handle_auto_mode();
         break;
-/*
+
     case RTL:
     case LOITER:
     case GUIDED:
@@ -1300,7 +1300,7 @@ static void update_flight_mode(void)
         calc_nav_pitch();
         calc_throttle();
         break;
-*/
+
     case MANUAL:
         // servo_out is for Sim control only
         // ---------------------------------

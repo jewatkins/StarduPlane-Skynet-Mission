@@ -37,51 +37,51 @@ static void GetWaypoint() {
   // Circle 1
   float omega = v/RC[0];
   float T = (2*PI - tau[0] - theta + offset) / omega;
-  float nTp = ceilf(T/ts);
+  uint16_t nTp = (uint16_t)ceilf(T/ts);
   float ang;
-  if ((float)wp <= nTp) {
+  if (wp <= nTp) {
       ang = theta + omega*ts*(float)wp;
       ang += rotation;
       xwp = RC[0]*cosf(ang);
       ywp = RC[0]*sinf(ang);
       return;
   }
-  ang = theta + omega*ts*nTp;
+  ang = theta + omega*ts*(float)nTp;
   theta = WrapAngle(ang);
-  float nTm = nTp;
+  uint16_t nTm = nTp;
   
   uint16_t iC;
   for (iC=1; iC<4; iC++) {
     // Transition from circle 1 to circle 2
     omega = v/RC[iC-1];
     T = (2*tau[iC-1]) / omega;
-    nTp = nTm + ceilf(T/ts);
+    nTp = nTm + (uint16_t)ceilf(T/ts);
     float rad;
-    if ((float)wp <= nTp) {
-        rad = (RC[iC-1] + (RC[iC]-RC[iC-1])*((float)wp-nTm)/ (nTp-nTm));
-        ang = theta + omega*ts*((float)wp-nTm);
+    if (wp <= nTp) {
+        rad = (RC[iC-1] + (RC[iC]-RC[iC-1])*(float)(wp-nTm)/ (float)(nTp-nTm)); // Probably never zero
+        ang = theta + omega*ts*(float)(wp-nTm);
         ang += rotation;
         xwp = rad*cosf(ang);
         ywp = rad*sinf(ang);
         return;
     }
-    ang = theta + omega*ts*(nTp-nTm);
+    ang = theta + omega*ts*(float)(nTp-nTm);
     theta = WrapAngle(ang);
     nTm = nTp;
     
     // Circle 2
     omega = v/RC[iC];
     T = (2*PI - theta - tau[iC] + offset) / omega;
-    nTp = nTm + ceilf(T/ts);
-    if ((float)wp <= nTp) {
+    nTp = nTm + (uint16_t)ceilf(T/ts);
+    if (wp <= nTp) {
         rad = RC[iC];
-        ang = theta + omega*ts*((float)wp-nTm);
+        ang = theta + omega*ts*(float)(wp-nTm);
         ang += rotation;
         xwp = rad*cosf(ang);
         ywp = rad*sinf(ang);
         return;
     }
-    ang = theta + omega*ts*(nTp-nTm);
+    ang = theta + omega*ts*(float)(nTp-nTm);
     theta = WrapAngle(ang);
     nTm = nTp;
   }

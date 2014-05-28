@@ -1,5 +1,7 @@
 // -*- tab-width: 4; Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+#include "AA241X_WaypointNavigation.h"
+
 // default sensors are present and healthy: gyro, accelerometer, barometer, rate_control, attitude_stabilization, yaw_position, altitude control, x/y position control, motor_control
 #define MAVLINK_SENSOR_PRESENT_DEFAULT (MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL | MAV_SYS_STATUS_SENSOR_ABSOLUTE_PRESSURE | MAV_SYS_STATUS_SENSOR_ANGULAR_RATE_CONTROL | MAV_SYS_STATUS_SENSOR_ATTITUDE_STABILIZATION | MAV_SYS_STATUS_SENSOR_YAW_POSITION | MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL | MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL | MAV_SYS_STATUS_SENSOR_MOTOR_OUTPUTS)
 
@@ -480,6 +482,16 @@ static void NOINLINE send_raw_imu1(mavlink_channel_t chan)
     mavlink_msg_raw_imu_send(
         chan,
         micros(),
+		iwp,
+		(uint16_t)x_init,
+		(uint16_t)y_init,
+		(uint16_t)xwp,
+		(uint16_t)ywp,
+		gyro.z * 1000.0,
+        mag.x,
+        mag.y,
+        mag.z);
+		/*
         accel.x * 1000.0 / GRAVITY_MSS,
         accel.y * 1000.0 / GRAVITY_MSS,
         accel.z * 1000.0 / GRAVITY_MSS,
@@ -489,6 +501,7 @@ static void NOINLINE send_raw_imu1(mavlink_channel_t chan)
         mag.x,
         mag.y,
         mag.z);
+		*/
 
     if (ins.get_gyro_count() <= 1 &&
         ins.get_accel_count() <= 1 &&
