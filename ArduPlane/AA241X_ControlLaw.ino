@@ -117,12 +117,20 @@ static void AA241X_AUTO_FastLoop(void)
 			// Set initial start position
 			x_init = X_position;
 			y_init = Y_position;
-
+                        
+                        /*
+                        // Set initial start position (same everytime)
+                        x_init = 150;
+                        y_init = 0;
+                        */
+                        
 			// Set waypoint iterator
 			iwp = 0;
     
 			// Get first waypoint
 			GetWaypoint();
+                        //xwp = waypoints[iwp][0];
+                        //ywp = waypoints[iwp][1];
     
 			// Compute heading (waypoint tangent line)
 			Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
@@ -502,6 +510,8 @@ static void AA241X_AUTO_MediumLoop(void)
             iwp = 0;
           }
           GetWaypoint();
+          //xwp = waypoints[iwp][0];
+          //ywp = waypoints[iwp][1];
           
           // Compute heading (waypoint tangent line)
           Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
