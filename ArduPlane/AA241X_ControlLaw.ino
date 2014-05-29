@@ -110,8 +110,11 @@ static void AA241X_AUTO_FastLoop(void)
 		initFastLoopPhase = true;
 
 		// Medium Loop Initialization
-		{
-  	                // Start timer
+		if (init_flag == 1) {
+			// Turn off initialization
+			init_flag = 0;
+
+  	        // Start timer
 			t_init = CPU_time_ms;
     
 			// Set initial start position
@@ -472,7 +475,7 @@ static void AA241X_AUTO_MediumLoop(void)
       // Check to see if waypoint is found
       float dx = xwp - X_position;
       float dy = ywp - Y_position;
-      float pos_error = sqrtf(dx*dx + dy*dy);
+      pos_error = sqrtf(dx*dx + dy*dy);
       if (pos_error <= SNAPSHOT_ERROR) {
 		/*
         // Take a snapshot
@@ -512,16 +515,27 @@ static void AA241X_AUTO_MediumLoop(void)
           // If all waypoints complete, restart route
           if (iwp == Nwp) {
             iwp = 0;
-          }
+		  }
+
+		  // Get new waypoints
+		  float xwp_old = xwp;
+		  float ywp_old = ywp;
           GetWaypoint();
           //xwp = waypoints[iwp][0];
           //ywp = waypoints[iwp][1];
           
-          // Compute heading (waypoint tangent line)
-          Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
-          
           // Start timer
           t_init = CPU_time_ms;
+
+		  // Compute heading (waypoint to waypoint or waypoint tangent line)
+		  if (trans_flag == 1) {
+			  dx = xwp - xwp_old;
+			  dy = ywp - ywp_old;
+			  Hwp = WrapAngle(atan2f(dy,dx));
+		  }
+		  else {
+			  Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
+		  }
 		  /*
         }
         else {

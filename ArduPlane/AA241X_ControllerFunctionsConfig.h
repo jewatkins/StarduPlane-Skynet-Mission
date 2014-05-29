@@ -111,7 +111,7 @@ float gains [numControllers][numGains] = {
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
                                           {0.1, 0.007, 0.0},  /* altitude controller p, i, d */                                        
                                           {10.0, 0.1, 0.0},  /* airspeed controller p, i, d */
-                                          {1.0, 0.01, 0.0}   /* heading controller p, i, d */
+                                          {0.9, 0.075, 0.0}   /* heading controller p, i, d */
                                          };
 
 /*------------------------------------- Trim States ------------------------------------------------*/
