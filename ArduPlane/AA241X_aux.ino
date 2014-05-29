@@ -310,13 +310,17 @@ static void updateScore(float *X_person_truth, float *Y_person_truth){
   float errX;
   float errY;
   float t_sight = CPU_time_sight_ms/1000.0;
+
+  // targets not sighted yet
   if (CPU_time_sight_ms == 0.0){
     Score = 0.0;
     return;
   }
   
+  // no score update after energy consumed
   if (mission_energy_consumed > ENERGY_LIMIT) return;
   
+  // target errors
   for (int i = 0; i < 4; i++){
     errX = (X_person_estimate[i] - X_person_truth[i]);
     errY = (Y_person_estimate[i] - Y_person_truth[i]);
@@ -576,13 +580,16 @@ static struct snapshot takeSnapshot(float X_current, float Y_current, float alti
     
     mySnap.pictureTaken = 0;
     mySnap.timeOfPicture_ms = 0;
-    mySnap.personsInPicture[0] = 0;
-    mySnap.personsInPicture[1] = 0;
-    mySnap.personsInPicture[2] = 0;
-    mySnap.personsInPicture[3] = 0;
     mySnap.diameterOfPicture = 0.0;
     mySnap.centerOfPictureX = 0.0;
     mySnap.centerOfPictureY = 0.0;
+
+    for (int i = 0; i < 4; i++){
+      mySnap.personsInPicture[i]         = 0;
+      mySnap.centerOfPersonEstimateX[i]  = 0.;
+      mySnap.centerOfPersonEstimateY[i]  = 0.; 
+      mySnap.diameterOfPersonEstimate[i] = 0.;
+    }
 
     if ( gpsOK                                             && 
          (current_time_ms - last_time_ms) >= WAIT_TIME_MS  && 

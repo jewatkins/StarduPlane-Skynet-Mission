@@ -1,5 +1,5 @@
 
-#define ENERGY_LIMIT   0.450*7.4*3600 // max energy in Joules allowed for the mission.  Above this energy consumption, the camera function stops returning snapshots
+#define ENERGY_LIMIT   0.300*7.4*3600 // max energy in Joules allowed for the mission.  Above this energy consumption, the camera function stops returning snapshots
 
 // ***** Multiplier matrices to convert logged variables into SI, degrees and % of full PWM units  ***** //
 // If you multiply each column of the respective log line (MF or HF) by these coefficients, this should convert the data to SI units, except for angles and angular rates, which are in
@@ -81,8 +81,8 @@ static float Last_AUTO_stampTime_ms = 0.0; // holds the last CPU time in ms for 
 
 static int   personDistributionIndex = 0; // This selects which of the 10 sample distributions you use for your training runs
 
-static float X_person_estimate[4];  // your estimate of the X_position for each of the 3 lost persons, in meters
-static float Y_person_estimate[4];  // your estimate of the Y_position for each of the 3 lost persons, in meters
+static float X_person_estimate[4] = {0.,0.,0.,0.};  // your estimate of the X_position for each of the 3 lost persons, in meters
+static float Y_person_estimate[4] = {0.,0.,0.,0.};  // your estimate of the Y_position for each of the 3 lost persons, in meters
 
 static float CPU_time_mission_ms = 0.0;
 static char in_mission = 0;
