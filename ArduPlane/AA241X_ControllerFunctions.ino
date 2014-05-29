@@ -160,6 +160,15 @@ float ScheduleThrottleTrim(float airspeedCommand)
 /* blah
  *
  */
+void ScheduleHeadingGain(float airspeedCommand)
+{
+	gains[headingController_DEF][pGain] = .25 + .75*(airspeedCommand)/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
+	gains[headingController_DEF][iGain] = .0025 + .0075*(airspeedCommand)/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
+}
+
+/* blah
+ *
+ */
 /*
 char determineTrimState(float rollCommand, float airspeedCommand)
 {

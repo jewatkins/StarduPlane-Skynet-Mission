@@ -204,6 +204,13 @@ static void AA241X_AUTO_FastLoop(void)
   else if (controlMode == FBW_MODE)
   {
 	  // Maintain heading, altitude, and airspeed RC pilot commands offsets from saved initial conditions
+
+	  // Airspeed Control
+	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+	  SetReference(airspeedController_DEF, airspeedCommand);
+	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
+	  
 	  // Heading Commands
       if ( fabs(RC_roll - RC_Roll_Trim) > 5 )
       {      
@@ -221,6 +228,9 @@ static void AA241X_AUTO_FastLoop(void)
         
         SetReference(headingController_DEF, headingCommand);
       }
+
+	  // Schedule the heading gains based on airspeed command
+	  ScheduleHeadingGain(airspeedCommand);
       float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
       Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
@@ -248,12 +258,6 @@ static void AA241X_AUTO_FastLoop(void)
 	  float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
 	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
 	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
-
-	  // Airspeed Control
-	  airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
-	  SetReference(airspeedController_DEF, airspeedCommand);
-	  airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
-	  airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
   }
   else if(controlMode == MISSION)

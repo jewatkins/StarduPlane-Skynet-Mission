@@ -34,6 +34,11 @@ float ScheduleThrottleTrim(float airspeedCommand);
 /* blah
  *
  */
+void ScheduleHeadingGain(float airspeedCommand);
+
+/* blah
+ *
+ */
 //char determineTrimState(float rollCommand, float airspeedCommand);
 
 #endif /* CONTROLLER_FUNCTIONS_H */
