@@ -516,9 +516,12 @@ static void AA241X_AUTO_MediumLoop(void)
 		*/
       }
       
-      // Estimate needed airspeed to reach waypoint at correct time
+      // Recalculate position error
       dx = xwp - X_position;
       dy = ywp - Y_position;
+      pos_error = sqrtf(dx*dx + dy*dy);
+      
+      // Estimate needed airspeed to reach waypoint at correct time
 	  /*
       float ds = sqrtf(dx*dx + dy*dy);
       float dt = TIME_ESTIMATE - (CPU_time_ms - t_init)/1000;

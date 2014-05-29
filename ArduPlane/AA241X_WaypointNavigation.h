@@ -25,7 +25,7 @@ static float xwp = 0.0f;    static float ywp = 0.0f;     // Waypoint
 static float Hwp = 0.0f;                                 // Heading: waypoint tangent line
 static void GetWaypoint() {
   // Set parameters
-  uint16_t wp = iwp + 1;
+  uint16_t wp = iwp + (uint16_t)1;
   float ts = 3.0;
   float v = 11.0;
   float RC[4] = {150.8251f, 101.0875f, 52.0025f, 10.5042f};
