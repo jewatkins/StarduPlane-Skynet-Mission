@@ -9,7 +9,8 @@
 static char persons_found[Np] = {0,0,0,0};     // Number of persons found
 static uint8_t init_t_sight_flag = 1;
 static uint8_t finalize_t_sight_flag = 1;
-static float t_sight = 0.0;
+static float t_sight_start = 0.0;
+static float t_sight_end = 0.0;
 static uint16_t no_snap = 0;
 static char n_persons_found = 0;
 

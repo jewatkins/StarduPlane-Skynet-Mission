@@ -282,7 +282,7 @@ static void AA241X_AUTO_FastLoop(void)
 			// Initialize t_sight
 			if (init_t_sight_flag == 1 && altitude > 30.488) {
 				init_t_sight_flag = 0;
-				t_sight = CPU_time_ms;
+				t_sight_start = CPU_time_ms;
 			}
 
 			// Set maximum throttle
@@ -506,7 +506,6 @@ static void AA241X_AUTO_MediumLoop(void)
 {
 	// Determine heading command based on specified route and current position
 	if (controlMode == MISSION && phaseOfFlight == SIGHTING) {
-
 		if(INIT_SPIRAL < .5)
 		{
 			// Snapshot parameters
@@ -561,7 +560,7 @@ static void AA241X_AUTO_MediumLoop(void)
               // Display message if all persons found
               if (n_persons_found == Np && finalize_t_sight_flag == 1) {
 				finalize_t_sight_flag = 0;
-				t_sight = (CPU_time_ms - t_sight);
+				t_sight_end = CPU_time_ms;
                 gcs_send_text_P(SEVERITY_LOW, PSTR("All Persons found!"));
               }
             }
