@@ -483,13 +483,13 @@ static void NOINLINE send_raw_imu1(mavlink_channel_t chan)
         chan,
         micros(),
 		iwp,
-		(uint16_t)t_sight,
+                (uint16_t)pos_error*10,
 		n_persons_found,
 		no_snap,
-		(uint16_t)pos_error*10,
-		gyro.z * 1000.0,
-        mag.x,
-        mag.y,
+                Score,
+                in_mission,
+		(uint16_t)t_sight_start,
+                (uint16_t)t_sight_end,
         mag.z);
 		/*
         accel.x * 1000.0 / GRAVITY_MSS,
