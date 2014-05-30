@@ -352,7 +352,7 @@ static void AA241X_AUTO_FastLoop(void)
 				initFastLoopPhase = false;
 				
 				// Reset Gains on heading controller
-				gains[headingController_DEF][pGain] = 0.9;
+				gains[headingController_DEF][pGain] = 0.7;
 				gains[headingController_DEF][iGain] = 0.007;
 
 				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
@@ -573,43 +573,41 @@ static void AA241X_AUTO_MediumLoop(void)
               }
             }
           }
+
+			// Output time of waypoint capture
+			float dt = (CPU_time_ms - t_init)/1000;
+			gcs_send_text_fmt(PSTR("Waypoint found: %f sec"),dt);
+
+
+			// Go to next waypoint
+			iwp++;
+          
+			// If all waypoints complete, restart route
+			if (iwp == Nwp) {
+			iwp = 0;
+			}
+
+			// Get new waypoints
+			float xwp_old = xwp;
+			float ywp_old = ywp;
+			GetWaypoint();
+        
+			// Start timer
+			t_init = CPU_time_ms;
+
+			// Compute heading (waypoint to waypoint or waypoint tangent line)
+			if (trans_flag == 1) {
+				dx = xwp - xwp_old;
+				dy = ywp - ywp_old;
+				Hwp = WrapAngle(atan2f(dy,dx));
+			}
+			else {
+				Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
+			}
 		}
 		else {
 			no_snap++;
 			gcs_send_text_P(SEVERITY_LOW, PSTR("Snapshot not taken!"));
-		}
-
-		// Output time of waypoint capture
-		float dt = (CPU_time_ms - t_init)/1000;
-		gcs_send_text_fmt(PSTR("Waypoint found: %f sec"),dt);
-
-
-        // Go to next waypoint
-        iwp++;
-          
-        // If all waypoints complete, restart route
-        if (iwp == Nwp) {
-        iwp = 0;
-		}
-
-		// Get new waypoints
-		float xwp_old = xwp;
-		float ywp_old = ywp;
-        GetWaypoint();
-        //xwp = waypoints[iwp][0];
-        //ywp = waypoints[iwp][1];
-          
-        // Start timer
-        t_init = CPU_time_ms;
-
-		// Compute heading (waypoint to waypoint or waypoint tangent line)
-		if (trans_flag == 1) {
-			dx = xwp - xwp_old;
-			dy = ywp - ywp_old;
-			Hwp = WrapAngle(atan2f(dy,dx));
-		}
-		else {
-			Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
 		}
       }
       
@@ -661,9 +659,9 @@ static void AA241X_AUTO_MediumLoop(void)
   if(controlMode == MISSION && phaseOfFlight == CLIMBING)
     {
 		// Settings to track a heading
-		float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
-		Limit(rollCommand, .175, -.175);
-		SetReference(rollController_DEF, rollCommand);
+		//float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
+		//Limit(rollCommand, .175, -.175);
+		SetReference(rollController_DEF, .05);
 	}
 
 	if(controlMode == MISSION && phaseOfFlight == SIGHTING)
@@ -671,8 +669,9 @@ static void AA241X_AUTO_MediumLoop(void)
 		float altitude = -Z_position_Baro;
 		
 		// Settings to track ground speed
-		airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
-		Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
+		//airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
+		//Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
+		airspeedCommand = 9.0;
 		SetReference(airspeedController_DEF, airspeedCommand);            
             
 		// Set reference for the heading
