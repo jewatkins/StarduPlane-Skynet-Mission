@@ -4,76 +4,20 @@
 #include <math.h>
 
 /**** Waypoint Navigation ****/
-#define TIME_ESTIMATE 3.2f                     // Time estimate between waypoints (s)
+#define TIME_ESTIMATE 3.5f                     // Time estimate between waypoints (s)
 #define Np 4                                   // Number of persons to find
 static char persons_found[Np] = {0,0,0,0};     // Number of persons found
+static uint8_t init_t_sight_flag = 1;
+static uint8_t finalize_t_sight_flag = 1;
+static float t_sight = 0.0;
+static uint16_t no_snap = 0;
+static char n_persons_found = 0;
 
 // Wrap angle to interval [0,2*pi]
 static float WrapAngle(float angle) {
   float twoPi = 2*PI;
   return angle - twoPi*(float)floor(angle/twoPi);
 }
-
-/*
-// Static Waypoint path
-#define Nwp 54
-static float waypoints[Nwp][2] = {
-  {-32.6961,  136.3175},
-  {-63.5886,  124.9319},
-  {-90.9736,  106.6551},
- {-113.3404,   82.4951},
- {-129.4554,   53.7847},
- {-138.4296,   22.1075},
- {-139.7680,  -10.7891},
- {-133.3968,  -43.0906},
- {-119.6673,  -73.0153},
-  {-99.3370,  -98.9123},
-  {-73.5273, -119.3534},
-  {-43.6618, -133.2109},
-  {-11.3878, -139.7205},
-   {21.5142, -138.5230},
-   {53.2296, -129.6847},
-   {82.0088, -113.6928},
-  {106.2643,  -91.4297},
-  {124.6584,  -64.1233},
-  {136.1762,  -33.2798},
-  {140.1825,   -0.6006},
-  {136.4563,   32.1117},
-  {125.2032,   63.0528},
-  {107.0439,   90.5158},
-   {82.9799,  112.9860},
-   {54.3388,  129.2238},
-   {22.7004,  138.3336},
-  {-10.1902,  139.8129},
-  {-34.8138,  109.3737},
-  {-46.2253,   76.4955},
-  {-70.7165,   54.6582},
-  {-85.6763,   25.4540},
-  {-89.0886,   -7.1810},
-  {-80.4932,  -38.8481},
-  {-61.0489,  -65.2792},
-  {-33.3762,  -82.9118},
-   {-1.2051,  -89.3694},
-   {31.1285,  -83.7816},
-   {59.2666,  -66.9015},
-   {79.4165,  -41.0043},
-   {88.8625,   -9.5805},
-   {86.3315,   23.1346},
-   {72.1645,   52.7316},
-   {48.2710,   75.2213},
-   {17.8715,   87.5725},
-  {-10.7679,   63.5260},
-  {-20.2042,   33.9262},
-  {-38.7156,    7.7652},
-  {-31.7244,  -23.5109},
-  { -3.8356,  -39.3000},
-  { 26.5797,  -29.2014},
-  { 39.4865,    0.1327},
-  { 26.3828,   29.3794},
-  { -4.0998,   39.2733},
-  { -7.7101,    5.6341}
-};
-*/
 
 // Returns waypoint number 'wp' for phase-1 assuming that the airspeed is
 // maintained at 11 m/s and there are 56 waypoints

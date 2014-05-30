@@ -27,17 +27,20 @@ static uint16_t controlMode = ROLL_STABILIZE_MODE;
  *
  */
 
-#define	LOITERING            0 // Hang out at current altitude, airspeed, and heading
-#define CLIMBING             1 // Climb to the maximum altitude to get the widest field of view with the camera
-#define	SIGHTING             2 // Cruise at highest altitude until all persons have been seen
-#define REFINING             3 // Algorithm based waypoint nav (still in cruise mode)
-#define	GLIDING              4 // Battery power is running low, lose altitude and refine as much as possible
-#define	CELEBRATING          5 // Let's do some loops and fun crap here!
-static char phaseOfFlight = LOITERING; // Waiting to start mission
+#define	LOITERING				0 // Hang out at 90 feet, fly waypoints to get to CLIMBING initial position
+#define CLIMBING				1 // Climb to the maximum altitude to get the widest field of view with the camera
+#define	SIGHTING				2 // Cruise at highest altitude until all persons have been seen
+#define REFINING				3 // Algorithm based waypoint nav (still in cruise mode)
+#define	GLIDING					4 // Battery power is running low, lose altitude and refine as much as possible
+#define	CELEBRATING				5 // Let's do some loops and fun crap here!
+#define POST_MISSION_LOITERING	6 // Drop to a prescribed altitude and circle
+static char phaseOfFlight = CLIMBING; // Waiting to start mission
 
 /*----------------------------------------- Mission Planning Variables ----------------------------------------*/
+#define LOITERING_ALTITUDE 27.0f
+#define LOITERING_AIRSPEED 15.0f
 #define SIGHTING_ALTITUDE 115.0f
-#define MAX_CLIMB_AIRSPEED 7.5f
+#define MAX_CLIMB_AIRSPEED 15.0f
 
 static bool initFastLoopPhase = true;
 
@@ -68,8 +71,8 @@ static void AA241X_AUTO_FastLoop(void)
   if (delta_t > 100)
   {
 	// Adjust gains based on mission planner parameter input
-	gains [altitudeController_DEF][pGain] = ALTITUDE_P;
-	gains [airspeedController_DEF][pGain] = AIRSPEED_P;
+	//gains [altitudeController_DEF][pGain] = ALTITUDE_P;
+	//gains [airspeedController_DEF][pGain] = AIRSPEED_P;
 	  
 	// Determine control mode from bits in parameter list
     if(FLIGHT_MODE > .5 && FLIGHT_MODE < 1.5)
@@ -99,44 +102,34 @@ static void AA241X_AUTO_FastLoop(void)
 	{
 		// This is probably the most important control mode, it is what will be used to fly the mission
 		controlMode = MISSION;
-		
-		// Set commands upon initialization of the autonomous mode
-		SetReference(altitudeController_DEF, 115.0); // Altitude needed for phase 1 of mission
-		airspeedCommand = 15.0; // As fast as we can go
-		SetReference(airspeedController_DEF, airspeedCommand);
 
-		// Set the phase of flight
-		phaseOfFlight = CLIMBING; // Climb as fast as possible to 115 meters
-		initFastLoopPhase = true;
-
-		// Medium Loop Initialization
-		if (init_flag == 1) {
-			// Turn off initialization
-			init_flag = 0;
-
-  	        // Start timer
-			t_init = CPU_time_ms;
-    
-			// Set initial start position
-			x_init = X_position;
-			y_init = Y_position;
-                        
-                        /*
-                        // Set initial start position (same everytime)
-                        x_init = 150;
-                        y_init = 0;
-                        */
-                        
-			// Set waypoint iterator
-			iwp = 0;
-    
-			// Get first waypoint
-			GetWaypoint();
-                        //xwp = waypoints[iwp][0];
-                        //ywp = waypoints[iwp][1];
-    
-			// Compute heading (waypoint tangent line)
-			Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
+		switch(phaseOfFlight)
+		{
+		case LOITERING:
+			initFastLoopPhase = true;
+			SetReference(altitudeController_DEF, LOITERING_ALTITUDE);
+			SetReference(airspeedController_DEF, LOITERING_AIRSPEED);
+			break;
+		case CLIMBING:
+			initFastLoopPhase = true;
+			SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
+			SetReference(airspeedController_DEF, MAX_CLIMB_AIRSPEED);
+			break;
+		case SIGHTING:
+			initFastLoopPhase = true;
+			break;
+		case REFINING:
+			initFastLoopPhase = true;
+			break;
+		case GLIDING:
+			initFastLoopPhase = true;
+			break;
+		case CELEBRATING:
+			initFastLoopPhase = true;
+			break;
+		case POST_MISSION_LOITERING:
+			initFastLoopPhase = true;
+			break;
 		}
 
 	}else if(FLIGHT_MODE > 7.5 && FLIGHT_MODE < 8.5)
@@ -145,6 +138,9 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Set pitch angle
 	  float pitchCommand = MAX_CLIMB_PITCH;
 	  SetReference(pitchController_DEF, pitchCommand);
+	  headingCommand = ground_course;
+	  SetReference(headingController_DEF, headingCommand);
+
     }else if(FLIGHT_MODE > 8.5 && FLIGHT_MODE < 9.5)
 	{
       controlMode = GLIDE;
@@ -274,21 +270,37 @@ static void AA241X_AUTO_FastLoop(void)
   else if(controlMode == MISSION)
   {
 	  // This mode is for flying the actual mission. It will have mission phase logic included soon enough.
-	  
-	  if(phaseOfFlight == CLIMBING)
+	  if(phaseOfFlight == LOITERING)
 	  {
-			float altitude = -Z_position_GPS;
+			// Do pre-mission loitering circuit, then climb to altitude
+	  }else if(phaseOfFlight == CLIMBING)
+	  {
+		  	float altitude = -Z_position_Baro;
+
+			// Initialize t_sight
+			if (init_t_sight_flag == 1 && altitude > 30.488) {
+				init_t_sight_flag = 0;
+				t_sight = CPU_time_ms;
+			}
+
+			// Set maximum throttle
+			airspeedControllerOut = 100.0;
+
 		    // Climb to 115 meters
 			if(initFastLoopPhase == true)
 			{
+				init_t_sight_flag = 1;
+				finalize_t_sight_flag = 1;
 				initFastLoopPhase = false;
 				SetReference(pitchController_DEF, MAX_CLIMB_PITCH);
-				SetReference(rollController_DEF, 0.0);
 				airspeedCommand = MAX_CLIMB_AIRSPEED;
 				SetReference(airspeedController_DEF, airspeedCommand);
+				// Schedule the heading gains based on airspeed command
+				gains[headingController_DEF][pGain] = .5;
+				gains[headingController_DEF][pGain] = .008;
 			}
 
-			if(-Z_position_GPS >= altitude/*SIGHTING_ALTITUDE*/)
+			if(-Z_position_GPS >= SIGHTING_ALTITUDE)
 			{
 				phaseOfFlight = SIGHTING;
 				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
@@ -298,8 +310,14 @@ static void AA241X_AUTO_FastLoop(void)
 
 			// Step the PID controllers to keep max climb trim
 			pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
-			rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 			airspeedControllerOut = ScheduleThrottleTrim(airspeedCommand) + StepController(airspeedController_DEF, Air_speed, delta_t); // Add the trim depending on the desired airspeed
+			
+			float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
+			Limit(rollCommand, .12, -.12);
+
+			// Roll Control
+			SetReference(rollController_DEF, rollCommand);
+			rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 	  }else if(phaseOfFlight == SIGHTING)
 	  {		
 			// Use waypoint navigation while in altitude hold, airspeed hold, and heading hold inner loop controllers
@@ -308,16 +326,17 @@ static void AA241X_AUTO_FastLoop(void)
 			// 2. airspeedCommand is given by the outer loop
 			// 3. altitudeCommand remains static at SIGHTING_ALTITUDE during the entire phase
 
-		  	float altitude = 0.0;
-			if(gpsOK == true)
-				altitude = -Z_position_GPS;
-			else
-				altitude = -Z_position_Baro;
+		  	float altitude = -Z_position_Baro;
 		  
 		    if(initFastLoopPhase == true)
 			{
 				initFastLoopPhase = false;
-				SetReference(altitudeController_DEF, altitude/*SIGHTING_ALTITUDE*/);
+				
+				// Reset Gains on heading controller
+				gains[headingController_DEF][pGain] = 0.9;
+				gains[headingController_DEF][iGain] = 0.007;
+
+				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
 			}
 			
 			// Set reference for the heading
@@ -333,14 +352,6 @@ static void AA241X_AUTO_FastLoop(void)
 			SetReference(rollController_DEF, headingControllerOut);
 			rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
-			/*
-			// Altitude Control
-			float altitude = 0.0;
-			if(gpsOK == true)
-				altitude = -Z_position_GPS;
-			else
-				altitude = -Z_position_Baro;
-			*/
 			// Pitch trim scheduling
 			float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
 
@@ -370,11 +381,16 @@ static void AA241X_AUTO_FastLoop(void)
 	  }*/
 	  
   }else if(controlMode == MAX_CLIMB)
-  {
-	  // Set roll angle at zero degrees, keep wings level at max climb
-	  float rollCommand = 0.0;
-	  SetReference(rollController_DEF, rollCommand);
-	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+  {        
+	  // Schedule the heading gains based on airspeed command
+	  gains[headingController_DEF][pGain] = .5;
+	  gains[headingController_DEF][pGain] = .008;
+      float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
+      Limit(rollCommand, .175, -.175);
+
+      // Roll Control
+      SetReference(rollController_DEF, rollCommand);
+      rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
 	  // Set maximum throttle
 	  airspeedControllerOut = 100.0;
@@ -468,16 +484,41 @@ static void AA241X_AUTO_FastLoop(void)
 // *****   AA241X Medium Loop - @ ~10Hz  *****  //
 static void AA241X_AUTO_MediumLoop(void)
 {
-  // Determine heading command based on specified route and current position
-  if (controlMode == MISSION) {
+	// Determine heading command based on specified route and current position
+	if (controlMode == MISSION && phaseOfFlight == SIGHTING) {
+
+		if(INIT_SPIRAL < .5)
+		{
+			// Snapshot parameters
+			no_snap = 0;
+
+			// Mission Planner Parameter
+			INIT_SPIRAL = 1.0;
+
+			// Start timer
+			t_init = CPU_time_ms;
+    
+			// Set initial start position
+			x_init = X_position;
+			y_init = Y_position;
+                        
+			// Set waypoint iterator
+			iwp = 0;
+    
+			// Get first waypoint
+			GetWaypoint();
+    
+			// Compute heading (waypoint tangent line)
+			Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
+		}
+
     if (gpsOK == true)
     {
-      // Check to see if waypoint is found
+	  // Check to see if waypoint is found
       float dx = xwp - X_position;
       float dy = ywp - Y_position;
       pos_error = sqrtf(dx*dx + dy*dy);
       if (pos_error <= SNAPSHOT_ERROR) {
-		/*
         // Take a snapshot
         snapshot mySnapShot = takeASnapshot();
         
@@ -492,56 +533,57 @@ static void AA241X_AUTO_MediumLoop(void)
               
               // Sum all persons found
               uint16_t ii;
-              char sum = 0;
+              n_persons_found = 0;
               for (ii=0; ii<Np; ii++) {
-                sum += persons_found[ii];
+                n_persons_found += persons_found[ii];
               }
               
               // Display message if all persons found
-              if (sum == Np) {
+              if (n_persons_found == Np && finalize_t_sight_flag == 1) {
+				finalize_t_sight_flag = 0;
+				t_sight = (CPU_time_ms - t_sight);
                 gcs_send_text_P(SEVERITY_LOW, PSTR("All Persons found!"));
               }
             }
           }
-		  */
-          
-		  // Output time of waypoint capture
-		  float dt = (CPU_time_ms - t_init)/1000;
-		  gcs_send_text_fmt(PSTR("Waypoint found: %f sec"),dt);
+		}
+		else {
+			no_snap++;
+			gcs_send_text_P(SEVERITY_LOW, PSTR("Snapshot not taken!"));
+		}
 
-          // Go to next waypoint
-          iwp++;
-          
-          // If all waypoints complete, restart route
-          if (iwp == Nwp) {
-            iwp = 0;
-		  }
+		// Output time of waypoint capture
+		float dt = (CPU_time_ms - t_init)/1000;
+		gcs_send_text_fmt(PSTR("Waypoint found: %f sec"),dt);
 
-		  // Get new waypoints
-		  float xwp_old = xwp;
-		  float ywp_old = ywp;
-          GetWaypoint();
-          //xwp = waypoints[iwp][0];
-          //ywp = waypoints[iwp][1];
-          
-          // Start timer
-          t_init = CPU_time_ms;
 
-		  // Compute heading (waypoint to waypoint or waypoint tangent line)
-		  if (trans_flag == 1) {
-			  dx = xwp - xwp_old;
-			  dy = ywp - ywp_old;
-			  Hwp = WrapAngle(atan2f(dy,dx));
-		  }
-		  else {
-			  Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
-		  }
-		  /*
-        }
-        else {
-          gcs_send_text_P(SEVERITY_LOW, PSTR("Snapshot could not be taken!"));
-        }
-		*/
+        // Go to next waypoint
+        iwp++;
+          
+        // If all waypoints complete, restart route
+        if (iwp == Nwp) {
+        iwp = 0;
+		}
+
+		// Get new waypoints
+		float xwp_old = xwp;
+		float ywp_old = ywp;
+        GetWaypoint();
+        //xwp = waypoints[iwp][0];
+        //ywp = waypoints[iwp][1];
+          
+        // Start timer
+        t_init = CPU_time_ms;
+
+		// Compute heading (waypoint to waypoint or waypoint tangent line)
+		if (trans_flag == 1) {
+			dx = xwp - xwp_old;
+			dy = ywp - ywp_old;
+			Hwp = WrapAngle(atan2f(dy,dx));
+		}
+		else {
+			Hwp = WrapAngle(atan2f(ywp,xwp) + PI/2);
+		}
       }
       
       // Recalculate position error
@@ -550,7 +592,6 @@ static void AA241X_AUTO_MediumLoop(void)
       pos_error = sqrtf(dx*dx + dy*dy);
       
       // Estimate needed airspeed to reach waypoint at correct time
-	  /*
       float ds = sqrtf(dx*dx + dy*dy);
       float dt = TIME_ESTIMATE - (CPU_time_ms - t_init)/1000;
       airspeedCommand = ds/dt;
@@ -562,8 +603,6 @@ static void AA241X_AUTO_MediumLoop(void)
       else if (airspeedCommand < 7.0) {
         airspeedCommand = 7.0;
       }
-	  */
-	  airspeedCommand = 11.0;
       
       // Compute heading (UAV to waypoint)
       float Huav = WrapAngle(atan2f(dy,dx));

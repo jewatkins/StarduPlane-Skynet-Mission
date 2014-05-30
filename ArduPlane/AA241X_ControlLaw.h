@@ -39,9 +39,9 @@
 #define AA241X_9_NAME     "AA241_GldPtch" 
 #define AA241X_9_DEFAULT   0.122
 // My parameter 10
-#define my_param_10        g.aa241x_10
-#define AA241X_10_NAME     "my_paramName10" 
-#define AA241X_10_DEFAULT  -20.523 
+#define INIT_SPIRAL        g.aa241x_10
+#define AA241X_10_NAME     "AA241_InitSpl" 
+#define AA241X_10_DEFAULT  0.0
 // My parameter 11
 #define my_param_11        g.aa241x_11
 #define AA241X_11_NAME     "my_paramName11" 

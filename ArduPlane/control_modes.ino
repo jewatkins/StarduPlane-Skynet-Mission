@@ -76,7 +76,7 @@ static uint8_t readSwitch(void)
     if (pulsewidth > 1360 && pulsewidth <= 1490) return 2;
     if (pulsewidth > 1490 && pulsewidth <= 1620) return 3;
     if (pulsewidth > 1620 && pulsewidth <= 1749) return 4;              // Software Manual
-    if (pulsewidth >= 1750) return 5;                                                           // Hardware Manual
+    if (pulsewidth >= 1750) return 5;                                   // Hardware Manual
     return 0;
 }
 
