@@ -61,7 +61,7 @@ const float referenceLimits[numControllers][minMax] = {
                                    {0.35 /* 20 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
                                    {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */
-                                   {12.0 /* 12 m/s max */, 7.0 /* 6.0 m/s min */}, /* airspeed controller */
+                                   {13.0 /* 12 m/s max */, 7.0 /* 6.0 m/s min */}, /* airspeed controller */
                                    {6.30 /* 2 PI max */, -0.1 /* -0.1 min */}, /* heading controller */
 								   {3.0 /* 3 m/s max */, -3.0 /* -3.0 m/s min */} /* ground speed controller */ 
                                   };
