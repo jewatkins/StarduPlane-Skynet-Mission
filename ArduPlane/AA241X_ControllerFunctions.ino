@@ -162,8 +162,8 @@ float ScheduleThrottleTrim(float airspeedCommand)
  */
 void ScheduleHeadingGain(float airspeedCommand)
 {
-	gains[headingController_DEF][pGain] = .25 + .75*(airspeedCommand)/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
-	gains[headingController_DEF][iGain] = .0025 + .0075*(airspeedCommand)/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
+	gains[headingController_DEF][pGain] = .5 + .4*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
+	gains[headingController_DEF][iGain] = .003 + .0035*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
 }
 
 /* blah

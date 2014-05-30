@@ -246,11 +246,7 @@ static void AA241X_AUTO_FastLoop(void)
       rollControllerOut = StepController(rollController_DEF, roll, delta_t);
       
       // Altitude Control
-      float altitude = 0.0;
-	  if(gpsOK == true)
-        altitude = -Z_position_GPS;
-      else
-        altitude = -Z_position_Baro;
+      float altitude = -Z_position_Baro;
       
       if(fabs(RC_pitch - RC_Pitch_Trim) > 5)
       {
@@ -292,15 +288,32 @@ static void AA241X_AUTO_FastLoop(void)
 				init_t_sight_flag = 1;
 				finalize_t_sight_flag = 1;
 				initFastLoopPhase = false;
+				
+				// Set pitch angle reference
 				SetReference(pitchController_DEF, MAX_CLIMB_PITCH);
+				
+				// Set airspeed reference
 				airspeedCommand = MAX_CLIMB_AIRSPEED;
 				SetReference(airspeedController_DEF, airspeedCommand);
-				// Schedule the heading gains based on airspeed command
+				
+				// Schedule the heading gains based on max climb conditions
 				gains[headingController_DEF][pGain] = .5;
 				gains[headingController_DEF][pGain] = .008;
+				
+				// Set heading angle
+				headingCommand = ground_course;
+				// Check radian range of heading command
+				if(headingCommand > 2*PI)
+				{
+				  headingCommand -= 2*PI;
+				}else if(headingCommand < 0)
+				{
+				  headingCommand += 2*PI;
+				}
+				SetReference(headingController_DEF, headingCommand);
 			}
 
-			if(-Z_position_GPS >= SIGHTING_ALTITUDE)
+			if(-Z_position_Baro >= SIGHTING_ALTITUDE)
 			{
 				phaseOfFlight = SIGHTING;
 				SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
@@ -313,7 +326,7 @@ static void AA241X_AUTO_FastLoop(void)
 			airspeedControllerOut = ScheduleThrottleTrim(airspeedCommand) + StepController(airspeedController_DEF, Air_speed, delta_t); // Add the trim depending on the desired airspeed
 			
 			float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
-			Limit(rollCommand, .12, -.12);
+			Limit(rollCommand, .175, -.175);
 
 			// Roll Control
 			SetReference(rollController_DEF, rollCommand);
@@ -341,6 +354,7 @@ static void AA241X_AUTO_FastLoop(void)
 			
 			// Set reference for the heading
 			SetReference(headingController_DEF, headingCommand);
+			//ScheduleHeadingGain(airspeedCommand);
 			float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
 			Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
@@ -385,12 +399,10 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Schedule the heading gains based on airspeed command
 	  gains[headingController_DEF][pGain] = .5;
 	  gains[headingController_DEF][pGain] = .008;
-      float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
-      Limit(rollCommand, .175, -.175);
-
-      // Roll Control
-      SetReference(rollController_DEF, rollCommand);
-      rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+	  float rollCommand = StepController(headingController_DEF,ground_course, delta_t);
+	  Limit(rollCommand, .175, -.175);
+	  SetReference(rollController_DEF, rollCommand);
+	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
 	  // Set maximum throttle
 	  airspeedControllerOut = 100.0;
@@ -591,18 +603,21 @@ static void AA241X_AUTO_MediumLoop(void)
       dy = ywp - Y_position;
       pos_error = sqrtf(dx*dx + dy*dy);
       
+	  /*
       // Estimate needed airspeed to reach waypoint at correct time
       float ds = sqrtf(dx*dx + dy*dy);
       float dt = TIME_ESTIMATE - (CPU_time_ms - t_init)/1000;
       airspeedCommand = ds/dt;
       
       // Airspeed limiter
-      if (airspeedCommand < 0.0 || airspeedCommand > 14.0) {
-        airspeedCommand = 14.0;
+      if (airspeedCommand < 0.0 || airspeedCommand > 13.0) {
+        airspeedCommand = 13.0;
       }
-      else if (airspeedCommand < 7.0) {
-        airspeedCommand = 7.0;
+      else if (airspeedCommand < 9.0) {
+        airspeedCommand = 9.0;
       }
+	  */
+	  airspeedCommand = 9.0;
       
       // Compute heading (UAV to waypoint)
       float Huav = WrapAngle(atan2f(dy,dx));

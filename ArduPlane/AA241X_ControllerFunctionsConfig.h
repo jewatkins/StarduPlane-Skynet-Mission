@@ -37,7 +37,8 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define altitudeController_DEF     3
 #define airspeedController_DEF     4
 #define headingController_DEF      5
-#define numControllers             6
+#define groundSpeedController_DEF  6
+#define numControllers             7
 
 /*------------------------------------ Inner Loop Limits ------------------------------------------*/
 #define maximum_DEF 0
@@ -51,7 +52,8 @@ const float outputLimits[numControllers] = {
 											20, // percent of rudder servo
 											3,  // altitude controller m/s
 											25, // throttle deviation maximum
-											25 // heading angle deviation maximum
+											25, // heading angle deviation maximum
+											3   // airspeed maximum deviation
 										   };
 
 const float referenceLimits[numControllers][minMax] = {
@@ -59,8 +61,9 @@ const float referenceLimits[numControllers][minMax] = {
                                    {0.35 /* 20 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
                                    {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */
-                                   {12.0 /* 12 m/s max */, 6.0 /* 6.0 m/s min */}, /* airspeed controller */
-                                   {6.30 /* 2 PI max */, -0.1 /* -0.1 min */} /* heading controller */
+                                   {12.0 /* 12 m/s max */, 7.0 /* 6.0 m/s min */}, /* airspeed controller */
+                                   {6.30 /* 2 PI max */, -0.1 /* -0.1 min */}, /* heading controller */
+								   {3.0 /* 3 m/s max */, -3.0 /* -3.0 m/s min */} /* ground speed controller */ 
                                   };
 
 const float integralLimits[numControllers] = {
@@ -68,8 +71,9 @@ const float integralLimits[numControllers] = {
 											  1, /* pitch controller */
 											  1, /* rudder controller */
 											  5.0, /* altitude controller */
-											  10, /* airspeed controller */
-											  1 /* heading controller */
+											  5, /* airspeed controller */
+											  1, /* heading controller */
+											  .5 /* ground speed controller */
 											 };
 
 const float derivativeLimits[numControllers] = {
@@ -78,7 +82,8 @@ const float derivativeLimits[numControllers] = {
 											   3, /* rudder controller */
 											   5.0, /* altitude controller */
 											   3, /* airspeed controller */
-											   3 /* heading controller */
+											   3, /* heading controller */
+											   .5 /* ground speed controller */
 											  };
 
 const float integralTermLimits[numControllers] = {
@@ -87,7 +92,8 @@ const float integralTermLimits[numControllers] = {
 											   5, /* rudder controller */
 											   0.01, /* altitude controller */
 											   5, /* airspeed controller */
-											   5 /* heading controller */
+											   5, /* heading controller */
+											   .5 /* ground speed controller */
 											  };
 
 const float derivativeTermLimits[numControllers] = {
@@ -96,7 +102,8 @@ const float derivativeTermLimits[numControllers] = {
 											   5, /* rudder controller */
 											   0.01, /* altitude controller */
 											   5, /* airspeed controller */
-											   5 /* heading controller */
+											   5, /* heading controller */
+											   .5 /* ground speed controller */
 											  };
 
 /*------------------------------------ Controller Gains --------------------------------------------*/
@@ -110,8 +117,9 @@ float gains [numControllers][numGains] = {
                                           {40.0, 1.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
                                           {0.1, 0.007, 0.0},  /* altitude controller p, i, d */                                        
-                                          {25.0, 0.1, 0.0},  /* airspeed controller p, i, d */
-                                          {0.9, 0.007, 0.0}   /* heading controller p, i, d */
+                                          {12.0, 0.05, 0.0},  /* airspeed controller p, i, d */
+                                          {0.9, 0.007, 0.0},   /* heading controller p, i, d */
+										  {1.0, 0.01, 0.0}    /* ground speed controller p, i, d */
                                          };
 
 /*------------------------------------- Trim States ------------------------------------------------*/
@@ -133,8 +141,6 @@ float gains [numControllers][numGains] = {
 
 #define MAX_CLIMB_RATE_PITCH_DEF 0.2616f  // 15 degrees maximum
 #define MIN_CLIMB_RATE_PITCH_DEF -0.1221f // -7 degrees minimum
-
-
 
 
 #endif /* CONTROLLER_FUNCTIONS_CONFIG_H */
