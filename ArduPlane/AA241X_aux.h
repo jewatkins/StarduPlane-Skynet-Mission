@@ -79,7 +79,7 @@ static float GPS_time_ms = 0.0;
 static float Main_loop_deltaTime_ms; // time in ms that Main loop (i.e. ArduPlane fast + medium + slow loops) took, ideally should be less than 20ms to ensure that the fast loop is executed at 50Hz
 static float Last_AUTO_stampTime_ms = 0.0; // holds the last CPU time in ms for which we were in AUTO mode 
 
-static int   personDistributionIndex = 0; // This selects which of the 10 sample distributions you use for your training runs
+static int   personDistributionIndex = 0; // You need to declare what distribution you are using for the flight trial
 
 static float X_person_estimate[4] = {0.,0.,0.,0.};  // your estimate of the X_position for each of the 3 lost persons, in meters
 static float Y_person_estimate[4] = {0.,0.,0.,0.};  // your estimate of the Y_position for each of the 3 lost persons, in meters

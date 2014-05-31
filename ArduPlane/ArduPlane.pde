@@ -695,7 +695,7 @@ static const AP_Scheduler::Task scheduler_tasks[] PROGMEM = {
     { ahrs_update,            1,   6400 },
     { update_speed_height,    1,   1600 },
     { update_flight_mode,     1,   1400 },
-    { stabilize,              1,   3500 },  // Could remove
+    //{ stabilize,              1,   3500 },  // Could remove
     { set_servos,             1,   1600 },
     { read_control_switch,    7,   1000 },
     { gcs_retry_deferred,     1,   1000 },
@@ -731,6 +731,7 @@ static const AP_Scheduler::Task scheduler_tasks[] PROGMEM = {
     { Log_Write_AA241X_MF, 5, 2000},
     { Log_Write_AA241X_AHF, 1, 1000},
     { Log_Write_AA241X_AMF, 5, 2000},
+    { Log_Write_AA241X_SCR, 50, 2000},
 };
 
 // setup the var_info table
