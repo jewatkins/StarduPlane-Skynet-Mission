@@ -570,11 +570,12 @@ static void NOINLINE send_raw_imu3(mavlink_channel_t chan)
 //                                    accel_offsets.y,
 //                                    accel_offsets.z);
                                     
-                                    in_mission,  // int
-                                    Competition_day,  // int
+                                    in_mission,  // int  
+                                    mission_energy_consumed,  // int
                                     personDistributionIndex,  // int
                                     (CPU_time_mission_ms/1000.0)/60.0,  // mission time in minutes
-                                    mission_energy_consumed,
+                                    
+                                    777.5
                                     777.6,
                                     
                                     // floats
