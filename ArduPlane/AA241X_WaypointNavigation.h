@@ -18,13 +18,11 @@ static void GetWaypointPhase1() {
   uint16_t wp = iwp + (uint16_t)1;
   trans_flag = 0;
   float ts = 3.0;
-  float v = 11.0;
-  float RC[4] = {
-    140.1838f, 89.3775f, 39.4867f, 9.5493f        };
-  float tau[4] = {
-    0.1500f, 0.2667f, 0.3833f, 0.5000f        };
-  float theta = 1.6414f;
-  float offset = 1.6546f;
+  float v = 13.0;
+  float RC[4] = {143.4739, 98.3224, 53.8284, 12.4141};
+  float tau[4] = {0.1500f, 0.2667f, 0.3833f, 0.5000f};
+  float offset = 1.7537f;
+  float theta = 1.7374f;
   float rotation = WrapAngle(atan2f(y_init,x_init)) - theta;
 
   // Circle 1
