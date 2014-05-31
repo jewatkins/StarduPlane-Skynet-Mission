@@ -12,7 +12,7 @@ static float WrapAngle(float angle) {
 }
 
 // Returns waypoint number 'wp' for phase-1 assuming that the airspeed is
-// maintained at 11 m/s and there are 56 waypoints
+// maintained at 13 m/s and there are 52 waypoints
 static void GetWaypointPhase1() {
   // Set parameters
   uint16_t wp = iwp + (uint16_t)1;
