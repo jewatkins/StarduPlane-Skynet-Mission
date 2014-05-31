@@ -575,7 +575,7 @@ static void NOINLINE send_raw_imu3(mavlink_channel_t chan)
                                     personDistributionIndex,  // int
                                     (CPU_time_mission_ms/1000.0)/60.0,  // mission time in minutes
                                     
-                                    777.5
+                                    777.5,
                                     777.6,
                                     
                                     // floats
