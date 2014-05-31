@@ -6,7 +6,7 @@
 // NOTE: The first two distributions (i.e. 0 and 1) are the ones used on Monday 3rd and Wednesday 5th.
 
 const float persons_location[][4][2] = { 
-{{12.2292,   -4.9984},   {-125.72, -100.2242},  {-76.6759,  138.1325}, {67.6059,  -108.2025}},
+{{50,   100},   {120, 30},  {70,  10}, {10,  40}},
 // TO BE FILLED
 };
                                          

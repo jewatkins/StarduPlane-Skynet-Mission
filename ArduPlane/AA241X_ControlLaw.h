@@ -5,11 +5,11 @@
 // My parameter 1: Maximum error in waypoint capture
 #define POSITION_ERROR    g.aa241x_1      // Don't change g.aa241x_1 ! Replace my_param_1 with whatever name you want to access the parameter with.  See the example in ControlLaw.ino   
 #define AA241X_1_NAME     "AA241_Pos_Err" // Don't change AA241X_1_NAME ! Replace my_paramName1 with whateve name you want to see on the Mission Planner GCS 
-#define AA241X_1_DEFAULT  20.0             // replace 10.0 with whatever default value you wante to this parameter to have, when reloading the code 
+#define AA241X_1_DEFAULT  10.0             // replace 10.0 with whatever default value you wante to this parameter to have, when reloading the code 
 // My parameter 2: Maximum error in snapshot capture
 #define SNAPSHOT_ERROR    g.aa241x_2
 #define AA241X_2_NAME     "AA241_Snp_Err" 
-#define AA241X_2_DEFAULT  10.0
+#define AA241X_2_DEFAULT  5.0
 // My parameter 3: Proportional gain on line tracking, "ROUTE_P = 1" means set heading to waypoint
 #define ROUTE_P           g.aa241x_3
 #define AA241X_3_NAME     "AA241_Rte_P" 
@@ -43,9 +43,9 @@
 #define AA241X_10_NAME     "AA241_InitSpl" 
 #define AA241X_10_DEFAULT  0.0
 // My parameter 11
-#define my_param_11        g.aa241x_11
-#define AA241X_11_NAME     "my_paramName11" 
-#define AA241X_11_DEFAULT  10.0 
+#define INIT_SIMPLE        g.aa241x_11
+#define AA241X_11_NAME     "AA241_InitSim" 
+#define AA241X_11_DEFAULT  0.0
 // My parameter 12
 #define my_param_12        g.aa241x_12
 #define AA241X_12_NAME     "my_paramName12" 
