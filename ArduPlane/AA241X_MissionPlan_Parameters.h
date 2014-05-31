@@ -33,16 +33,13 @@ static uint8_t trans_flag = 0;
 /**** Snapshot Data and Parameters ****/
 #define Ntargets 4              // Total number of targets
 #define Ndim 5                  // Dimension of snapshot data structure
-#define nG 10                   // Maximum number of snapshots that can be saved
+#define nG 3                    // Maximum number of snapshots that can be saved
 static uint16_t no_snap = 0;
 static char n_persons_found = 0; // Number of persons found
-static char persons_found[Ntargets] = {0,0,0,0};     
+static char persons_found[Ntargets] = {0,0,0,0};
 static uint16_t n_snaps[Ntargets] = {0,0,0,0};
 static uint8_t order[Ntargets] = {0,0,0,0};
-static float G_inc[Ntargets][Ndim][nG] = { {{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0}},
-                   {{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0}},
-                   {{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0}},
-                   {{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0}}};
+static float G_inc[Ntargets][Ndim][nG];
 
 /**** Output to Mission Planner ****/
 static float pos_error = 0.0f;	// Position Error

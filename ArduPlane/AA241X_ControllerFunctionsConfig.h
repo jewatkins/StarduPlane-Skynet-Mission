@@ -57,7 +57,7 @@ const float outputLimits[numControllers] = {
 										   };
 
 const float referenceLimits[numControllers][minMax] = {
-                                   {0.52 /* 30 degrees max */, -0.52 /* -30 degrees min */ },  /* roll controller */
+                                   {0.70 /* 40 degrees max */, -0.7 /* -40 degrees min */ },  /* roll controller */
                                    {0.35 /* 20 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
                                    {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */

@@ -695,13 +695,13 @@ static const AP_Scheduler::Task scheduler_tasks[] PROGMEM = {
     { ahrs_update,            1,   6400 },
     { update_speed_height,    1,   1600 },
     { update_flight_mode,     1,   1400 },
-    { stabilize,              1,   3500 },  // Could remove
+    //{ stabilize,              1,   3500 },  // Could remove
     { set_servos,             1,   1600 },
     { read_control_switch,    7,   1000 },
     { gcs_retry_deferred,     1,   1000 },
     { update_GPS_50Hz,        1,   2500 },
     { update_GPS_10Hz,        5,   2500 }, // 10
-    { navigate,               5,   3000 },  // Could remove
+    //{ navigate,               5,   3000 },  // Could remove
     { update_compass,         5,   1200 },
     { read_airspeed,          5,   1200 },
     { update_alt,             5,   3400 },
@@ -715,12 +715,12 @@ static const AP_Scheduler::Task scheduler_tasks[] PROGMEM = {
     { compass_accumulate,     1,   1500 },
     { barometer_accumulate,   1,    900 },
     { update_notify,          1,    300 },
-    { read_sonars,            1,    500 }, // Could remove
+    //{ read_sonars,            1,    500 }, // Could remove
     { one_second_loop,       50,   1000 },
     //{ check_long_failsafe,   15,   1000 },
     { read_receiver_rssi,     5,   1000 },
     { airspeed_ratio_update, 50,   1000 }, // 30
-    { update_mount,           1,   1500 }, // Could remove
+    //{ update_mount,           1,   1500 }, // Could remove
     { log_perf_info,        500,   1000 },
     { compass_save,        3000,   2500 },
     { update_logging1,        5,   1700 },

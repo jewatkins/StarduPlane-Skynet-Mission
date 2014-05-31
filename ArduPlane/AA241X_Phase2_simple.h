@@ -72,8 +72,8 @@ static void EstimateTargetLocation() {
     sum_x = 0.0;
     sum_y = 0.0;
     for (j=0; j < n_snaps[i]; j++) {
-      sum_x += G_inc[i][3][j];
-      sum_y += G_inc[i][4][j];
+      sum_x += G_inc[i][0][j];
+      sum_y += G_inc[i][1][j];
     }
     if (n_snaps[i] != 0) {
       X_person_estimate[i] = sum_x/n_snaps[i];

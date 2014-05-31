@@ -79,8 +79,8 @@ static void GetWaypointPhase1() {
   }
 }
 
-/*
 static float GetNavAirspeed() {
+  /*
   // Estimate needed airspeed to reach waypoint at correct time
   float dx = xwp - X_position;
   float dy = ywp - Y_position;
@@ -96,9 +96,22 @@ static float GetNavAirspeed() {
     ASCommand = 9.0;
   }
   ASCommand = 9.0;
+  */
+  
+  // Set constant airspeed
+  float ASCommand;
+  if (phase_flag == 1) {
+	  ASCommand = 10.0;
+  }
+  else if (phase_flag == 2) {
+	  ASCommand = 9.0;
+  }
+  else if (phase_flag == 3) {
+	  ASCommand = 9.0;
+  }
+
   return ASCommand;
 }
-*/
 
 static float GetNavHeading() {
   // Calculate position error

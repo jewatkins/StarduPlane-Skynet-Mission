@@ -10,6 +10,19 @@
 /**** Phase-1: Spiral ****/
 // Initialize spiral
 static void InitPhase1Spiral() {
+  // Initialize G_inc
+  uint8_t i,j,k;
+  for (i=0; i<Ntargets; i++) {
+	  for (j=0; j<Ndim; j++) {
+		  for (k=0; k<nG; k++) {
+			  G_inc[i][j][k] = 0.0;
+		  }
+	  }
+  }
+
+  // Initialize iorder
+  iorder = 0;
+
   // Snapshot parameters
   no_snap = 0;
 
@@ -59,6 +72,12 @@ static void Phase1() {
           G_inc[i][2][isnap] = mySnapShot.diameterOfPicture;
           G_inc[i][3][isnap] = mySnapShot.centerOfPersonEstimateX[iTarget];
           G_inc[i][4][isnap] = mySnapShot.centerOfPersonEstimateY[iTarget];
+
+		  // Set order
+		  if (isnap == 0) {
+		    order[(Ntargets-1)-iorder] = i;
+		    iorder++;
+		  }
           
           // Add to snapshot counter
           n_snaps[i]++;
@@ -83,7 +102,7 @@ static void Phase1() {
       iwp++;
 
       // If all waypoints complete, restart route
-      if (iwp >= Nwp) {
+      if (iwp >= Nwp || n_persons_found == Ntargets) {
         phase_flag = 2;
         iwp = 0;
         return;
@@ -117,11 +136,13 @@ static void Phase1() {
 /**** Phase-2: Simple ****/
 // Initialize refinement of first target
 static void InitPhase2Simple() {
+  /*
   // Test data for phase-2 simple
-  X_person_estimate[0] = 65;   X_person_estimate[1] = 110;  X_person_estimate[2] = 50;  X_person_estimate[3] = 10;
-  Y_person_estimate[0] = 110;  Y_person_estimate[1] = 20;   Y_person_estimate[2] = 12;  Y_person_estimate[3] = 30;
-              order[0] = 3;                order[1] = 2;                order[2] = 1;               order[3] = 0;
-  
+  X_person_estimate[0] = -100;   X_person_estimate[1] = -100;    X_person_estimate[2] =  100;  X_person_estimate[3] = 100;
+  Y_person_estimate[0] = 100;    Y_person_estimate[1] = -100;    Y_person_estimate[2] = -100;  Y_person_estimate[3] = 100;
+              order[0] = 3;                  order[1] = 2;                   order[2] = 1;                 order[3] = 0;
+  */
+
   // Mission Planner Parameter
   INIT_SIMPLE = 1.0;
   
@@ -170,6 +191,12 @@ static void Phase2() {
         iorder++;
         SetTarget();
       }
+
+	  // 
+	  if (iorder >= Ntargets) {
+		  phase_flag = 3;
+		  return;
+	  }
     }
   }
   
@@ -186,6 +213,22 @@ static void Phase2() {
     float dy = ywp - y_target;
     Hwp = WrapAngle(atan2f(dy,dx) + PI/2);
   }
+}
+
+
+
+/**** Phase-3: Circle center of lake lag ****/
+// Circle center of lake lag
+static void Phase3() {
+	// Set target to center of lake
+	x_target = 0.0;
+	y_target = 0.0;
+	GetWaypointPhase2();
+
+    // Compute heading (waypoint tangent line)
+    float dx = xwp - x_target;
+    float dy = ywp - y_target;
+    Hwp = WrapAngle(atan2f(dy,dx) + PI/2);
 }
 #endif /* MISSION_PLAN_H */
 

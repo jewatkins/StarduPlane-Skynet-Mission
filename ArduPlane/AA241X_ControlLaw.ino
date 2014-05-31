@@ -530,7 +530,7 @@ static void AA241X_AUTO_MediumLoop(void)
   if (controlMode == MISSION && phaseOfFlight == SIGHTING) {
 
     // Initialize Phase-1 Spiral
-    if (INIT_SPIRAL < .5) {
+    if (INIT_SPIRAL < .5 && phase_flag == 1) {
       InitPhase1Spiral();
     }
 
@@ -539,7 +539,8 @@ static void AA241X_AUTO_MediumLoop(void)
       Phase1();
     }
 
-    // Initialize Phase-2 Simple
+    
+	// Initialize Phase-2 Simple
     if (INIT_SIMPLE < .5 && phase_flag == 2) {
       InitPhase2Simple();
     }
@@ -549,8 +550,15 @@ static void AA241X_AUTO_MediumLoop(void)
       Phase2();
     }
 
+	// Phase-3 Logistics Loop
+    if (gpsOK == true && phase_flag == 3) {
+      Phase3();
+    }
+
     // Navigation Loop
     headingCommand =  GetNavHeading();
+	SetReference(headingController_DEF, headingCommand);
+
     //airspeedCommand = GetNavAirspeed();
   }
 
@@ -560,7 +568,7 @@ static void AA241X_AUTO_MediumLoop(void)
     // Settings to track a heading
     //float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
     //Limit(rollCommand, .175, -.175);
-    SetReference(rollController_DEF, .05);
+    SetReference(rollController_DEF, -.07);
   }
 
   if(controlMode == MISSION && phaseOfFlight == SIGHTING)
@@ -570,11 +578,11 @@ static void AA241X_AUTO_MediumLoop(void)
     // Settings to track ground speed
     //airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
     //Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
-    airspeedCommand = 9.0;
-    SetReference(airspeedController_DEF, airspeedCommand);            
+    //airspeedCommand = 9.0;
+    //SetReference(airspeedController_DEF, airspeedCommand);            
 
     // Set reference for the heading
-    SetReference(headingController_DEF, headingCommand);
+    //SetReference(headingController_DEF, headingCommand);
     float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
     Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
@@ -597,16 +605,19 @@ static void AA241X_AUTO_MediumLoop(void)
 
 
 
-
 // *****   AA241X Slow Loop - @ ~1Hz  *****  //
 static void AA241X_AUTO_SlowLoop(void)
 {
-  /*
   // Estimate target locations (Phase-2 Simple)
   if (controlMode == MISSION && phaseOfFlight == SIGHTING) {
-    EstimateTargetLocation();
+
+    // Set airspeed for mission
+	airspeedCommand = GetNavAirspeed();
+	SetReference(airspeedController_DEF, airspeedCommand);
+
+	// Compute estimated target locations
+	EstimateTargetLocation();
   }
-  */
 
   // YOUR CODE HERE
 
