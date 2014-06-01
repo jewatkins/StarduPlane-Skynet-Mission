@@ -569,7 +569,7 @@ static void AA241X_AUTO_MediumLoop(void)
     // Settings to track a heading
     //float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
     //Limit(rollCommand, .175, -.175);
-    SetReference(rollController_DEF, -.09);
+    SetReference(rollController_DEF, .09);
   }
 
   if(controlMode == MISSION && phaseOfFlight == SIGHTING)

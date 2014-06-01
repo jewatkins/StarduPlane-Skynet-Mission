@@ -121,7 +121,7 @@ static float gains [numControllers][numGains] = {
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
                                           {0.1, 0.007, 0.0},  /* altitude controller p, i, d */                                        
                                           {12.0, 0.05, 0.0},  /* airspeed controller p, i, d */
-										  {0.9, 0.007, 0.0},   /* heading controller p, i, d */ //{1.722, 0.002, 0.0}, for the quadratic
+										  {1.05, 0.007, 0.0},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
 										  {1.0, 0.01, 0.0}    /* ground speed controller p, i, d */
                                          };
 
