@@ -47,9 +47,9 @@
 #define AA241X_11_NAME     "AA241_InitSim" 
 #define AA241X_11_DEFAULT  0.0
 // My parameter 12
-#define my_param_12        g.aa241x_12
-#define AA241X_12_NAME     "my_paramName12" 
-#define AA241X_12_DEFAULT  -20.523 
+#define INITIAL_ERROR        g.aa241x_12
+#define AA241X_12_NAME     "AA241_InitErr" 
+#define AA241X_12_DEFAULT  20.0 
 // My parameter 13
 #define my_param_13        g.aa241x_13
 #define AA241X_13_NAME     "my_paramName13" 
