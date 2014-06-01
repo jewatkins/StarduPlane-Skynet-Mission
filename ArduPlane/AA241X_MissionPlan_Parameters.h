@@ -19,8 +19,15 @@ static float t_sight_end = 0.0;
 /**** Phase-2 Parameters ****/
 static uint8_t iTarget;
 static uint8_t iorder = 0;
-static float x_target;
-static float y_target;
+static float y_centroid[2];
+
+#define Rc               30.0
+#define beta             1.0
+#define ts               3.0
+#define v_phase2         7.0
+#define n_Inc_lim        10
+#define n_Exc_lim        10
+#define n_region_lim     10
 
 /**** Waypoint Parameters ****/
 static uint16_t iwp = 0;        // Waypoint iterator
@@ -30,19 +37,25 @@ static float Hwp = 0.0f;        // Waypoint heading
 static uint8_t init_flag = 1;
 static uint8_t trans_flag = 0;
 
+/**** Output to Mission Planner ****/
+static float pos_error = 0.0f;	// Position Error
+
 /**** Snapshot Data and Parameters ****/
 #define Ntargets 4              // Total number of targets
 #define Ndim 5                  // Dimension of snapshot data structure
-#define nG 3                    // Maximum number of snapshots that can be saved
+#define nG 1                    // Maximum number of snapshots that can be saved
 static uint16_t no_snap = 0;
 static char n_persons_found = 0; // Number of persons found
 static char persons_found[Ntargets] = {0,0,0,0};
 static uint16_t n_snaps[Ntargets] = {0,0,0,0};
-static uint8_t order[Ntargets] = {3,2,1,0};
+static uint8_t order[Ntargets] = {0,0,0,0};
 static float G_inc[Ntargets][Ndim][nG];
 
-/**** Output to Mission Planner ****/
-static float pos_error = 0.0f;	// Position Error
+// Snapshot data
+static int n_Inc, n_Exc;
+static float cam_est[n_Inc_lim][2];
+static float Inc[n_Inc_lim][3];
+static float Exc[n_Exc_lim][3];
 
 #endif /* MISSION_PLAN_PARAMETERS_H */
 

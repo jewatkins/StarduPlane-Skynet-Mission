@@ -543,7 +543,7 @@ static void AA241X_AUTO_MediumLoop(void)
     
 	// Initialize Phase-2 Simple
     if (INIT_SIMPLE < .5 && phase_flag == 2) {
-      InitPhase2Simple();
+      //InitPhase2Simple();
     }
 
     // Phase-2 Logistics Loop
@@ -617,7 +617,7 @@ static void AA241X_AUTO_SlowLoop(void)
 	SetReference(airspeedController_DEF, airspeedCommand);
 
 	// Compute estimated target locations
-	EstimateTargetLocation();
+	//EstimateTargetLocation();
   }
 
   // YOUR CODE HERE

@@ -17,16 +17,12 @@ static void GetWaypointPhase1() {
   // Set parameters
   uint16_t wp = iwp + (uint16_t)1;
   trans_flag = 0;
-  float ts = 3.0;
   float v = 13.0;
   float RC[4] = {143.4739, 98.3224, 53.8284, 12.4141};
   float tau[4] = {0.1500f, 0.2667f, 0.3833f, 0.5000f};
   float offset = 1.7537f;
   float theta = 1.7374f;
   float rotation = WrapAngle(atan2f(y_init,x_init)) - theta;
-
-  // Additional room for beginning first spiral
-  rotation += 4*ts*v/RC[0];
 
   // Circle 1
   float omega = v/RC[0];
@@ -104,10 +100,10 @@ static float GetNavAirspeed() {
   // Set constant airspeed
   float ASCommand;
   if (phase_flag == 1) {
-	  ASCommand = 11.0;
+	  ASCommand = 10.0;
   }
   else if (phase_flag == 2) {
-	  ASCommand = 8.0;
+	  ASCommand = v_phase2;
   }
   else if (phase_flag == 3) {
 	  ASCommand = 9.0;
