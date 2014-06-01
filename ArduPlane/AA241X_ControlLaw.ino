@@ -542,8 +542,9 @@ static void AA241X_AUTO_MediumLoop(void)
 
     
 	// Initialize Phase-2 Simple
-    if (INIT_SIMPLE < .5 && phase_flag == 2) {
+    if (INIT_PHASE2 < .5 && phase_flag == 2) {
       //InitPhase2Simple();
+      InitPhase2();
     }
 
     // Phase-2 Logistics Loop

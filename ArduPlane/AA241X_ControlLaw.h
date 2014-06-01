@@ -43,8 +43,8 @@
 #define AA241X_10_NAME     "AA241_InitSpl" 
 #define AA241X_10_DEFAULT  0.0
 // My parameter 11
-#define INIT_SIMPLE        g.aa241x_11
-#define AA241X_11_NAME     "AA241_InitSim" 
+#define INIT_PHASE2        g.aa241x_11
+#define AA241X_11_NAME     "AA241_InitPh2" 
 #define AA241X_11_DEFAULT  0.0
 // My parameter 12
 #define my_param_12        g.aa241x_12
