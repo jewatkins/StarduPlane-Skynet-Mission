@@ -133,9 +133,9 @@ static float gains [numControllers][numGains] = {
  * States
  */
 
-#define SEVEN_MPS_PITCH_DEF   0.1308f     // 7.5 degrees
+#define SEVEN_MPS_PITCH_DEF   0.1744f     // 7.5 degrees
 #define TWELVE_MPS_PITCH_DEF  0.0f        // 0 degrees
-#define PITCH_TRIM_SLOPE_DEF  -0.02267f   // -1.3 degrees per mps
+#define PITCH_TRIM_SLOPE_DEF  -0.034f   // -2.0 degrees per mps
 
 #define PITCH_TRIM_BANK_MAX_DEF   0.05233f    // 3 degrees added to pitch for a maximum bank angle
 

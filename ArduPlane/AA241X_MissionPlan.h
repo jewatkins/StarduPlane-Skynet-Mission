@@ -53,7 +53,16 @@ static void Phase1() {
   float dx = xwp - X_position;
   float dy = ywp - Y_position;
   pos_error = sqrtf(dx*dx + dy*dy);
-  if (pos_error <= SNAPSHOT_ERROR) {
+
+  float error_lim;
+  if (iwp < entryPts) {
+	  error_lim = INITIAL_ERROR;
+  }
+  else {
+	  error_lim = SNAPSHOT_ERROR;
+  }
+
+  if (pos_error <= error_lim) {
     // Take a snapshot
     snapshot mySnapShot = takeASnapshot();
 

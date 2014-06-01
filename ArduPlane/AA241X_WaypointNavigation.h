@@ -12,7 +12,7 @@ static float WrapAngle(float angle) {
 }
 
 // Returns waypoint number 'wp' for phase-1 assuming that the airspeed is
-// maintained at 13 m/s and there are 52 waypoints
+// maintained at 13 m/s and there are entryPts+53 waypoints
 static void GetWaypointPhase1() {
   // Set parameters
   uint16_t wp = iwp + (uint16_t)1;
@@ -20,18 +20,30 @@ static void GetWaypointPhase1() {
   float v = 13.0;
   float RC[4] = {143.4739, 98.3224, 53.8284, 12.4141};
   float tau[4] = {0.1500f, 0.2667f, 0.3833f, 0.5000f};
-  float offset = 1.7537f;
-  float theta = 1.7374f;
-  float rotation = WrapAngle(atan2f(y_init,x_init)) - theta;
+  float rad0 = sqrt(x_init*x_init+ y_init*y_init);
+  float rotation = WrapAngle(atan2f(y_init,x_init));
+
+  // Entry points
+  float omega = 1.0*v/rad0;
+  float ang = 0.0;
+  float rad = 0.0;
+  if (wp <= entryPts) {
+    ang = omega*ts*(float)wp + rotation;
+    rad = rad0 + (RC[0] - rad0)* sqrt((float)wp / (float)entryPts);
+    xwp = rad*cosf(ang);
+    ywp = rad*sinf(ang);
+    return;
+  }
+  ang = omega*ts*(float)entryPts + rotation;
+  float theta = WrapAngle(ang);
+  wp = wp - entryPts;
 
   // Circle 1
-  float omega = v/RC[0];
-  float T = (2*PI - tau[0] - theta + offset) / omega;
+  omega = v/RC[0];
+  float T = (2*PI - omega*ts) / omega;
   uint16_t nTp = (uint16_t)ceilf(T/ts);
-  float ang = 0.0;
   if (wp <= nTp) {
     ang = theta + omega*ts*(float)wp;
-    ang += rotation;
     xwp = RC[0]*cosf(ang);
     ywp = RC[0]*sinf(ang);
     return;
@@ -46,12 +58,10 @@ static void GetWaypointPhase1() {
     omega = v/RC[iC-1];
     T = (2*tau[iC-1]) / omega;
     nTp = nTm + (uint16_t)ceilf(T/ts);
-    float rad = 0.0;
     if (wp <= nTp) {
       trans_flag = 1;
       rad = (RC[iC-1] + (RC[iC]-RC[iC-1])*(float)(wp-nTm)/ (float)(nTp-nTm)); // Probably never zero
       ang = theta + omega*ts*(float)(wp-nTm);
-      ang += rotation;
       xwp = rad*cosf(ang);
       ywp = rad*sinf(ang);
       return;
@@ -62,12 +72,11 @@ static void GetWaypointPhase1() {
 
     // Circle 2
     omega = v/RC[iC];
-    T = (2*PI - theta - tau[iC] + offset) / omega;
+    T = (2*PI - omega*ts) / omega;
     nTp = nTm + (uint16_t)ceilf(T/ts);
     if (wp <= nTp) {
       rad = RC[iC];
       ang = theta + omega*ts*(float)(wp-nTm);
-      ang += rotation;
       xwp = rad*cosf(ang);
       ywp = rad*sinf(ang);
       return;
@@ -100,7 +109,7 @@ static float GetNavAirspeed() {
   // Set constant airspeed
   float ASCommand;
   if (phase_flag == 1) {
-	  ASCommand = 10.0;
+	  ASCommand = 9.0;
   }
   else if (phase_flag == 2) {
 	  ASCommand = v_phase2;
