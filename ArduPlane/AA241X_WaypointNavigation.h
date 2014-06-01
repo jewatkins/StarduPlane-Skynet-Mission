@@ -25,6 +25,9 @@ static void GetWaypointPhase1() {
   float theta = 1.7374f;
   float rotation = WrapAngle(atan2f(y_init,x_init)) - theta;
 
+  // Additional room for beginning first spiral
+  rotation += 4*ts*v/RC[0];
+
   // Circle 1
   float omega = v/RC[0];
   float T = (2*PI - tau[0] - theta + offset) / omega;

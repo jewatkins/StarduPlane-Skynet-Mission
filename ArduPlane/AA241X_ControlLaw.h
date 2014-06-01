@@ -31,8 +31,8 @@
 #define AA241X_7_NAME     "AA241_Spd_P" 
 #define AA241X_7_DEFAULT  10.0 
 // My parameter 8
-#define MAX_CLIMB_PITCH   g.aa241x_8
-#define AA241X_8_NAME     "AA241_MaxClmb" 
+#define CLIMB_PITCH_TEST  g.aa241x_8
+#define AA241X_8_NAME     "AA241_ClmbTst" 
 #define AA241X_8_DEFAULT  0.349
 // My parameter 9
 #define GLIDE_PITCH        g.aa241x_9

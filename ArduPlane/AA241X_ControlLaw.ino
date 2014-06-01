@@ -44,6 +44,7 @@ static char phaseOfFlight = CLIMBING; // Waiting to start mission
 #define MAX_CLIMB_AIRSPEED 15.0f
 #define SIGHTING_GROUND_SPEED 10.5f
 #define NOMINAL_AIRSPEED 10.0f
+#define MAX_CLIMB_PITCH .35f
 
 static bool initFastLoopPhase = true;
 
@@ -55,7 +56,7 @@ static bool initFastLoopPhase = true;
 
 static float headingCommand = 0.0;
 static float altitudeCommand = 115.0;
-static float airspeedCommand = 7.0;
+static float airspeedCommand = 11.0;
 
 // Debug variable
 static float variableOfInterest1 = 0.0;
@@ -214,7 +215,7 @@ static void AA241X_AUTO_FastLoop(void)
       SetReference(headingController_DEF, headingCommand);
     }
     float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-    Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+    Limit(headingControllerOut, pgm_read_float_near(&(referenceLimits[rollController_DEF][maximum_DEF])), pgm_read_float_near(&(referenceLimits[rollController_DEF][minimum_DEF])));
 
     // Roll Commands
     SetReference(rollController_DEF, headingControllerOut);
@@ -229,7 +230,7 @@ static void AA241X_AUTO_FastLoop(void)
     float groundSpeedCommand = 7.0 + 5.0*RC_throttle*.01;
     SetReference(groundSpeedController_DEF, groundSpeedCommand);
     airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
-    Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
+    Limit(airspeedCommand, pgm_read_float_near(&(referenceLimits[airspeedController_DEF][maximum_DEF])), pgm_read_float_near(&(referenceLimits[airspeedController_DEF][minimum_DEF])));
     SetReference(airspeedController_DEF, airspeedCommand);
     airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
     airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
@@ -256,7 +257,7 @@ static void AA241X_AUTO_FastLoop(void)
     // Schedule the heading gains based on airspeed command
     //ScheduleHeadingGain(airspeedCommand);
     float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
-    Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+    Limit(rollCommand, pgm_read_float_near(&(referenceLimits[rollController_DEF][maximum_DEF])), pgm_read_float_near(&(referenceLimits[rollController_DEF][minimum_DEF])));
 
     // Roll Control
     SetReference(rollController_DEF, rollCommand);
@@ -568,7 +569,7 @@ static void AA241X_AUTO_MediumLoop(void)
     // Settings to track a heading
     //float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
     //Limit(rollCommand, .175, -.175);
-    SetReference(rollController_DEF, -.07);
+    SetReference(rollController_DEF, -.09);
   }
 
   if(controlMode == MISSION && phaseOfFlight == SIGHTING)
@@ -584,11 +585,11 @@ static void AA241X_AUTO_MediumLoop(void)
     // Set reference for the heading
     //SetReference(headingController_DEF, headingCommand);
     float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-    Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+    Limit(headingControllerOut, pgm_read_float_near(&(referenceLimits[rollController_DEF][maximum_DEF])), pgm_read_float_near(&(referenceLimits[rollController_DEF][minimum_DEF])));
 
     // Determine the roll command from the heading controller
     float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-    Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);		
+    Limit(rollCommand, pgm_read_float_near(&(referenceLimits[rollController_DEF][maximum_DEF])), pgm_read_float_near(&(referenceLimits[rollController_DEF][minimum_DEF])));		
     SetReference(rollController_DEF, headingControllerOut);
 
     // Pitch trim scheduling

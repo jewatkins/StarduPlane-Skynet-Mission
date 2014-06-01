@@ -1,6 +1,9 @@
 #ifndef CONTROLLER_FUNCTIONS_CONFIG_H
 #define CONTROLLER_FUNCTIONS_CONFIG_H
 
+//#include <avr/pgmspace.h>
+#include <avr/pgmspace.h>
+
 // This file defines all of the configuration parameters for the inner loop controllers
 
 /*************************** Mechanical Limit Variables ***********************************************
@@ -46,19 +49,19 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define minMax      2
 
 // These are the absolute values of the controller deviations (saturates the controller at a limit based on the units of the controller)
-const float outputLimits[numControllers] = {
+const float outputLimits[numControllers] PROGMEM = {
 											25, // percent of aileron servo
 											20, // percent of elevator servo
 											20, // percent of rudder servo
-											3,  // altitude controller m/s
-											25, // throttle deviation maximum
-											25, // heading angle deviation maximum
+											.06,  // altitude controller ~3.25 degrees 
+											35, // throttle deviation maximum
+											0.872, // heading angle deviation maximum ~50 degrees
 											3   // airspeed maximum deviation
 										   };
 
-const float referenceLimits[numControllers][minMax] = {
+const float referenceLimits[numControllers][minMax] PROGMEM = {
                                    {0.70 /* 40 degrees max */, -0.7 /* -40 degrees min */ },  /* roll controller */
-                                   {0.35 /* 20 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
+                                   {0.43 /* 24.7 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
                                    {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */
                                    {13.0 /* 12 m/s max */, 7.0 /* 6.0 m/s min */}, /* airspeed controller */
@@ -66,43 +69,43 @@ const float referenceLimits[numControllers][minMax] = {
 								   {3.0 /* 3 m/s max */, -3.0 /* -3.0 m/s min */} /* ground speed controller */ 
                                   };
 
-const float integralLimits[numControllers] = {
+const float integralLimits[numControllers] PROGMEM = {
 											  1, /* roll controller */
 											  1, /* pitch controller */
 											  1, /* rudder controller */
 											  5.0, /* altitude controller */
 											  5, /* airspeed controller */
-											  1, /* heading controller */
+											  .05, /* heading controller */
 											  .5 /* ground speed controller */
 											 };
 
-const float derivativeLimits[numControllers] = {
-											   3, /* roll controller */
-											   3, /* pitch controller */
-											   3, /* rudder controller */
-											   5.0, /* altitude controller */
-											   3, /* airspeed controller */
-											   3, /* heading controller */
-											   .5 /* ground speed controller */
+const float derivativeLimits[numControllers] PROGMEM = {
+											   3, /* roll controller (% rc out) */
+											   3, /* pitch controller (% rc out) */
+											   3, /* rudder controller (% rc out) */
+											   5.0, /* altitude controller (meters) */
+											   3, /* airspeed controller (meters/second) */
+											   .05, /* heading controller (radians) */
+											   .5 /* ground speed controller (meters/second) */
 											  };
 
-const float integralTermLimits[numControllers] = {
+const float integralTermLimits[numControllers] PROGMEM = {
 											   5, /* roll controller */
 											   5, /* pitch controller */
 											   5, /* rudder controller */
 											   0.01, /* altitude controller */
 											   5, /* airspeed controller */
-											   5, /* heading controller */
+											   .052, /* heading controller */
 											   .5 /* ground speed controller */
 											  };
 
-const float derivativeTermLimits[numControllers] = {
+const float derivativeTermLimits[numControllers] PROGMEM = {
 											   5, /* roll controller */
 											   5, /* pitch controller */
 											   5, /* rudder controller */
 											   0.01, /* altitude controller */
 											   5, /* airspeed controller */
-											   5, /* heading controller */
+											   .052, /* heading controller */
 											   .5 /* ground speed controller */
 											  };
 
@@ -112,13 +115,13 @@ const float derivativeTermLimits[numControllers] = {
 #define dGain 2
 #define numGains 3
 
-float gains [numControllers][numGains] = {
+static float gains [numControllers][numGains] = {
                                           {25.0, .5, 0.0}, /* roll controller p, i, d */
                                           {40.0, 1.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
                                           {0.1, 0.007, 0.0},  /* altitude controller p, i, d */                                        
                                           {12.0, 0.05, 0.0},  /* airspeed controller p, i, d */
-                                          {0.9, 0.007, 0.0},   /* heading controller p, i, d */
+										  {0.9, 0.007, 0.0},   /* heading controller p, i, d */ //{1.722, 0.002, 0.0}, for the quadratic
 										  {1.0, 0.01, 0.0}    /* ground speed controller p, i, d */
                                          };
 
