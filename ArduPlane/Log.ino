@@ -645,6 +645,57 @@ static void Log_Write_AA241X_HF(void)
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
 
+struct PACKED log_AA241X_SCR {
+    LOG_PACKET_HEADER;   
+    // Score Variables  "I BHI ffffffff fB"
+    uint32_t cpu_time_ms;  // I
+    
+    uint8_t In_mission;  // B
+    uint16_t Mission_energy_consumed;  // H
+    uint32_t cpu_time_sight_ms;  // I
+    
+    float X_Person0_estimate;  // f
+    float Y_Person0_estimate;  // f
+    float X_Person1_estimate;  // f
+    float Y_Person1_estimate;  // f
+    float X_Person2_estimate;  // f
+    float Y_Person2_estimate;  // f
+    float X_Person3_estimate;  // f
+    float Y_Person3_estimate;  // f
+    
+    float score;    // f
+    uint8_t PersonDistributionIndex;  // B
+       
+};
+
+static void Log_Write_AA241X_SCR(void)
+{
+    struct log_AA241X_SCR pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_AA241X_SCR_MSG),
+        // High Frequency Variables 
+        cpu_time_ms   :  CPU_time_ms,  
+        
+        In_mission    : in_mission,
+        Mission_energy_consumed    :  mission_energy_consumed,
+        cpu_time_sight_ms     :    CPU_time_sight_ms,
+        
+        X_Person0_estimate  :  X_person_estimate[0],
+        Y_Person0_estimate  :  Y_person_estimate[0],
+        X_Person1_estimate  :  X_person_estimate[1],
+        Y_Person1_estimate  :  Y_person_estimate[1],
+        X_Person2_estimate  :  X_person_estimate[2],
+        Y_Person2_estimate  :  Y_person_estimate[2],
+        X_Person3_estimate  :  X_person_estimate[3],
+        Y_Person3_estimate  :  Y_person_estimate[3],
+        
+        score     :  Score,
+        PersonDistributionIndex   :  personDistributionIndex,
+    };
+    DataFlash.WriteBlock(&pkt, sizeof(pkt));
+}
+
+
+
 // AA241X - end
 
 static const struct LogStructure log_structure[] PROGMEM = {
@@ -679,6 +730,8 @@ static const struct LogStructure log_structure[] PROGMEM = {
       "MF",  "IIhhhhhBBHHHBhH",     "CP_t,GP_t,X_p,Y_p,Z_pG,Gd_S,Gd_C,Fix,NS,B_c,B_v,B_e,c_m,Z_v,AS" },
     { LOG_AA241X_HF_MSG, sizeof(log_AA241X_HF),
       "HF",  "HhhhhfffBBBB",     "CP_t,Z_pB,fi,theta,psi,p,q,r,CH1,CH2,CH3,CH4" },
+    { LOG_AA241X_SCR_MSG, sizeof(log_AA241X_SCR),
+      "SCR",  "IBHIfffffffffB",     "CP_t,In_Mis,Mis_En,T_sit,X0,Y0,X1,Y1,X2,Y2,X4,Y3,Scre,D_Ind " },
     TECS_LOG_FORMAT(LOG_TECS_MSG)
 };
 

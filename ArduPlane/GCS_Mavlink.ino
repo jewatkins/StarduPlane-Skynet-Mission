@@ -549,20 +549,57 @@ static void NOINLINE send_raw_imu3(mavlink_channel_t chan)
     Vector3f mag_offsets = compass.get_offsets();
     Vector3f accel_offsets = ins.get_accel_offsets();
     Vector3f gyro_offsets = ins.get_gyro_offsets();
+    
+    float errX;
+    float errY;
+    
+    errX = X_person_estimate[0] - X_person_truth[0] ;
+    errY = Y_person_estimate[0] - Y_person_truth[0] ;
+    float err0 = sqrt(errX*errX + errY*errY );
+    
+    errX = X_person_estimate[1] - X_person_truth[1] ;
+    errY = Y_person_estimate[1] - Y_person_truth[1] ;
+    float err1 = sqrt(errX*errX + errY*errY );
+    
+    errX = X_person_estimate[2] - X_person_truth[2] ;
+    errY = Y_person_estimate[2] - Y_person_truth[2] ;
+    float err2 = sqrt(errX*errX + errY*errY );
+    
+    errX = X_person_estimate[3] - X_person_truth[3] ;
+    errY = Y_person_estimate[3] - Y_person_truth[3] ;
+    float err3 = sqrt(errX*errX + errY*errY );
 
     mavlink_msg_sensor_offsets_send(chan,
-                                    mag_offsets.x,
-                                    mag_offsets.y,
-                                    mag_offsets.z,
-                                    compass.get_declination(),
-                                    barometer.get_pressure(),
-                                    barometer.get_temperature()*100,
-                                    gyro_offsets.x,
-                                    gyro_offsets.y,
-                                    gyro_offsets.z,
-                                    accel_offsets.x,
-                                    accel_offsets.y,
-                                    accel_offsets.z);
+//                                    mag_offsets.x,
+//                                    mag_offsets.y,
+//                                    mag_offsets.z,
+//                                    compass.get_declination(),
+//                                    barometer.get_pressure(),
+//                                    barometer.get_temperature()*100,
+//                                    gyro_offsets.x,
+//                                    gyro_offsets.y,
+//                                    gyro_offsets.z,
+//                                    accel_offsets.x,
+//                                    accel_offsets.y,
+//                                    accel_offsets.z);
+                                    
+                                    in_mission,  // int  
+                                    mission_energy_consumed,  // int
+                                    personDistributionIndex,  // int
+                                    (CPU_time_mission_ms/1000.0)/60.0,  // mission time in minutes
+                                    
+                                    777.5,
+                                    777.6,
+                                    
+                                    // floats
+                                    Score, 
+                                    CPU_time_sight_ms/1000.0,  // floats
+                                    err0, 
+                                    err1, 
+                                    err2,
+                                    err3);  // floats
+
+                                    
 }
 
 static void NOINLINE send_ahrs(mavlink_channel_t chan)

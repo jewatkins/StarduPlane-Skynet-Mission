@@ -145,7 +145,7 @@ static void Phase1() {
   */
 
   // Mission Planner Parameter
-//  INIT_SIMPLE = 1.0;
+//  INIT_PHASE2 = 1.0;
   
   // Start timer
 //  t_init = CPU_time_ms;
@@ -162,6 +162,28 @@ static void Phase1() {
   //float dy = ywp - y_target;
   //Hwp = WrapAngle(atan2f(dy,dx) + PI/2);
 //}
+
+// Initialize refinement of first target
+static void InitPhase2() {
+
+  // Mission Planner Parameter
+  INIT_PHASE2 = 1.0;
+  
+  // Start timer
+  t_init = CPU_time_ms;
+  
+  // Set target order iterator
+  iorder = 0;
+  SetTarget();
+
+  // Get first waypoint
+  GetWaypointPhase2();
+
+  // Compute heading (waypoint tangent line)
+  float dx = xwp - y_centroid[0];
+  float dy = ywp - y_centroid[1];
+  Hwp = WrapAngle(atan2f(dy,dx) + PI/2);
+}
 
 // Capture waypoints, take snapshots every 3 seconds
 static void Phase2() 
