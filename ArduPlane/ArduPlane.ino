@@ -731,6 +731,7 @@ static const AP_Scheduler::Task scheduler_tasks[] PROGMEM = {
     { Log_Write_AA241X_MF, 5, 2000},
     { Log_Write_AA241X_AHF, 1, 1000},
     { Log_Write_AA241X_AMF, 5, 2000},
+    { Log_Write_AA241X_SCR, 50, 2000},
 };
 
 // setup the var_info table

@@ -129,7 +129,7 @@ enum log_messages {
     LOG_AIRSPEED_MSG, 
     LOG_AA241X_MF_MSG,
     LOG_AA241X_HF_MSG,
-    LOG_AA241X_LF_MSG,
+    LOG_AA241X_SCR_MSG,
 };
 
 #define MASK_LOG_ATTITUDE_FAST          (1<<0)
