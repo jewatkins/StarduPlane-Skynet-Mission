@@ -659,33 +659,33 @@ static void AA241X_AUTO_SlowLoop(void)
 		// Phase-2 Logistics Loop
 		if (gpsOK == true && phase_flag == 2) {
 
-	   // Check to see if snapshot is available
-		float dt = (CPU_time_ms - t_init)/1000;
-		if (dt >= 3.0) {
-			// Take a snapshot
-			snapshot mySnapShot = takeASnapshot();
+	   		// Check to see if snapshot is available
+			float dt = (CPU_time_ms - t_init)/1000;
+			if (dt >= 3.0) {
+				// Take a snapshot
+				snapshot mySnapShot = takeASnapshot();
       
-			// Parse snapshots and continue to next target if all snapshots complete
-			if (parseSnapshot(mySnapShot)) {
-				n_snaps[iTarget] = n_Inc;
-				iorder++;
-				SetTarget();
-			}
+				// Parse snapshots and continue to next target if all snapshots complete
+				if (parseSnapshot(mySnapShot)) {
+					n_snaps[iTarget] = n_Inc;
+					iorder++;
+					SetTarget();
+				}
 
-		// 
-			if (iorder >= Ntargets) {
-				phase_flag = 3;
+				// 
+				if (iorder >= Ntargets) {
+					phase_flag = 3;
+				}
 			}
 		}
-	}
 
-    // Set airspeed for mission
-	airspeedCommand = GetNavAirspeed();
-	SetReference(airspeedController_DEF, airspeedCommand);
+    	// Set airspeed for mission
+		airspeedCommand = GetNavAirspeed();
+		SetReference(airspeedController_DEF, airspeedCommand);
 
-	// Compute estimated target locations
-	//EstimateTargetLocation();
-  }
+		// Compute estimated target locations
+		//EstimateTargetLocation();
+  	}
 
   // YOUR CODE HERE
 

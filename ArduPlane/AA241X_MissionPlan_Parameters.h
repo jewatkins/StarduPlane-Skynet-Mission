@@ -53,7 +53,7 @@ static uint8_t order[Ntargets] = {0,0,0,0};
 static float G_inc[Ntargets][Ndim][nG];
 
 // Snapshot data
-static int n_Inc, n_Exc;
+static uint8_t n_Inc, n_Exc;
 static float cam_est[n_Inc_lim][2];
 static float Inc[n_Inc_lim][3];
 static float Exc[n_Exc_lim][3];

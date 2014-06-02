@@ -83,11 +83,11 @@ static void Phase1() {
           G_inc[i][3][isnap] = mySnapShot.centerOfPersonEstimateX[iTarget];
           G_inc[i][4][isnap] = mySnapShot.centerOfPersonEstimateY[iTarget];
 
-		  // Set order
-		  if (isnap == 0) {
-		    order[(Ntargets-1)-iorder] = i;
-		    iorder++;
-		  }
+		      // Set order
+		      if (isnap == 0) {
+		        order[(Ntargets-1)-iorder] = i;
+		        iorder++;
+		      }
           
           // Add to snapshot counter
           n_snaps[i]++;

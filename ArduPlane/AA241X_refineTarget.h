@@ -66,7 +66,7 @@ Return:       1 post convergence, 0 otherwise
     if (n_Inc > 1 && polyNorm(ny, y_region) < beta) converged = 1;
 
     // Re-evaluate target at convergence
-    if (converged == 1) {
+    if (converged == 1 || n_Inc == n_Inc_lim) {
         wMLE_mFOVcorr(ny, y_region, n_Inc, cam_est, Inc, yT);
         X_person_estimate[iTarget] = yT[0];
         Y_person_estimate[iTarget] = yT[1];
