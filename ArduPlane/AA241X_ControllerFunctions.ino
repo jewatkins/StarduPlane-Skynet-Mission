@@ -74,7 +74,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   //hal.console->printf_P(PSTR("\n command: %f \n"), command);
 
   // Put a saturation limit on the output command
-  Limit(command, pgm_read_float_near(&(outputLimits[controller])), -pgm_read_float_near(&(outputLimits[controller])));
+  Limit(command, outputLimits[controller], -outputLimits[controller]);
 
   //hal.console->printf_P(PSTR("\n limited command: %f \n"), command);
     
@@ -87,7 +87,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
 void SetReference(unsigned int controller, float newValue)
 {
   /* Check that the new reference input to command is within limited commands */
-  Limit(newValue, pgm_read_float_near(&(referenceLimits[controller][maximum_DEF])), pgm_read_float_near(&(referenceLimits[controller][minimum_DEF])));
+  Limit(newValue, referenceLimits[controller][maximum_DEF], referenceLimits[controller][minimum_DEF]);
   
   /* Assumes references is under the total number of controllers */
   references[controller] = newValue;
@@ -118,12 +118,12 @@ void Limit(float &variable, float maximum, float minimum)
  * on the commanded climb rate. In essence, this is just acting as a feed forward controller by knowing
  * a little about the system characteristics.
  */
-float SchedulePitchTrim(float roll, float airspeed, float climbRate)
+float SchedulePitchTrim(float rollCommand, float airspeedCommand, float climbRateCommand)
 {
   float pitchAngleOut = 0.0; // pitch angle trim state (radians)
 
   // Straight and level flight, airspeed dependent component
-  pitchAngleOut = SEVEN_MPS_PITCH_DEF + PITCH_TRIM_SLOPE_DEF*airspeed;
+  pitchAngleOut = SEVEN_MPS_PITCH_DEF + PITCH_TRIM_SLOPE_DEF*airspeedCommand;
 
   // Limit the pitch trim so that it doesn't become unstable in straight and level flight
   if(pitchAngleOut < 0.0)
@@ -132,21 +132,63 @@ float SchedulePitchTrim(float roll, float airspeed, float climbRate)
   }
 
   // Take into account bank angle
-  pitchAngleOut += (fabs(roll)/pgm_read_float_near(&(referenceLimits[rollController_DEF][maximum_DEF])))*PITCH_TRIM_BANK_MAX_DEF;
+  pitchAngleOut += (fabs(rollCommand)/referenceLimits[rollController_DEF][maximum_DEF])*PITCH_TRIM_BANK_MAX_DEF;
 
   // Take into account climb rate
-  if(climbRate > 0.0)
+  if(climbRateCommand > 0.0)
   {
-	  pitchAngleOut += (climbRate/MAX_CLIMB_RATE_DEF)*MAX_CLIMB_RATE_PITCH_DEF;
+	  pitchAngleOut += (climbRateCommand/MAX_CLIMB_RATE_DEF)*MAX_CLIMB_RATE_PITCH_DEF;
   }
-  else if(climbRate < 0.0)
+  else if(climbRateCommand < 0.0)
   {
-	  pitchAngleOut += (climbRate/MIN_CLIMB_RATE_DEF)*MIN_CLIMB_RATE_PITCH_DEF;
+	  pitchAngleOut += (climbRateCommand/MIN_CLIMB_RATE_DEF)*MIN_CLIMB_RATE_PITCH_DEF;
   }
 	
   return pitchAngleOut;
   
 }
+
+#define SEVEN_MPS_PITCH 15.0f
+#define EIGHT_MPS_PITCH 15.0f
+#define NINE_MPS_PITCH 15.0f
+#define TEN_MPS_PITCH 15.0f
+#define ELEVEN_MPS_PITCH 15.0f
+#define TWELVE_MPS_PITCH 15.0f
+#define THIRTEEN_MPS_PITCH 15.0f
+#define FOURTEEN_MPS_PITCH 15.0f
+/*
+float SchedulePitchTrim(float rollCommand, float airspeedCommand, float climbRateCommand)
+{
+	float pitchTrimOut = 0.0;
+
+	if(airspeed < 7.5)
+	{
+		pitchTrimOut = SEVEN_MPS_PITCH;
+	}else if(airspeed >= 7.5 && airspeed < 8.5)
+	{
+		pitchTrimOut = EIGHT_MPS_PITCH;
+	}else if(airspeed >= 8.5 && airspeed < 9.5)
+	{
+		pitchTrimOut = NINE_MPS_PITCH;
+	}else if(airspeed >= 9.5 && airspeed < 10.5)
+	{
+		pitchTrimOut = TEN_MPS_PITCH;
+	}else if(airspeed >= 10.5 && airspeed < 11.5)
+	{
+		pitchTrimOut = ELEVEN_MPS_PITCH;
+	}else if(airspeed >= 11.5 && airspeed < 12.5)
+	{
+		pitchTrimOut = TWELVE_MPS_PITCH;
+	}else if(airspeed >= 12.5 && airspeed < 13.5)
+	{
+		pitchTrimOut = THIRTEEN_MPS_PITCH;
+	}else if(airspeed >= 13.5);
+	{
+		pitchTrimOut = FOURTEEN_MPS_PITCH;
+	}
+
+}
+*/
 
 /* blah
  *
@@ -156,7 +198,7 @@ float ScheduleThrottleTrim(float airspeedCommand)
 	float throttleTrim = 0.0;
 
 	//throttleTrim = 50.0 + (50.0/(referenceLimits[airspeedController_DEF][maximum_DEF]-referenceLimits[airspeedController_DEF][minimum_DEF]))*(airspeedCommand-referenceLimits[airspeedController_DEF][minimum_DEF]);
-	throttleTrim = 25.0 + 75.0*(airspeedCommand-pgm_read_float_near(&(referenceLimits[airspeedController_DEF][minimum_DEF])))/(pgm_read_float_near(&(referenceLimits[airspeedController_DEF][maximum_DEF]))-pgm_read_float_near(&(referenceLimits[airspeedController_DEF][minimum_DEF])));
+	throttleTrim = 25.0 + 75.0*(airspeedCommand-referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF]-referenceLimits[airspeedController_DEF][minimum_DEF]);
 	return throttleTrim;
 }
 
@@ -165,8 +207,8 @@ float ScheduleThrottleTrim(float airspeedCommand)
  */
 void ScheduleHeadingGain(float airspeedCommand)
 {
-	gains[headingController_DEF][pGain] = .5 + .4*(airspeedCommand - pgm_read_float_near(&(referenceLimits[airspeedController_DEF][minimum_DEF])))/(pgm_read_float_near(&(referenceLimits[airspeedController_DEF][maximum_DEF])) - pgm_read_float_near(&(referenceLimits[airspeedController_DEF][maximum_DEF])));
-	gains[headingController_DEF][iGain] = .003 + .0035*(airspeedCommand - pgm_read_float_near(&(referenceLimits[airspeedController_DEF][minimum_DEF])))/(pgm_read_float_near(&(referenceLimits[airspeedController_DEF][maximum_DEF])) - pgm_read_float_near(&(referenceLimits[airspeedController_DEF][maximum_DEF])));
+	gains[headingController_DEF][pGain] = .5 + .4*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
+	gains[headingController_DEF][iGain] = .003 + .0035*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
 }
 
 /* blah

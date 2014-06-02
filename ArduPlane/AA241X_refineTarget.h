@@ -50,10 +50,11 @@ Return:       1 post convergence, 0 otherwise
 	    y_centroid[1] = y_centroid[1]/ny;
         
         // Refine estimate
-        if (target_comp == 1) wMLE_mFOVcorr(ny, y_region, n_Inc, cam_est, Inc, yT);
-
-        X_person_estimate[iTarget] = yT[0];
-        Y_person_estimate[iTarget] = yT[1];
+        if (target_comp == 1) {
+			wMLE_mFOVcorr(ny, y_region, n_Inc, cam_est, Inc, yT);
+			X_person_estimate[iTarget] = yT[0];
+            Y_person_estimate[iTarget] = yT[1];
+		}
         
     }
     // ---

@@ -28,11 +28,11 @@ static uint8_t parseSnapshot(snapshot mySnapShot) {
       n_Inc++;
 
       // Re-compute the centroid of target region and update target estimate
-      if( refineTarget(1, 1) || n_Inc == n_Inc_lim - 1 ) return 1;
+      if( refineTarget(1, 0) || n_Inc == n_Inc_lim - 1 ) return 1;
       else return 0;
       
     }
-    else if (mySnapShot.personsInPicture[iTarget] == 0 && n_Exc_lim > 0) {
+    else if (mySnapShot.personsInPicture[iTarget] == 0 && n_Exc_lim > 0 && n_Exc < n_Exc_lim) {
       // Collect Exc snapshot data
       Exc[n_Exc][0] = mySnapShot.centerOfPictureX;
       Exc[n_Exc][1] = mySnapShot.centerOfPictureY;
@@ -45,7 +45,7 @@ static uint8_t parseSnapshot(snapshot mySnapShot) {
       n_Exc++;
 
       // Re-compute the centroid of target region and update target estimate
-      if( refineTarget(0, 1) || n_Exc == n_Exc_lim - 1 ) return 1;
+      if( refineTarget(0, 0)) return 1;
       else return 0;
 
     }

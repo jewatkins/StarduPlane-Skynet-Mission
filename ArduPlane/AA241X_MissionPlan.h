@@ -197,7 +197,7 @@ static void InitPhase2() {
 // Capture waypoints, take snapshots every 3 seconds
 static void Phase2() 
 {  
-  // Check to see if snapshot is available
+  /*// Check to see if snapshot is available
   float dt = (CPU_time_ms - t_init)/1000;
   if (dt > 3.0) {
     // Take a snapshot
@@ -216,7 +216,7 @@ static void Phase2()
 		  return;
 	  }
     }
-  
+  */
   // Check to see if waypoint is found
   float dx = xwp - X_position;
   float dy = ywp - Y_position;

@@ -19,17 +19,17 @@
 #define AA241X_4_NAME     "AA241_FltMode" 
 #define AA241X_4_DEFAULT  1.0 
 // My parameter 5
-#define ALTITUDE_P        g.aa241x_5
-#define AA241X_5_NAME     "AA241_Alt_P" 
-#define AA241X_5_DEFAULT  0.1 
+#define TEST_AIRSPEED     g.aa241x_5
+#define AA241X_5_NAME     "AA241_Airspd" 
+#define AA241X_5_DEFAULT  11.0
 // My parameter 6
-#define CLIMB_RATE_P      g.aa241x_6
-#define AA241X_6_NAME     "AA241_Clmb_P" 
-#define AA241X_6_DEFAULT  1.0 
+#define TEST_PITCH        g.aa241x_6
+#define AA241X_6_NAME     "AA241_Pitch" 
+#define AA241X_6_DEFAULT  0.0 
 // My parameter 7
-#define AIRSPEED_P        g.aa241x_7
-#define AA241X_7_NAME     "AA241_Spd_P" 
-#define AA241X_7_DEFAULT  10.0 
+#define TEST_ROLL         g.aa241x_7
+#define AA241X_7_NAME     "AA241_Roll" 
+#define AA241X_7_DEFAULT  0.0 
 // My parameter 8
 #define CLIMB_PITCH_TEST  g.aa241x_8
 #define AA241X_8_NAME     "AA241_ClmbTst" 

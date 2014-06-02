@@ -24,7 +24,7 @@ void Limit(float &variable, float maximum, float minimum);
 /* blah
  *
  */
-float SchedulePitchTrim(float roll, float airspeed, float climbRate);
+float SchedulePitchTrim(float rollCommand, float airspeedCommand, float climbRateCommand);
 
 /* blah
  *

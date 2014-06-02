@@ -31,7 +31,7 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define rudderMax_DEF    100  // Left Rudder
 #define rudderMin_DEF    0    // Right Rudder
 #define throttleMax_DEF  95   // Throttle Up
-#define throttleMin_DEF  20   // Throttle Down
+#define throttleMin_DEF  5    // Throttle Down
 
 /*------------------------------------ Controllers -------------------------------------------------*/
 #define rollController_DEF         0
@@ -49,22 +49,22 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define minMax      2
 
 // These are the absolute values of the controller deviations (saturates the controller at a limit based on the units of the controller)
-const float outputLimits[numControllers] PROGMEM = {
+const float outputLimits[numControllers] = {
 											25, // percent of aileron servo
 											20, // percent of elevator servo
 											20, // percent of rudder servo
-											.06,  // altitude controller ~3.25 degrees 
+											.08,  // altitude controller ~4.5 degrees 
 											35, // throttle deviation maximum
 											0.872, // heading angle deviation maximum ~50 degrees
 											3   // airspeed maximum deviation
 										   };
 
-const float referenceLimits[numControllers][minMax] PROGMEM = {
-                                   {0.70 /* 40 degrees max */, -0.7 /* -40 degrees min */ },  /* roll controller */
+const float referenceLimits[numControllers][minMax] = {
+                                   {0.52 /* 30 degrees max */, -0.52 /* -30 degrees min */ },  /* roll controller */
                                    {0.43 /* 24.7 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
                                    {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */
-                                   {13.0 /* 12 m/s max */, 7.0 /* 6.0 m/s min */}, /* airspeed controller */
+                                   {14.0 /* 14 m/s max */, 7.0 /* 7.0 m/s min */}, /* airspeed controller */
                                    {6.30 /* 2 PI max */, -0.1 /* -0.1 min */}, /* heading controller */
 								   {3.0 /* 3 m/s max */, -3.0 /* -3.0 m/s min */} /* ground speed controller */ 
                                   };
@@ -73,7 +73,7 @@ const float integralLimits[numControllers] PROGMEM = {
 											  1, /* roll controller */
 											  1, /* pitch controller */
 											  1, /* rudder controller */
-											  5.0, /* altitude controller */
+											  .05, /* altitude controller */
 											  5, /* airspeed controller */
 											  .05, /* heading controller */
 											  .5 /* ground speed controller */
@@ -83,7 +83,7 @@ const float derivativeLimits[numControllers] PROGMEM = {
 											   3, /* roll controller (% rc out) */
 											   3, /* pitch controller (% rc out) */
 											   3, /* rudder controller (% rc out) */
-											   5.0, /* altitude controller (meters) */
+											   .05, /* altitude controller (meters) */
 											   3, /* airspeed controller (meters/second) */
 											   .05, /* heading controller (radians) */
 											   .5 /* ground speed controller (meters/second) */
