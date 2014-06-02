@@ -40,13 +40,14 @@ static uint16_t controlMode = ROLL_STABILIZE_MODE;
 static char phaseOfFlight = CLIMBING; // Waiting to start mission
 
 /*----------------------------------------- Mission Planning Variables ----------------------------------------*/
-#define LOITERING_ALTITUDE 27.0f
-#define LOITERING_AIRSPEED 15.0f
+#define LOITERING_ALTITUDE 10.0f
+#define LOITERING_AIRSPEED 13.5f
 #define SIGHTING_ALTITUDE 115.0f
 #define MAX_CLIMB_AIRSPEED 15.0f
 #define SIGHTING_GROUND_SPEED 10.5f
 #define NOMINAL_AIRSPEED 10.0f
-#define MAX_CLIMB_PITCH 0.38f
+#define MAX_CLIMB_PITCH 0.38f  // 22 degrees
+#define MAX_CLIMB_ROLL 0.1744f // 10 degrees
 
 static bool initFastLoopPhase = true;
 
@@ -59,10 +60,7 @@ static bool initFastLoopPhase = true;
 static float headingCommand = 0.0;
 static float altitudeCommand = 115.0;
 static float airspeedCommand = 11.0;
-
-// Debug variable
-static float variableOfInterest1 = 0.0;
-static float variableOfInterest2 = 0.0;
+static float pitchTrim = 0.0;
 
 // These functions are executed when control mode is in AUTO
 // Please read AA241X_aux.h for all necessary definitions and interfaces
@@ -124,6 +122,7 @@ static void AA241X_AUTO_FastLoop(void)
         SetReference(airspeedController_DEF, MAX_CLIMB_AIRSPEED);
         break;
       case SIGHTING:
+		// Let the waypoint navigation command airspeed and heading
         initFastLoopPhase = true;
         break;
       case REFINING:
@@ -253,7 +252,7 @@ static void AA241X_AUTO_FastLoop(void)
     // Maintain heading, altitude, and airspeed RC pilot commands offsets from saved initial conditions
 
     // Airspeed Control
-    //airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
+    // airspeedCommand = 7.0 + 5.0*RC_throttle*.01;
     float groundSpeedCommand = 7.0 + 5.0*RC_throttle*.01;
     SetReference(groundSpeedController_DEF, groundSpeedCommand);
     airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
@@ -300,7 +299,7 @@ static void AA241X_AUTO_FastLoop(void)
     }
 
     // Pitch trim scheduling
-    float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
+    float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand);
 
     // Pitch Angle Control
     float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
@@ -341,7 +340,7 @@ static void AA241X_AUTO_FastLoop(void)
         // Set airspeed reference
         airspeedCommand = MAX_CLIMB_AIRSPEED;
         SetReference(airspeedController_DEF, airspeedCommand);
-
+/*
         // Schedule the heading gains based on max climb conditions
         gains[headingController_DEF][pGain] = .5;
         gains[headingController_DEF][pGain] = .008;
@@ -358,6 +357,7 @@ static void AA241X_AUTO_FastLoop(void)
           headingCommand += 2*PI;
         }
         SetReference(headingController_DEF, headingCommand);
+*/
       }
 
       if(-Z_position_Baro >= SIGHTING_ALTITUDE)
@@ -398,34 +398,16 @@ static void AA241X_AUTO_FastLoop(void)
         gains[headingController_DEF][iGain] = 0.007;
 
         SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
-        SetReference(groundSpeedController_DEF, SIGHTING_GROUND_SPEED);
+        // SetReference(groundSpeedController_DEF, SIGHTING_GROUND_SPEED);
       }
 
-      // Set reference for the heading
-      //SetReference(headingController_DEF, headingCommand);
-      //float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-      //Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
-
-      // Determine the roll command from the heading controller
-      //float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-      //Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
-
-      // Roll Control
-      //SetReference(rollController_DEF, headingControllerOut);
+      // Roll Angle Control
       rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 
-      // Pitch trim scheduling
-      //float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
-
       // Pitch Angle Control
-      //float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
-      //SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
       pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
 
       // Airspeed Control
-      //airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
-      //Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
-      //SetReference(airspeedController_DEF, airspeedCommand);
       airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
       airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
     }
@@ -620,11 +602,37 @@ static void AA241X_AUTO_MediumLoop(void)
       Phase3();
     }
 
+	/************** Set references for the fast loop based on medium loop updates ********************/
+
     // Navigation Loop
     headingCommand =  GetNavHeading();
 	SetReference(headingController_DEF, headingCommand);
+    float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
+    Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
 
-    //airspeedCommand = GetNavAirspeed();
+	// Settings to track ground speed
+    //float groundSpeedCommand = GetNavAirspeed();
+	//SetReference(groundSpeedController_DEF, groundSpeedCommand);
+    //airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
+	
+	// Discretize the airspeedCommand to allow the controller to work
+	//DiscretizeAirspeedCommand(airspeedCommand);
+    //Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
+    //airspeedCommand = 9.0;
+    //SetReference(airspeedController_DEF, airspeedCommand);
+
+    // Determine the roll command from the heading controller
+    float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
+    Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);		
+    SetReference(rollController_DEF, headingControllerOut);
+
+    // Pitch trim scheduling
+    float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand);
+
+    // Pitch Angle Control
+	float altitude = -Z_position_Baro;
+    float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
+    SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));            
   }
 
   /***** References for the Fast Loop *******/
@@ -633,37 +641,8 @@ static void AA241X_AUTO_MediumLoop(void)
     // Settings to track a heading
     //float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
     //Limit(rollCommand, .175, -.175);
-    SetReference(rollController_DEF, .122);
+    SetReference(rollController_DEF, MAX_CLIMB_ROLL);
   }
-
-  if(controlMode == MISSION && phaseOfFlight == SIGHTING)
-  {
-    float altitude = -Z_position_Baro;
-
-    // Settings to track ground speed
-    //airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
-    //Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
-    //airspeedCommand = 9.0;
-    //SetReference(airspeedController_DEF, airspeedCommand);            
-
-    // Set reference for the heading
-    //SetReference(headingController_DEF, headingCommand);
-    float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-    Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
-
-    // Determine the roll command from the heading controller
-    float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-    Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);		
-    SetReference(rollController_DEF, headingControllerOut);
-
-    // Pitch trim scheduling
-    float pitchTrim = SchedulePitchTrim(rollCommand, airspeedCommand, /*commandedClimbRate*/ 0.0 /* no contribution from climb rate */);
-
-    // Pitch Angle Control
-    float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
-    SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));            
-  }
-
 
 };
 

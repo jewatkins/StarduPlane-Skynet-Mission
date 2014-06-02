@@ -13,7 +13,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   float command = 0.0;
   float pTerm = 0.0;
   float iTerm = 0.0;
-  float dTerm = 0.0;
+  //float dTerm = 0.0;
 
   float error = references[controller] - measured;
 
@@ -39,10 +39,10 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   //hal.console->printf_P(PSTR("\n intError: %f \n"), intErrors[controller]);
 
   // Cut off maximum integral error
-  Limit(intErrors[controller], pgm_read_float_near(&(integralLimits[controller])), -pgm_read_float_near(&(integralLimits[controller])));
+  Limit(intErrors[controller], integralLimits[controller], -integralLimits[controller]);
 
   // Calculate derivative error
-  float derError = (error - prevErrors[controller])/delta_t;
+  // float derError = (error - prevErrors[controller])/delta_t;
 
   //hal.console->printf_P(PSTR("\n derError: %f \n"), derError);
 
@@ -50,7 +50,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   prevErrors[controller] = error;
 
   // Put a saturation limit on the derivative error
-  Limit(derError,  pgm_read_float_near(&(derivativeLimits[controller])), -pgm_read_float_near(&(derivativeLimits[controller])));
+  // Limit(derError,  pgm_read_float_near(&(derivativeLimits[controller])), -pgm_read_float_near(&(derivativeLimits[controller])));
   
   // Calculate All Controller Terms
   pTerm = gains[controller][pGain]*error;  // Proportional Controller Term
@@ -61,15 +61,16 @@ float StepController(unsigned int controller, float measured, float &delta_t)
 
   //hal.console->printf_P(PSTR("\n iTerm: %f \n"), iTerm);
 
-  Limit(iTerm, pgm_read_float_near(&(integralTermLimits[controller])), -pgm_read_float_near(&(integralTermLimits[controller])));  // Limit the integral controller
-  dTerm = gains[controller][dGain]*derError;  // Derivative Term
+  Limit(iTerm, integralTermLimits[controller], -integralTermLimits[controller]);  // Limit the integral controller
+  
+  //dTerm = gains[controller][dGain]*derError;  // Derivative Term
 
   //hal.console->printf_P(PSTR("\n dTerm: %f \n"), dTerm);
 
-  Limit(dTerm, pgm_read_float_near(&(derivativeTermLimits[controller])), -pgm_read_float_near(&(derivativeTermLimits[controller]))); // Limit the derivative controller
+  //Limit(dTerm, pgm_read_float_near(&(derivativeTermLimits[controller])), -pgm_read_float_near(&(derivativeTermLimits[controller]))); // Limit the derivative controller
   
   /* Sum all terms */
-  command = pTerm + iTerm + dTerm;
+  command = pTerm + iTerm /*+ dTerm*/;
 
   //hal.console->printf_P(PSTR("\n command: %f \n"), command);
 
@@ -118,6 +119,7 @@ void Limit(float &variable, float maximum, float minimum)
  * on the commanded climb rate. In essence, this is just acting as a feed forward controller by knowing
  * a little about the system characteristics.
  */
+/*
 float SchedulePitchTrim(float rollCommand, float airspeedCommand, float climbRateCommand)
 {
   float pitchAngleOut = 0.0; // pitch angle trim state (radians)
@@ -147,48 +149,89 @@ float SchedulePitchTrim(float rollCommand, float airspeedCommand, float climbRat
   return pitchAngleOut;
   
 }
+*/
 
-#define SEVEN_MPS_PITCH 15.0f
-#define EIGHT_MPS_PITCH 15.0f
-#define NINE_MPS_PITCH 15.0f
-#define TEN_MPS_PITCH 15.0f
-#define ELEVEN_MPS_PITCH 15.0f
-#define TWELVE_MPS_PITCH 15.0f
-#define THIRTEEN_MPS_PITCH 15.0f
-#define FOURTEEN_MPS_PITCH 15.0f
-/*
-float SchedulePitchTrim(float rollCommand, float airspeedCommand, float climbRateCommand)
+#define EIGHT_MPS_PITCH 0.2442f //14.0 degrees
+#define NINE_MPS_PITCH 0.09594f //5.5 degrees
+#define TEN_MPS_PITCH 0.008722f //0.5 degrees
+#define ELEVEN_MPS_PITCH 0.0f
+#define TWELVE_MPS_PITCH 0.0f
+#define THIRTEEN_MPS_PITCH 0.0f
+#define FOURTEEN_MPS_PITCH -0.01744f // -1 degrees
+
+float SchedulePitchTrim(float rollCommand, float airspeedCommand)
 {
 	float pitchTrimOut = 0.0;
 
-	if(airspeed < 7.5)
-	{
-		pitchTrimOut = SEVEN_MPS_PITCH;
-	}else if(airspeed >= 7.5 && airspeed < 8.5)
+	if(airspeedCommand < 8.5)
 	{
 		pitchTrimOut = EIGHT_MPS_PITCH;
-	}else if(airspeed >= 8.5 && airspeed < 9.5)
+	}
+	else if(airspeedCommand >= 8.5 && airspeedCommand < 9.5)
 	{
 		pitchTrimOut = NINE_MPS_PITCH;
-	}else if(airspeed >= 9.5 && airspeed < 10.5)
+	}else if(airspeedCommand >= 9.5 && airspeedCommand < 10.5)
 	{
 		pitchTrimOut = TEN_MPS_PITCH;
-	}else if(airspeed >= 10.5 && airspeed < 11.5)
+	}else if(airspeedCommand >= 10.5 && airspeedCommand < 11.5)
 	{
 		pitchTrimOut = ELEVEN_MPS_PITCH;
-	}else if(airspeed >= 11.5 && airspeed < 12.5)
+	}else if(airspeedCommand >= 11.5 && airspeedCommand < 12.5)
 	{
 		pitchTrimOut = TWELVE_MPS_PITCH;
-	}else if(airspeed >= 12.5 && airspeed < 13.5)
+	}else if(airspeedCommand >= 12.5 && airspeedCommand < 13.5)
 	{
 		pitchTrimOut = THIRTEEN_MPS_PITCH;
-	}else if(airspeed >= 13.5);
+	}else if(airspeedCommand >= 13.5);
 	{
 		pitchTrimOut = FOURTEEN_MPS_PITCH;
 	}
 
+	// Roll Command Schedule
+	if(fabs(rollCommand) >= 0.131 && fabs(rollCommand) <= 0.3925 /* 22.5 degrees */)
+	{
+		if(airspeedCommand >= 11.0)
+		{
+			// This schedule was determined from experimental data taken. At 13.5 m/s and a 15 degree bank angle
+			// the pitch trim must be increased by 0.5 degrees. At 11 m/s and a 15 degree bank angle, the pitch
+			// trim must be increased by 5.5 degrees (from airspeed based nominal).
+			pitchTrimOut += .095944 - 0.08722*(airspeedCommand - 11.0)/3.0;
+
+			return pitchTrimOut;
+		}else
+		{
+			// This schedule was determined from experimental data taken. At 11 m/s and a 15 degree bank angle
+			// the pitch trim must be increased by 5.5 degrees. At 8 m/s and a 15 degree bank angle, the pitch trim
+			// must be increased by 4.0 degrees.
+			pitchTrimOut += .069777 + 0.02616*(airspeedCommand - 8.0)/3.0;
+
+			return pitchTrimOut;
+		}
+	}else if(fabs(rollCommand) >= 0.3925)
+	{
+		if (airspeedCommand >= 11.0)
+		{
+			// This schedule was determined from experimental data taken. At 13.5 m/s and a 30 degree bank angle
+			// the pitch trim must be increased by 4.75 degrees. At 11 m/s and a 15 degree bank angle, the pitch
+			// trim must be increased by 9.0 degrees (from airspeed based nominal).
+			pitchTrimOut += 0.157 - 0.07414*(airspeedCommand - 11.0)/3.0;
+
+			return pitchTrimOut;
+		}else
+		{
+			// This schedule was determined from experimental data taken. At 11 m/s and a 30 degree bank angle, 
+			// the pitch trim must increase by 9.0 degrees to maintain level flight. We're going to leave this value
+			// here and let the controller do the work for lower speeds than 11.0
+			pitchTrimOut += 0.157;
+
+			return pitchTrimOut;
+		}
+	}
+
+	return pitchTrimOut;
+
 }
-*/
+
 
 /* blah
  *
@@ -209,6 +252,35 @@ void ScheduleHeadingGain(float airspeedCommand)
 {
 	gains[headingController_DEF][pGain] = .5 + .4*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
 	gains[headingController_DEF][iGain] = .003 + .0035*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
+}
+
+/* blah
+ *
+ */
+void DiscretizeAirspeedCommand(float &airspeedCommand)
+{
+	if(airspeedCommand <= 8.5)
+	{
+		airspeedCommand = 8.5;
+	}else if(airspeedCommand <= 9.5 && airspeedCommand > 8.5)
+	{
+		airspeedCommand = 9.0;
+	}else if(airspeedCommand <= 10.5 && airspeedCommand > 9.5)
+	{
+		airspeedCommand = 10.0;
+	}else if(airspeedCommand <= 11.5 && airspeedCommand > 10.5)
+	{
+		airspeedCommand = 11.0;
+	}else if(airspeedCommand <= 12.5 && airspeedCommand > 11.5)
+	{
+		airspeedCommand = 12.0;
+	}else if(airspeedCommand <= 13.5 && airspeedCommand > 12.5)
+	{
+		airspeedCommand = 13.0;
+	}else if( airspeedCommand > 13.5)
+	{
+		airspeedCommand = 13.5;
+	}
 }
 
 /* blah

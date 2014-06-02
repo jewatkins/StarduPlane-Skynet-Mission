@@ -56,7 +56,7 @@ const float outputLimits[numControllers] = {
 											.08,  // altitude controller ~4.5 degrees 
 											35, // throttle deviation maximum
 											0.872, // heading angle deviation maximum ~50 degrees
-											3   // airspeed maximum deviation
+											3   // airspeed maximum deviation (for ground speed controller)
 										   };
 
 const float referenceLimits[numControllers][minMax] = {
@@ -64,18 +64,18 @@ const float referenceLimits[numControllers][minMax] = {
                                    {0.43 /* 24.7 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
                                    {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */
-                                   {14.0 /* 14 m/s max */, 7.0 /* 7.0 m/s min */}, /* airspeed controller */
+                                   {13.5 /* 13.5 m/s max */, 8.5 /* 8.5 m/s min */}, /* airspeed controller */
                                    {6.30 /* 2 PI max */, -0.1 /* -0.1 min */}, /* heading controller */
 								   {3.0 /* 3 m/s max */, -3.0 /* -3.0 m/s min */} /* ground speed controller */ 
                                   };
 
-const float integralLimits[numControllers] PROGMEM = {
+const float integralLimits[numControllers] = {
 											  1, /* roll controller */
 											  1, /* pitch controller */
 											  1, /* rudder controller */
 											  .05, /* altitude controller */
-											  5, /* airspeed controller */
-											  .05, /* heading controller */
+											  5, /* airspeed controller  */
+											  .05, /* heading controller  */
 											  .5 /* ground speed controller */
 											 };
 
@@ -83,20 +83,20 @@ const float derivativeLimits[numControllers] PROGMEM = {
 											   3, /* roll controller (% rc out) */
 											   3, /* pitch controller (% rc out) */
 											   3, /* rudder controller (% rc out) */
-											   .05, /* altitude controller (meters) */
+											   .05, /* altitude controller (radians - 2.86 degrees) */
 											   3, /* airspeed controller (meters/second) */
-											   .05, /* heading controller (radians) */
+											   .05, /* heading controller (radians - 2.86 degrees) */
 											   .5 /* ground speed controller (meters/second) */
 											  };
 
-const float integralTermLimits[numControllers] PROGMEM = {
-											   5, /* roll controller */
-											   5, /* pitch controller */
-											   5, /* rudder controller */
-											   0.01, /* altitude controller */
-											   5, /* airspeed controller */
-											   .052, /* heading controller */
-											   .5 /* ground speed controller */
+const float integralTermLimits[numControllers] = {
+											   5, /* roll controller percent aileron */
+											   5, /* pitch controller percent elevator */
+											   5, /* rudder controller percent rudder */
+											   0.01, /* altitude controller pitch angle (.57 degrees) */
+											   5, /* airspeed controller percent throttle */
+											   .052, /* heading controller (3 degrees)  */
+											   .5 /* ground speed controller (m/s) */
 											  };
 
 const float derivativeTermLimits[numControllers] PROGMEM = {
