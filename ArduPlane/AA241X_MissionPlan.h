@@ -221,7 +221,7 @@ static void Phase2()
   float dx = xwp - X_position;
   float dy = ywp - Y_position;
   pos_error = sqrtf(dx*dx + dy*dy);
-  if (pos_error <= SNAPSHOT_ERROR) {
+  if (pos_error <= SNAPSHOT_ERROR_2) {
     // Get new waypoint
     GetWaypointPhase2();
 

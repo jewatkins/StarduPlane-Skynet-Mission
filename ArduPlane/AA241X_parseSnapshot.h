@@ -4,10 +4,13 @@
 #include <math.h>
 #include "AA241X_MissionPlan_Parameters.h"
 #include "AA241X_refineTarget.h"
+#include "AA241X_aux.h"
 
 
 // Returns 1 to move to next target. Else 0.
 static uint8_t parseSnapshot(snapshot mySnapShot) {
+
+  float diff = hypotf( X_position-y_centroid[0] , Y_position-y_centroid[1] );
 
   if (mySnapShot.pictureTaken == 1) {
 
@@ -32,7 +35,7 @@ static uint8_t parseSnapshot(snapshot mySnapShot) {
       else return 0;
       
     }
-    else if (mySnapShot.personsInPicture[iTarget] == 0 && n_Exc_lim > 0 && n_Exc < n_Exc_lim) {
+    else if (mySnapShot.personsInPicture[iTarget] == 0 && n_Exc_lim > 0 && n_Exc < n_Exc_lim && diff < 1.2*Rc ) {
       // Collect Exc snapshot data
       Exc[n_Exc][0] = mySnapShot.centerOfPictureX;
       Exc[n_Exc][1] = mySnapShot.centerOfPictureY;
