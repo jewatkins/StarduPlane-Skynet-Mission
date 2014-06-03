@@ -85,7 +85,7 @@ static void Phase1() {
 
 		  // Set order
 		  if (isnap == 0) {
-		    order[(Ntargets-1)-iorder] = i;
+		    //order[(Ntargets-1)-iorder] = i;
 		    iorder++;
 		  }
           

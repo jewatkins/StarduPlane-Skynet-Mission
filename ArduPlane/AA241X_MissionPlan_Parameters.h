@@ -49,7 +49,7 @@ static uint16_t no_snap = 0;
 static char n_persons_found = 0; // Number of persons found
 static char persons_found[Ntargets] = {0,0,0,0};
 static uint16_t n_snaps[Ntargets] = {0,0,0,0};
-static uint8_t order[Ntargets] = {0,0,0,0};
+static uint8_t order[Ntargets] = {3,2,1,0};
 static float G_inc[Ntargets][Ndim][nG];
 
 // Snapshot data

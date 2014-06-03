@@ -48,6 +48,7 @@ static char phaseOfFlight = CLIMBING; // Waiting to start mission
 #define NOMINAL_AIRSPEED 10.0f
 #define MAX_CLIMB_PITCH 0.38f  // 22 degrees
 #define MAX_CLIMB_ROLL 0.1744f // 10 degrees
+#define GLIDE_PITCH 0.122f
 
 static bool initFastLoopPhase = true;
 
@@ -256,7 +257,7 @@ static void AA241X_AUTO_FastLoop(void)
     float groundSpeedCommand = 7.0 + 5.0*RC_throttle*.01;
     SetReference(groundSpeedController_DEF, groundSpeedCommand);
     airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
-    Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
+	DiscretizeAirspeedCommand(airspeedCommand);
     SetReference(airspeedController_DEF, airspeedCommand);
     airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
     airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
@@ -667,7 +668,7 @@ static void AA241X_AUTO_SlowLoop(void)
       
 			// Parse snapshots and continue to next target if all snapshots complete
 			if (parseSnapshot(mySnapShot)) {
-				n_snaps[iTarget] = n_Inc;
+				//n_snaps[iTarget] = n_Inc;
 				iorder++;
 				SetTarget();
 			}

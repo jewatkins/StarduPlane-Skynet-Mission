@@ -35,9 +35,9 @@
 #define AA241X_8_NAME     "AA241_ClmbTst" 
 #define AA241X_8_DEFAULT  0.349
 // My parameter 9
-#define GLIDE_PITCH        g.aa241x_9
-#define AA241X_9_NAME     "AA241_GldPtch" 
-#define AA241X_9_DEFAULT   0.122
+#define PERSON_4_Y         g.aa241x_9
+#define AA241X_9_NAME      "AA241_Prsn4Y" 
+#define AA241X_9_DEFAULT   0.0
 // My parameter 10
 #define INIT_SPIRAL        g.aa241x_10
 #define AA241X_10_NAME     "AA241_InitSpl" 
@@ -47,40 +47,40 @@
 #define AA241X_11_NAME     "AA241_InitPh2" 
 #define AA241X_11_DEFAULT  0.0
 // My parameter 12
-#define INITIAL_ERROR        g.aa241x_12
+#define INITIAL_ERROR      g.aa241x_12
 #define AA241X_12_NAME     "AA241_InitErr" 
-#define AA241X_12_DEFAULT  20.0 
+#define AA241X_12_DEFAULT  20.0
 // My parameter 13
 #define my_param_13        g.aa241x_13
-#define AA241X_13_NAME     "my_paramName13" 
-#define AA241X_13_DEFAULT  10.0 
+#define AA241X_13_NAME     "AA241_Prsn4X" 
+#define AA241X_13_DEFAULT  0.0 
 // My parameter 14
-#define my_param_14        g.aa241x_14
-#define AA241X_14_NAME     "my_paramName14" 
-#define AA241X_14_DEFAULT  -20.523 
+#define PERSON_3_Y         g.aa241x_14
+#define AA241X_14_NAME     "AA241_Prsn3Y" 
+#define AA241X_14_DEFAULT  0.0 
 // My parameter 15
-#define my_param_15        g.aa241x_15
-#define AA241X_15_NAME     "my_paramName15" 
-#define AA241X_15_DEFAULT  10.0 
+#define PERSON_3_X         g.aa241x_15
+#define AA241X_15_NAME     "AA241_Prsn3X" 
+#define AA241X_15_DEFAULT  0.0 
 // My parameter 16
-#define my_param_16        g.aa241x_16
-#define AA241X_16_NAME     "my_paramName16" 
-#define AA241X_16_DEFAULT  -20.523 
+#define PERSON_2_Y         g.aa241x_16
+#define AA241X_16_NAME     "AA241_Prsn2Y" 
+#define AA241X_16_DEFAULT  0.0 
 // My parameter 17
-#define my_param_17        g.aa241x_17
-#define AA241X_17_NAME     "my_paramName17" 
-#define AA241X_17_DEFAULT  10.0 
+#define PERSON_2_X         g.aa241x_17
+#define AA241X_17_NAME     "AA241_Prsn2X" 
+#define AA241X_17_DEFAULT  0.0 
 // My parameter 18
-#define my_param_18        g.aa241x_18
-#define AA241X_18_NAME     "my_paramName18" 
-#define AA241X_18_DEFAULT  -20.523 
+#define PERSON_1_Y         g.aa241x_18
+#define AA241X_18_NAME     "AA241_Prsn1Y" 
+#define AA241X_18_DEFAULT  0.0 
 // My parameter 19
-#define my_param_19        g.aa241x_19
-#define AA241X_19_NAME     "my_paramName19" 
-#define AA241X_19_DEFAULT  10.0 
+#define PERSON_1_X         g.aa241x_19
+#define AA241X_19_NAME     "AA241_Prsn1X" 
+#define AA241X_19_DEFAULT  0.0 
 // My parameter 20
-#define my_param_20        g.aa241x_20
-#define AA241X_20_NAME     "my_paramName20" 
-#define AA241X_20_DEFAULT  -20.523 
+#define T_SIGHT            g.aa241x_20
+#define AA241X_20_NAME     "AA241_tSight" 
+#define AA241X_20_DEFAULT  0.0
 
 #endif /* CONTROL_LAW_H */

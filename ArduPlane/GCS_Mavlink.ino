@@ -483,7 +483,7 @@ static void NOINLINE send_raw_imu1(mavlink_channel_t chan)
         chan,
         micros(),
 		iwp,
-        (uint16_t)pos_error*10,
+        iTarget, /*(uint16_t)pos_error*10,*/
 		n_persons_found,
 		no_snap,
         (uint16_t)Score,
