@@ -51,7 +51,7 @@
 #define AA241X_12_NAME     "AA241_InitErr" 
 #define AA241X_12_DEFAULT  20.0
 // My parameter 13
-#define my_param_13        g.aa241x_13
+#define PERSON_4_X      g.aa241x_13
 #define AA241X_13_NAME     "AA241_Prsn4X" 
 #define AA241X_13_DEFAULT  0.0 
 // My parameter 14

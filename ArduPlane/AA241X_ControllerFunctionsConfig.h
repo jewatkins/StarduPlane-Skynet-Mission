@@ -51,9 +51,9 @@ input) or the automatic flight system. These mechanical limits are what is defin
 // These are the absolute values of the controller deviations (saturates the controller at a limit based on the units of the controller)
 const float outputLimits[numControllers] = {
 											25, // percent of aileron servo
-											20, // percent of elevator servo
+											40, // percent of elevator servo
 											20, // percent of rudder servo
-											.08,  // altitude controller ~4.5 degrees 
+											.12,  // altitude controller ~6.8 degrees 
 											35, // throttle deviation maximum
 											0.872, // heading angle deviation maximum ~50 degrees
 											3   // airspeed maximum deviation (for ground speed controller)
@@ -61,7 +61,7 @@ const float outputLimits[numControllers] = {
 
 const float referenceLimits[numControllers][minMax] = {
                                    {0.52 /* 30 degrees max */, -0.52 /* -30 degrees min */ },  /* roll controller */
-                                   {0.43 /* 24.7 degrees max */, -0.122 /* -7 degrees min */ },  /* pitch controller */
+                                   {0.43 /* 24.7 degrees max */, -0.24 /* -14 degrees min */ },  /* pitch controller */
                                    {0.0, 0.0}, /* rudder controller */
                                    {120 /* 120 meters */, 0 /* 0 meters */ },  /* altitude controller */
                                    {13.5 /* 13.5 m/s max */, 8.5 /* 8.5 m/s min */}, /* airspeed controller */
@@ -119,9 +119,9 @@ static float gains [numControllers][numGains] = {
                                           {25.0, .5, 0.0}, /* roll controller p, i, d */
                                           {40.0, 1.0, 0.0}, /* pitch controller p, i, d */
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
-                                          {0.1, 0.007, 0.0},  /* altitude controller p, i, d */                                        
+                                          {0.15, 0.009, 0.0},  /* altitude controller p, i, d */                                        
                                           {12.0, 0.05, 0.0},  /* airspeed controller p, i, d */
-										  {1.05, 0.007, 0.0},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
+										  {1.15, 0.007, 0.0},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
 										  {1.0, 0.01, 0.0}    /* ground speed controller p, i, d */
                                          };
 

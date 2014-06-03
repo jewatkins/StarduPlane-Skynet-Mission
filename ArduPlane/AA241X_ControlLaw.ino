@@ -601,6 +601,8 @@ static void AA241X_AUTO_MediumLoop(void)
 	// Phase-3 Logistics Loop
     if (gpsOK == true && phase_flag == 3) {
       Phase3();
+	  altitudeCommand = 115.0;
+	  SetReference(altitudeController_DEF, altitudeCommand);
     }
 
 	/************** Set references for the fast loop based on medium loop updates ********************/
@@ -633,7 +635,7 @@ static void AA241X_AUTO_MediumLoop(void)
     // Pitch Angle Control
 	float altitude = -Z_position_Baro;
     float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
-    SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));            
+    SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));
   }
 
   /***** References for the Fast Loop *******/
@@ -654,7 +656,7 @@ static void AA241X_AUTO_MediumLoop(void)
 static void AA241X_AUTO_SlowLoop(void)
 {
 
-	  // Estimate target locations (Phase-2 Simple)
+	// Estimate target locations (Phase-2 Simple)
 	if (controlMode == MISSION && phaseOfFlight == SIGHTING) {
 
 		// Phase-2 Logistics Loop
@@ -673,6 +675,20 @@ static void AA241X_AUTO_SlowLoop(void)
 				SetTarget();
 			}
 
+			// Set our own global person estimates for MAV-link
+			PERSON_1_X = X_person_estimate[0];
+			PERSON_1_Y = Y_person_estimate[0];
+
+			PERSON_2_X = X_person_estimate[1];
+			PERSON_2_Y = Y_person_estimate[1];
+
+			PERSON_3_X = X_person_estimate[2];
+			PERSON_3_Y = Y_person_estimate[2];
+
+			PERSON_4_X = X_person_estimate[3];
+			PERSON_4_Y = Y_person_estimate[3];
+
+			T_SIGHT = t_sight_end - t_sight_start;
 		// 
 			if (iorder >= Ntargets) {
 				phase_flag = 3;
