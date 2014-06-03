@@ -52,10 +52,10 @@ Return:       1 post convergence, 0 otherwise
         // Refine estimate
         if (target_comp == 1) {
 			wMLE_mFOVcorr(ny, y_region, n_Inc, cam_est, Inc, yT);
-			/* X_person_estimate[iTarget] = yT[0];
-            Y_person_estimate[iTarget] = yT[1]; */
-			X_person_estimate[iTarget] = y_centroid[0];
-            Y_person_estimate[iTarget] = y_centroid[1];
+			X_person_estimate[iTarget] = yT[0];
+            Y_person_estimate[iTarget] = yT[1];
+			/* X_person_estimate[iTarget] = y_centroid[0];
+            Y_person_estimate[iTarget] = y_centroid[1]; */
 		}
         
     }
@@ -70,10 +70,10 @@ Return:       1 post convergence, 0 otherwise
     // Re-evaluate target at convergence
     if (converged == 1 || n_Inc == n_Inc_lim-1) {
         wMLE_mFOVcorr(ny, y_region, n_Inc, cam_est, Inc, yT);
-        /* X_person_estimate[iTarget] = yT[0];
-        Y_person_estimate[iTarget] = yT[1]; */
-		X_person_estimate[iTarget] = y_centroid[0];
-        Y_person_estimate[iTarget] = y_centroid[1];
+        X_person_estimate[iTarget] = yT[0];
+        Y_person_estimate[iTarget] = yT[1]; 
+		/* X_person_estimate[iTarget] = y_centroid[0];
+        Y_person_estimate[iTarget] = y_centroid[1]; */
     }
     //
     if(converged)
