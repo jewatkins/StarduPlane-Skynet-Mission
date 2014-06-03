@@ -80,8 +80,10 @@ static void Phase1() {
           G_inc[i][0][isnap] = mySnapShot.centerOfPictureX;
           G_inc[i][1][isnap] = mySnapShot.centerOfPictureY;
           G_inc[i][2][isnap] = mySnapShot.diameterOfPicture;
-          G_inc[i][3][isnap] = mySnapShot.centerOfPersonEstimateX[iTarget];
-          G_inc[i][4][isnap] = mySnapShot.centerOfPersonEstimateY[iTarget];
+//          G_inc[i][3][isnap] = mySnapShot.centerOfPersonEstimateX[iTarget];
+//          G_inc[i][4][isnap] = mySnapShot.centerOfPersonEstimateY[iTarget];
+          G_inc[i][3][isnap] = mySnapShot.centerOfPersonEstimateX[i];
+          G_inc[i][4][isnap] = mySnapShot.centerOfPersonEstimateY[i];
 
 		  // Set order
 		  if (isnap == 0) {
