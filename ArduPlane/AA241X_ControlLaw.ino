@@ -242,7 +242,7 @@ static void AA241X_AUTO_FastLoop(void)
       SetReference(headingController_DEF, headingCommand);
     }
     float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-    Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+    Limit(headingControllerOut, pgm_read_float(&referenceLimits[rollController_DEF][maximum_DEF]), pgm_read_float(&referenceLimits[rollController_DEF][minimum_DEF]));
 
     // Roll Commands
     SetReference(rollController_DEF, headingControllerOut);
@@ -284,7 +284,7 @@ static void AA241X_AUTO_FastLoop(void)
     // Schedule the heading gains based on airspeed command
     //ScheduleHeadingGain(airspeedCommand);
     float rollCommand = StepController(headingController_DEF, ground_course, delta_t);
-    Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+    Limit(rollCommand, pgm_read_float(&referenceLimits[rollController_DEF][maximum_DEF]), pgm_read_float(&referenceLimits[rollController_DEF][minimum_DEF]));
 
     // Roll Control
     SetReference(rollController_DEF, rollCommand);
@@ -611,7 +611,7 @@ static void AA241X_AUTO_MediumLoop(void)
     headingCommand =  GetNavHeading();
 	SetReference(headingController_DEF, headingCommand);
     float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
-    Limit(headingControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
+    Limit(headingControllerOut, pgm_read_float(&referenceLimits[rollController_DEF][maximum_DEF]), pgm_read_float(&referenceLimits[rollController_DEF][minimum_DEF]));
 
 	// Settings to track ground speed
     //float groundSpeedCommand = GetNavAirspeed();
@@ -626,7 +626,7 @@ static void AA241X_AUTO_MediumLoop(void)
 
     // Determine the roll command from the heading controller
     float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-    Limit(rollCommand, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);		
+    Limit(rollCommand, pgm_read_float(&referenceLimits[rollController_DEF][maximum_DEF]), pgm_read_float(&referenceLimits[rollController_DEF][minimum_DEF]));
     SetReference(rollController_DEF, headingControllerOut);
 
     // Pitch trim scheduling
@@ -737,10 +737,35 @@ static void AA241X_AUTO_SlowLoop(void)
    gcs_send_text_fmt(PSTR("Test Float = %f \n"), 25.5);
    */
 
-	//hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_int(&derivativeTermLimits[0]));
-	//hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_near(&derivativeTermLimits[0]));
-	//hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_far(&derivativeTermLimits[0]));
+	/*
+	static const uint8_t testVar PROGMEM = 123;
 
+	hal.console->printf_P(PSTR("\ntestVar: \n"), pgm_read_byte(&testVar));
+	hal.console->printf_P(PSTR("\ntestVar: \n"), pgm_read_byte_near(&testVar));
+	hal.console->printf_P(PSTR("\ntestVar: \n"), pgm_read_byte_far(&testVar));
+	*/
+
+	/******* THIS WORKS!!!!
+	static const uint8_t testVar PROGMEM = 12;
+	uint8_t printVar = pgm_read_byte(&testVar);
+	hal.console->printf_P(PSTR("\nderivativeTermLimits[0]: %u \n"), printVar);
+	********/
+
+	/********* THIS WORKS!!!!!
+	static const float PROGMEM testVar = 0.1f;
+	float printVar = pgm_read_float(&testVar);
+
+	hal.console->printf_P(PSTR("\nprintVar: %f \n"), printVar);
+	**********/
+
+	/*********
+	float printVar = pgm_read_float(&derivativeTermLimits[0]);
+
+	hal.console->printf_P(PSTR("\nprintVar: %f \n"), printVar);
+	**********/
+
+	//hal.console->printf_P(PSTR("\nprintVar: %f \n"), pgm_read_float(&referenceLimits[0][1]));
+	
 };
 
 

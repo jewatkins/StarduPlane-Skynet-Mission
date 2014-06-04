@@ -39,7 +39,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   //hal.console->printf_P(PSTR("\n intError: %f \n"), intErrors[controller]);
 
   // Cut off maximum integral error
-  Limit(intErrors[controller], integralLimits[controller], -integralLimits[controller]);
+  Limit(intErrors[controller], pgm_read_float(&integralLimits[controller]), -pgm_read_float(&integralLimits[controller]));
 
   // Calculate derivative error
   // float derError = (error - prevErrors[controller])/delta_t;
@@ -61,7 +61,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
 
   //hal.console->printf_P(PSTR("\n iTerm: %f \n"), iTerm);
 
-  Limit(iTerm, integralTermLimits[controller], -integralTermLimits[controller]);  // Limit the integral controller
+  Limit(iTerm, pgm_read_float(&integralTermLimits[controller]), -pgm_read_float(&integralTermLimits[controller]));  // Limit the integral controller
   
   //dTerm = gains[controller][dGain]*derError;  // Derivative Term
 
@@ -75,7 +75,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   //hal.console->printf_P(PSTR("\n command: %f \n"), command);
 
   // Put a saturation limit on the output command
-  Limit(command, outputLimits[controller], -outputLimits[controller]);
+  Limit(command, pgm_read_float(&outputLimits[controller]), -pgm_read_float(&outputLimits[controller]));
 
   //hal.console->printf_P(PSTR("\n limited command: %f \n"), command);
     
@@ -88,7 +88,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
 void SetReference(unsigned int controller, float newValue)
 {
   /* Check that the new reference input to command is within limited commands */
-  Limit(newValue, referenceLimits[controller][maximum_DEF], referenceLimits[controller][minimum_DEF]);
+  Limit(newValue, pgm_read_float(&referenceLimits[controller][maximum_DEF]), pgm_read_float(&referenceLimits[controller][minimum_DEF]));
   
   /* Assumes references is under the total number of controllers */
   references[controller] = newValue;
@@ -241,7 +241,7 @@ float ScheduleThrottleTrim(float airspeedCommand)
 	float throttleTrim = 0.0;
 
 	//throttleTrim = 50.0 + (50.0/(referenceLimits[airspeedController_DEF][maximum_DEF]-referenceLimits[airspeedController_DEF][minimum_DEF]))*(airspeedCommand-referenceLimits[airspeedController_DEF][minimum_DEF]);
-	throttleTrim = 25.0 + 75.0*(airspeedCommand-referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF]-referenceLimits[airspeedController_DEF][minimum_DEF]);
+	throttleTrim = 25.0 + 75.0*(airspeedCommand-pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]))/(pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF])-pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]));
 	return throttleTrim;
 }
 
@@ -250,8 +250,8 @@ float ScheduleThrottleTrim(float airspeedCommand)
  */
 void ScheduleHeadingGain(float airspeedCommand)
 {
-	gains[headingController_DEF][pGain] = .5 + .4*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
-	gains[headingController_DEF][iGain] = .003 + .0035*(airspeedCommand - referenceLimits[airspeedController_DEF][minimum_DEF])/(referenceLimits[airspeedController_DEF][maximum_DEF] - referenceLimits[airspeedController_DEF][maximum_DEF]);
+	gains[headingController_DEF][pGain] = .5 + .4*(airspeedCommand - pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]))/(pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]) - pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]));
+	gains[headingController_DEF][iGain] = .003 + .0035*(airspeedCommand - pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]))/(pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]) - pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]));
 }
 
 /* blah
