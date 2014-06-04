@@ -5,13 +5,13 @@
 #include "AA241X_IntTwoCirc.h"
 #include "AA241X_IntTwoCircAux.h"
 
-// Evaluates the region of intersection of circles
+// Evaluates the region of uint8_tersection of circles
 void regionIntCirc(uint8_t nC, float Circ[][3], float y[][2], uint8_t *ny)
 /*
 nC   - uint8_t         - number of circles
 Circ - (nCx3) real - center (yc1,yc2) and radius R of nC circles
-y    - (nyx2) real - coordinates of points on the periphery of intersection
-ny   - uint8_t         - number of points on the periphery of intersection
+y    - (nyx2) real - coordinates of pouint8_ts on the periphery of uint8_tersection
+ny   - uint8_t         - number of pouint8_ts on the periphery of uint8_tersection
 */
 
 {
@@ -51,9 +51,11 @@ ny   - uint8_t         - number of points on the periphery of intersection
     // Else return the discrete descriptor of the region
     else
     {
-        // Evaluate all intersection points (2 * nC2 pts.)
-        float y_IntAll[2][2][nC][nC];
+        // Evaluate all uint8_tersection pouint8_ts (2 * nC2 pts.)
         float yTwo[2][2];       
+        float y_Int[nC][2], diff[2];
+        uint8_t cnt = 0, flag;
+        
         for (n0=0; n0<nC; n0++)
         {
             for (n1=0; n1<nC; n1++)
@@ -66,35 +68,15 @@ ny   - uint8_t         - number of points on the periphery of intersection
                         C1[i] = Circ[n1][i];
                     }
                     IntTwoCirc(C0, C1, yTwo);
+                
                     for (i=0; i<2; i++)
                     {
-                        for (j=0; j<2; j++)
-                        {
-                            y_IntAll[i][j][n0][n1] = yTwo[i][j];
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Test for pts. on the periphery of the intersection
-        float y_Int[nC][2], diff[2];
-        uint8_t cnt = 0, flag;
-        
-        for (n0=0; n0<nC; n0++)
-        {
-            for (n1=0; n1<nC; n1++)
-            {
-                if (n1 > n0)
-                {
-                    for (i=0; i<2; i++)
-                    {
-                        // Check for interior pts.
+                        // Check for uint8_terior pts.
                         flag = 1;
                         for (n=0; n<nC; n++)
                         {
-                            diff[0] = y_IntAll[i][0][n0][n1] - Circ[n][0];
-                            diff[1] = y_IntAll[i][1][n0][n1] - Circ[n][1];
+                            diff[0] = yTwo[i][0] - Circ[n][0];
+                            diff[1] = yTwo[i][1] - Circ[n][1];
                             if ( normL2(2,diff) > Circ[n][2] + 1e-5)
                             {
                                 flag = 0;
@@ -103,16 +85,17 @@ ny   - uint8_t         - number of points on the periphery of intersection
                         }
                         if (flag == 1)
                         {
-                            y_Int[cnt][0] = y_IntAll[i][0][n0][n1];
-                            y_Int[cnt][1] = y_IntAll[i][1][n0][n1];
+                            y_Int[cnt][0] = yTwo[i][0];
+                            y_Int[cnt][1] = yTwo[i][1];
                             cnt++;
                         }
                     }
+
                 }
             }
         }
-                
-        // Remove degenerate points
+        
+        // Remove degenerate pouint8_ts
         uint8_t logic[cnt];
         for (i=0; i<cnt; i++)
         {
