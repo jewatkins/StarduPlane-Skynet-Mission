@@ -732,9 +732,15 @@ static void AA241X_AUTO_SlowLoop(void)
   //hal.console->printf_P(PSTR("xwp: %f \n"), xwp);
   //hal.console->printf_P(PSTR("ywp: %f \n"), ywp);
   /*
+
   gcs_send_text_P(SEVERITY_LOW, PSTR("Test Statement"));
    gcs_send_text_fmt(PSTR("Test Float = %f \n"), 25.5);
    */
+
+	hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float(&derivativeTermLimits[0]));
+	hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_near(&derivativeTermLimits[0]));
+	hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_far(&derivativeTermLimits[0]));
+
 };
 
 

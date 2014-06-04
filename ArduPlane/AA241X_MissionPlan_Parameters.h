@@ -5,8 +5,8 @@
 static uint8_t phase_flag = 1;
 
 /**** Phase-1 Parameters ****/
-#define Nwp 53                  // Number of waypoints in phase-1 spiral
-#define entryPts 5              // Number of entry points to guide into phase-1 spiral
+#define Nwp 52                  // Number of waypoints in phase-1 spiral
+#define entryPts 3              // Number of entry points to guide into phase-1 spiral
 #define TIME_ESTIMATE 3.5f      // Time estimate between waypoints (s)
 static float t_init = 0.0f;     // Initial time between waypoints
 static float x_init = 0.0f;     // Initial x-position of spiral
@@ -26,9 +26,9 @@ static float y_centroid[2];
 #define beta             1.0
 #define ts               3.0
 #define v_phase2         9.5
-#define n_Inc_lim        15
+#define n_Inc_lim        5
 #define n_Exc_lim        0
-#define n_region_lim     10
+#define n_region_lim     5
 
 /**** Waypoint Parameters ****/
 static uint16_t iwp = 0;        // Waypoint iterator

@@ -114,7 +114,7 @@ static void Phase1() {
       iwp++;
 
       // If all waypoints complete, restart route
-      if (iwp >= Nwp || n_persons_found == Ntargets) {
+      if (iwp >= Nwp + entryPts || n_persons_found == Ntargets) {
         phase_flag = 2;
         iwp = 0;
         return;
@@ -223,7 +223,7 @@ static void Phase2()
   float dx = xwp - X_position;
   float dy = ywp - Y_position;
   pos_error = sqrtf(dx*dx + dy*dy);
-  if (pos_error <= SNAPSHOT_ERROR_2) {
+  if (pos_error <= 2.0*SNAPSHOT_ERROR) {
     // Get new waypoint
     GetWaypointPhase2();
 

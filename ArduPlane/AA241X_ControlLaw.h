@@ -82,9 +82,5 @@
 #define T_SIGHT            g.aa241x_20
 #define AA241X_20_NAME     "AA241_tSight" 
 #define AA241X_20_DEFAULT  0.0
-// My parameter 21: Maximum error in snapshot capture
-#define SNAPSHOT_ERROR_2   g.aa241x_2
-#define AA241X_2_NAME     "AA241_Snp_Er2" 
-#define AA241X_2_DEFAULT  10.0
 
 #endif /* CONTROL_LAW_H */

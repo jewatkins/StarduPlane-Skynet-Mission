@@ -1,7 +1,6 @@
 #ifndef CONTROLLER_FUNCTIONS_CONFIG_H
 #define CONTROLLER_FUNCTIONS_CONFIG_H
 
-//#include <avr/pgmspace.h>
 #include <avr/pgmspace.h>
 
 // This file defines all of the configuration parameters for the inner loop controllers
@@ -53,7 +52,7 @@ const float outputLimits[numControllers] = {
 											25, // percent of aileron servo
 											40, // percent of elevator servo
 											20, // percent of rudder servo
-											.12,  // altitude controller ~6.8 degrees 
+											.25,  // altitude controller ~14 degrees 
 											35, // throttle deviation maximum
 											0.872, // heading angle deviation maximum ~50 degrees
 											3   // airspeed maximum deviation (for ground speed controller)
@@ -121,7 +120,7 @@ static float gains [numControllers][numGains] = {
                                           {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
                                           {0.15, 0.009, 0.0},  /* altitude controller p, i, d */                                        
                                           {12.0, 0.05, 0.0},  /* airspeed controller p, i, d */
-										  {1.15, 0.007, 0.0},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
+										  {1.2, 0.007, 0.0},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
 										  {1.0, 0.01, 0.0}    /* ground speed controller p, i, d */
                                          };
 
