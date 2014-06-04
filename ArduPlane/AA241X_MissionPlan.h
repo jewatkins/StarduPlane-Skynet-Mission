@@ -68,12 +68,11 @@ static void Phase1() {
 
     // Post process results and go to next waypoint if snapshot is taken
     if (mySnapShot.pictureTaken == 1) {
-      uint16_t i;
+      uint8_t i;
       for (i=0; i<Ntargets; i++) {
         // Check if person found
-        if (mySnapShot.personsInPicture[i] == 1) {
+        if (mySnapShot.personsInPicture[i] == 1 && n_snaps[i] < nG) {
           persons_found[i] = 1;
-          gcs_send_text_fmt(PSTR("Person %d found"),i+1);
           
           // Collect snapshot data
           uint16_t isnap = n_snaps[i];
@@ -95,7 +94,7 @@ static void Phase1() {
           n_snaps[i]++;
           
           // Sum all persons found
-          uint16_t ii;
+          uint8_t ii;
           n_persons_found = 0;
           for (ii=0; ii<Ntargets; ii++) {
             n_persons_found += persons_found[ii];
@@ -105,7 +104,6 @@ static void Phase1() {
           if (n_persons_found == Ntargets && finalize_t_sight_flag == 1) {
             finalize_t_sight_flag = 0;
             t_sight_end = CPU_time_ms;
-            gcs_send_text_P(SEVERITY_LOW, PSTR("All Persons found!"));
           }
         }
       }
@@ -115,6 +113,11 @@ static void Phase1() {
 
       // If all waypoints complete, restart route
       if (iwp >= Nwp + entryPts || n_persons_found == Ntargets) {
+		uint8_t j;
+		for (j=0; j<Ntargets; j++) {
+		  X_person_estimate[j] = G_inc[j][0][0];
+		  Y_person_estimate[j] = G_inc[j][1][0];
+		}
         phase_flag = 2;
         iwp = 0;
         return;
