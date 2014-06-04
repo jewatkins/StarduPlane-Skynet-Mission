@@ -71,7 +71,7 @@ static void Phase1() {
       uint16_t i;
       for (i=0; i<Ntargets; i++) {
         // Check if person found
-        if (mySnapShot.personsInPicture[i] == 1) {
+        if (mySnapShot.personsInPicture[i] == 1 && n_snaps[i] < nG) {
           persons_found[i] = 1;
           gcs_send_text_fmt(PSTR("Person %d found"),i+1);
           
