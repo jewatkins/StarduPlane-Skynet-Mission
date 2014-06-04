@@ -737,9 +737,9 @@ static void AA241X_AUTO_SlowLoop(void)
    gcs_send_text_fmt(PSTR("Test Float = %f \n"), 25.5);
    */
 
-	hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float(&derivativeTermLimits[0]));
-	hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_near(&derivativeTermLimits[0]));
-	hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_far(&derivativeTermLimits[0]));
+	//hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_int(&derivativeTermLimits[0]));
+	//hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_near(&derivativeTermLimits[0]));
+	//hal.console->printf_P(PSTR("derivativeTermLimits[0]: "), pgm_read_float_far(&derivativeTermLimits[0]));
 
 };
 

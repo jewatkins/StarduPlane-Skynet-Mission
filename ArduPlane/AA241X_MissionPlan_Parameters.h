@@ -26,7 +26,7 @@ static float y_centroid[2];
 #define beta             1.0
 #define ts               3.0
 #define v_phase2         9.5
-#define n_Inc_lim        5
+#define n_Inc_lim        8
 #define n_Exc_lim        0
 #define n_region_lim     5
 

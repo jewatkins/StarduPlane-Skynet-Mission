@@ -98,14 +98,14 @@ const float integralTermLimits[numControllers] = {
 											   .5 /* ground speed controller (m/s) */
 											  };
 
-const float derivativeTermLimits[numControllers] PROGMEM = {
+const int derivativeTermLimits[] PROGMEM = {
 											   5, /* roll controller */
 											   5, /* pitch controller */
 											   5, /* rudder controller */
-											   0.01, /* altitude controller */
+											   1, /* altitude controller */
 											   5, /* airspeed controller */
-											   .052, /* heading controller */
-											   .5 /* ground speed controller */
+											   2, /* heading controller */
+											   5 /* ground speed controller */
 											  };
 
 /*------------------------------------ Controller Gains --------------------------------------------*/
