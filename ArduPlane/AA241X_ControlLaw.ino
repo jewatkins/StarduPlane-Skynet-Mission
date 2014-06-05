@@ -665,12 +665,19 @@ static void AA241X_AUTO_SlowLoop(void)
 			if (dt >= 3.0) {
 				// Take a snapshot
 				snapshot mySnapShot = takeASnapshot();
-      
+
 			// Parse snapshots and continue to next target if all snapshots complete
+                        //if (parseSnapshot(mySnapShot) || mission_energy_consumed > energy_limit) { 
 			if (parseSnapshot(mySnapShot)) {
-				//n_snaps[iTarget] = n_Inc;
 				iorder++;
 				SetTarget();
+                                
+                                /*
+                                // Restart battery energy consumed (Joules)
+                                if (iorder < Ntargets) {
+                                  energy_limit = mission_energy_consumed + (ENERGY_LIMIT - mission_energy_consumed)/(Ntargets-iorder);
+                                }
+                                */
 			}
 
 			// Set our own global person estimates for MAV-link

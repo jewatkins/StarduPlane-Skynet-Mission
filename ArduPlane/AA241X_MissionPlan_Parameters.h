@@ -21,6 +21,7 @@ static float t_sight_end = 0.0;
 static uint8_t iTarget;
 static uint8_t iorder = 0;
 static float y_centroid[2];
+//static float energy_limit = 0.0f;  // Battery energy limit for next target
 
 #define Rc               30.0
 #define beta             1.0

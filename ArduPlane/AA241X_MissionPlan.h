@@ -186,6 +186,11 @@ static void InitPhase2() {
   // Start timer
   t_init = CPU_time_ms;
   
+  /*
+  // Set battery energy limit for first target (Joules)
+  energy_limit = mission_energy_consumed + (ENERGY_LIMIT - mission_energy_consumed)/Ntargets;
+  */
+  
   // Set target order iterator
   iorder = 0;
   SetTarget();
