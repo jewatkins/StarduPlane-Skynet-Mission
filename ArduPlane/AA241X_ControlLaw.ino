@@ -716,7 +716,7 @@ static void AA241X_AUTO_SlowLoop(void)
   
   /*
   // Try to take a snapshot every second (Phase-1 Climb/Transition)
-  if (controlMode == MISSION && phase_flag == 1 && iwp <= entryPts && gpsOK == true) {
+  if (controlMode == MISSION && phase_flag == 1 && iwp <= entryPts && gpsOK == true && in_mission == 1) {
     float dx = xwp - X_position;
     float dy = ywp - Y_position;
     float pos_error = sqrtf(dx*dx + dy*dy);
