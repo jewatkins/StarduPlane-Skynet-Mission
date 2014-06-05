@@ -581,9 +581,15 @@ static void AA241X_AUTO_MediumLoop(void)
 
     // Phase-1 Logistics Loop
     if (gpsOK == true && phase_flag == 1) {
+      /*
+      if (iwp < entryPts) {
+        Phase1Trans();
+      }
+      else {
+      */
       Phase1();
+      //}
     }
-
     
 	// Initialize Phase-2 Simple
     if (INIT_PHASE2 < .5 && phase_flag == 2) {
@@ -653,8 +659,7 @@ static void AA241X_AUTO_MediumLoop(void)
 // *****   AA241X Slow Loop - @ ~1Hz  *****  //
 static void AA241X_AUTO_SlowLoop(void)
 {
-
-	// Estimate target locations (Phase-2 Simple)
+	// Estimate target locations (Phase-2)
 	if (controlMode == MISSION && phaseOfFlight == SIGHTING) {
 
 		// Phase-2 Logistics Loop
@@ -667,7 +672,7 @@ static void AA241X_AUTO_SlowLoop(void)
 				snapshot mySnapShot = takeASnapshot();
 
 			// Parse snapshots and continue to next target if all snapshots complete
-                        //if (parseSnapshot(mySnapShot) || mission_energy_consumed > energy_limit) { 
+                        //if (parseSnapshot(mySnapShot) || mission_energy_consumed > energy_limit) 
 			if (parseSnapshot(mySnapShot)) {
 				iorder++;
 				SetTarget();
@@ -708,8 +713,22 @@ static void AA241X_AUTO_SlowLoop(void)
 		// Compute estimated target locations
 		//EstimateTargetLocation();
   	}
-
-  // YOUR CODE HERE
+  
+  /*
+  // Try to take a snapshot every second (Phase-1 Climb/Transition)
+  if (controlMode == MISSION && phase_flag == 1 && iwp <= entryPts && gpsOK == true) {
+    float dx = xwp - X_position;
+    float dy = ywp - Y_position;
+    float pos_error = sqrtf(dx*dx + dy*dy);
+    if (iwp < entryPts || (iwp == entryPts && pos_error/ground_speed > TIME_ESTIMATE)) {
+      // Take a snapshot, check t_sight and move to phase 2 if all persons found
+      snapshot mySnapShot = takeASnapshot();
+      if (mySnapShot.pictureTaken == 1) {
+        CheckTSight(mySnapShot);
+      }
+    }
+  }
+  */
 
   /*
   float rollCommand = 0.0;
