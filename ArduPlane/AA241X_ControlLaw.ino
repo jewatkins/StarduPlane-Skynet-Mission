@@ -388,8 +388,6 @@ static void AA241X_AUTO_FastLoop(void)
       // 2. airspeedCommand is given by the outer loop
       // 3. altitudeCommand remains static at SIGHTING_ALTITUDE during the entire phase
 
-      float altitude = -Z_position_Baro;
-
       if(initFastLoopPhase == true)
       {
         initFastLoopPhase = false;

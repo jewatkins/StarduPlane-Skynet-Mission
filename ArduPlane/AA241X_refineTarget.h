@@ -25,7 +25,8 @@ Return:       1 post convergence, 0 otherwise
 
 {
 
-    uint8_t i, ny;
+    uint8_t i = 0;
+	uint8_t ny = 0;
     float y_region[n_region_lim][2], yT[2];
    
     // Initialize solution

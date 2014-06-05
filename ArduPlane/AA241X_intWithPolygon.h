@@ -9,7 +9,9 @@ void intWithPolygon(uint8_t n_poly, float poly[][2], float p[2], float yInt[2]){
 
 	float c[2], angles[n_poly], yAngle;
 	float x1, x2, y1, y2, den;
-	uint8_t i, ind1, ind2;
+	uint8_t i;
+	int ind1 = 0;
+	int ind2 = 0;
 
 	// Find centroid of the polygon
 	c[0] = 0;

@@ -30,7 +30,7 @@ input) or the automatic flight system. These mechanical limits are what is defin
 #define rudderMax_DEF    100  // Left Rudder
 #define rudderMin_DEF    0    // Right Rudder
 #define throttleMax_DEF  95   // Throttle Up
-#define throttleMin_DEF  5    // Throttle Down
+#define throttleMin_DEF  0    // Throttle Down
 
 /*------------------------------------ Controllers -------------------------------------------------*/
 #define rollController_DEF         0
@@ -53,7 +53,7 @@ static const float PROGMEM outputLimits[] = {
 											40.0f, // percent of elevator servo
 											20.0f, // percent of rudder servo
 											0.25f,  // altitude controller ~14 degrees 
-											35.0f, // throttle deviation maximum
+											50.0f, // throttle deviation maximum
 											0.872f, // heading angle deviation maximum ~50 degrees
 											3.0f   // airspeed maximum deviation (for ground speed controller)
 										    };

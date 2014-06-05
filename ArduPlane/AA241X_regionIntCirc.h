@@ -16,8 +16,14 @@ ny   - uint8_t         - number of pouint8_ts on the periphery of uint8_tersecti
 
 {
 
-    uint8_t i, j, n0, n1, n;
-    float C0[3], C1[3];
+    uint8_t i = 0;
+	uint8_t j = 0;
+	uint8_t n0 = 0;
+	uint8_t n1 = 0;
+	uint8_t n =0;
+
+	float C0[3] = {0,0,0};
+	float C1[3] = {0,0,0};
 
     // Check if only one circle is provided
     if (nC == 1)
@@ -54,7 +60,8 @@ ny   - uint8_t         - number of pouint8_ts on the periphery of uint8_tersecti
         // Evaluate all uint8_tersection pouint8_ts (2 * nC2 pts.)
         float yTwo[2][2];       
         float y_Int[nC][2], diff[2];
-        uint8_t cnt = 0, flag;
+        uint8_t cnt = 0;
+		uint8_t flag = 0;
         
         for (n0=0; n0<nC; n0++)
         {
