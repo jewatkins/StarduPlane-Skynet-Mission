@@ -29,9 +29,9 @@ static float energy_limit = 0.0f;  // Battery energy limit for next target
 #define beta             1.0
 #define ts               3.0
 #define v_phase2         9.0
-#define n_Inc_lim        10
-#define n_Exc_lim        0
-#define n_region_lim     10
+#define n_Inc_lim        7
+#define n_Exc_lim        10
+#define n_region_lim     7
 
 /**** Waypoint Parameters ****/
 static uint16_t iwp = 0;        // Waypoint iterator
