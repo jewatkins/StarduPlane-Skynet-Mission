@@ -48,7 +48,6 @@ static void InitPhase1Spiral() {
 }
 
 
-/*
 // Check tsight and move to phase 2 if all persons found
 static void CheckTSight(snapshot &mySnapShot) {
   uint8_t i;
@@ -66,7 +65,7 @@ static void CheckTSight(snapshot &mySnapShot) {
       // Set order
       if (isnap == 0) {
         persons_found[i] = 1;
-        //order[(Ntargets-1)-iorder] = i;
+        order[(Ntargets-1)-iorder] = i;
         iorder++;
       }
       
@@ -155,9 +154,8 @@ static void Phase1() {
     }
   }
 }
-*/
 
-
+/*
 // Capture waypoints only when successful snapshots are taken
 static void Phase1() {
   // Check to see if waypoint is found
@@ -256,7 +254,7 @@ static void Phase1() {
     }
   }
 }
-
+*/
 
 /**** Phase-2 ****/
 // Initialize refinement of first target
@@ -268,10 +266,8 @@ static void InitPhase2() {
   // Start timer
   t_init = CPU_time_ms;
   
-  /*
   // Set battery energy limit for first target (Joules)
   energy_limit = mission_energy_consumed + (ENERGY_LIMIT - mission_energy_consumed)/Ntargets;
-  */
   
   // Set target order iterator
   iorder = 0;

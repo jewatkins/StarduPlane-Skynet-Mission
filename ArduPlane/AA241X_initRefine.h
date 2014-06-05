@@ -29,12 +29,10 @@ entry_wp - entry waypoint
     }
     
     // Evaluate FOV region
-    /*
     regionIntCirc(n_Inc, Inc, y_region, &ny);
 
     // Calculate centroid
-    /*
-	y_centroid[0] = 0;
+    y_centroid[0] = 0;
     y_centroid[1] = 0;
     for(i=0; i<ny; i++){
 	    y_centroid[0] += y_region[i][0];
@@ -42,12 +40,12 @@ entry_wp - entry waypoint
     }
     y_centroid[0] = y_centroid[0]/ny;
     y_centroid[1] = y_centroid[1]/ny;
-    */
+    
 
 	// Changed for debugging!!!!!!!!!!!
 	// Needs to be deleted later
-	y_centroid[0] = Inc[0][0];
-	y_centroid[1] = Inc[0][1];
+	// y_centroid[0] = Inc[0][0];
+	// y_centroid[1] = Inc[0][1];
 
 }
 

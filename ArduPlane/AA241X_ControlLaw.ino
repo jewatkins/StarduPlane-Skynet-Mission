@@ -581,14 +581,12 @@ static void AA241X_AUTO_MediumLoop(void)
 
     // Phase-1 Logistics Loop
     if (gpsOK == true && phase_flag == 1) {
-      /*
       if (iwp < entryPts) {
         Phase1Trans();
       }
       else {
-      */
       Phase1();
-      //}
+      }
     }
     
 	// Initialize Phase-2 Simple
@@ -672,17 +670,17 @@ static void AA241X_AUTO_SlowLoop(void)
 				snapshot mySnapShot = takeASnapshot();
 
 			// Parse snapshots and continue to next target if all snapshots complete
-                        //if (parseSnapshot(mySnapShot) || mission_energy_consumed > energy_limit) 
-			if (parseSnapshot(mySnapShot)) {
+            if (parseSnapshot(mySnapShot) || mission_energy_consumed > energy_limit) { 
+			//if (parseSnapshot(mySnapShot)) {
 				iorder++;
 				SetTarget();
                                 
-                                /*
+                            
                                 // Restart battery energy consumed (Joules)
                                 if (iorder < Ntargets) {
                                   energy_limit = mission_energy_consumed + (ENERGY_LIMIT - mission_energy_consumed)/(Ntargets-iorder);
                                 }
-                                */
+                            
 			}
 
 			// Set our own global person estimates for MAV-link
@@ -714,7 +712,6 @@ static void AA241X_AUTO_SlowLoop(void)
 		//EstimateTargetLocation();
   	}
   
-  /*
   // Try to take a snapshot every second (Phase-1 Climb/Transition)
   if (controlMode == MISSION && phase_flag == 1 && iwp <= entryPts && gpsOK == true && in_mission == 1) {
     float dx = xwp - X_position;
@@ -724,11 +721,11 @@ static void AA241X_AUTO_SlowLoop(void)
       // Take a snapshot, check t_sight and move to phase 2 if all persons found
       snapshot mySnapShot = takeASnapshot();
       if (mySnapShot.pictureTaken == 1) {
+		prephase_snap++;
         CheckTSight(mySnapShot);
       }
     }
   }
-  */
 
   /*
   float rollCommand = 0.0;

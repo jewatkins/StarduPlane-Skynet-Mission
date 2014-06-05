@@ -31,7 +31,7 @@ static uint8_t parseSnapshot(snapshot mySnapShot) {
       n_Inc++;
 
       // Re-compute the centroid of target region and update target estimate
-      if( refineTarget(1, 0) || n_Inc == n_Inc_lim - 1 ) return 1;
+      if( refineTarget(1, 1) || n_Inc == n_Inc_lim - 1 ) return 1;
       else return 0;
       
     }
@@ -45,7 +45,7 @@ static uint8_t parseSnapshot(snapshot mySnapShot) {
       n_Exc++;
 
       // Re-compute the centroid of target region and update target estimate
-      if( refineTarget(0, 0)) return 1;
+      if( refineTarget(0, 1)) return 1;
       else return 0;
 
     }

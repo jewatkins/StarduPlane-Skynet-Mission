@@ -9,7 +9,7 @@
 #include "AA241X_initRefine.h"
 
 // Assumed time between snapshots of 3.2s for the search parameters
-static float dTheta = (v_phase2+1) * ts / Rc; // 50 degrees
+static float dTheta = (v_phase2+3) * ts / Rc; // 78 degrees
 
 // Calculates circular trajectory around a target
 // xwp -> current x position of waypoint in output

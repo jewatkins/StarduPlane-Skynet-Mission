@@ -483,14 +483,14 @@ static void NOINLINE send_raw_imu1(mavlink_channel_t chan)
         chan,
         micros(),
 		iwp,
-        iorder, /*(uint16_t)pos_error*10,*/
 		n_persons_found,
 		iTarget, // no_snap,
         (uint16_t)Score,
         in_mission,
 		phase_flag, //(uint16_t)t_sight_start,
-        (uint16_t) (t_sight_end - t_sight_start), //(uint16_t) t_sight,
-        (uint16_t)(mission_energy_consumed*1000/(7.4*3600)));
+        (uint16_t) t_sight,
+        (uint16_t)(mission_energy_consumed*1000/(7.4*3600)),
+        (uint16_t)(energy_limit*1000/(7.4*3600)));
 		/*
         accel.x * 1000.0 / GRAVITY_MSS,
         accel.y * 1000.0 / GRAVITY_MSS,

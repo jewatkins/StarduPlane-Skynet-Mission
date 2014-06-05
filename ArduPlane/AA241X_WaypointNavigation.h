@@ -24,7 +24,7 @@ static void GetWaypointPhase1() {
   float rotation = WrapAngle(atan2f(y_init,x_init));
 
   // Entry points
-  float omega = 2.0*v/rad0;
+  float omega = 1.0*v/rad0;
   float ang = 0.0;
   float rad = 0.0;
   if (wp <= entryPts) {

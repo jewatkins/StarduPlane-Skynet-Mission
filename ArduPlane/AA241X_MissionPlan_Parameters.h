@@ -16,21 +16,22 @@ static uint8_t init_t_sight_flag = 1;
 static uint8_t finalize_t_sight_flag = 1;
 static float t_sight_start = 0.0;
 static float t_sight_end = 0.0;
-//static float t_sight = 0.0;
+static float t_sight = 0.0;
+static uint16_t prephase_snap = 0;
 
 /**** Phase-2 Parameters ****/
 static uint8_t iTarget;
 static uint8_t iorder = 0;
 static float y_centroid[2];
-//static float energy_limit = 0.0f;  // Battery energy limit for next target
+static float energy_limit = 0.0f;  // Battery energy limit for next target
 
 #define Rc               30.0
 #define beta             1.0
 #define ts               3.0
-#define v_phase2         9.5
-#define n_Inc_lim        7
+#define v_phase2         9.0
+#define n_Inc_lim        10
 #define n_Exc_lim        0
-#define n_region_lim     7
+#define n_region_lim     10
 
 /**** Waypoint Parameters ****/
 static uint16_t iwp = 0;        // Waypoint iterator
@@ -46,7 +47,7 @@ static float pos_error = 0.0f;	// Position Error
 /**** Snapshot Data and Parameters ****/
 #define Ntargets 4              // Total number of targets
 #define Ndim 5                  // Dimension of snapshot data structure
-#define nG 1                    // Maximum number of snapshots that can be saved
+#define nG 2                    // Maximum number of snapshots that can be saved
 static uint16_t no_snap = 0;
 static char n_persons_found = 0; // Number of persons found
 static char persons_found[Ntargets] = {0,0,0,0};

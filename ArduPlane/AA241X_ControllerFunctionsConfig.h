@@ -52,8 +52,8 @@ static const float PROGMEM outputLimits[] = {
 											25.0f, // percent of aileron servo
 											40.0f, // percent of elevator servo
 											20.0f, // percent of rudder servo
-											0.25f,  // altitude controller ~14 degrees 
-											50.0f, // throttle deviation maximum
+											0.175f,  // altitude controller ~10 degrees 
+											30.0f, // throttle deviation maximum
 											0.872f, // heading angle deviation maximum ~50 degrees
 											3.0f   // airspeed maximum deviation (for ground speed controller)
 										    };
