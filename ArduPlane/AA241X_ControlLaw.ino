@@ -393,8 +393,8 @@ static void AA241X_AUTO_FastLoop(void)
         initFastLoopPhase = false;
 
         // Reset Gains on heading controller
-        gains[headingController_DEF][pGain] = 0.7;
-        gains[headingController_DEF][iGain] = 0.007;
+        //gains[headingController_DEF][pGain] = 0.7;
+        //gains[headingController_DEF][iGain] = 0.007;
 
         SetReference(altitudeController_DEF, SIGHTING_ALTITUDE);
         // SetReference(groundSpeedController_DEF, SIGHTING_GROUND_SPEED);
@@ -429,8 +429,8 @@ static void AA241X_AUTO_FastLoop(void)
   else if(controlMode == MAX_CLIMB)
   {        
     // Schedule the heading gains based on airspeed command
-    gains[headingController_DEF][pGain] = .5;
-    gains[headingController_DEF][pGain] = .008;
+    //gains[headingController_DEF][pGain] = .5;
+    //gains[headingController_DEF][pGain] = .008;
     float rollCommand = StepController(headingController_DEF,ground_course, delta_t);
     Limit(rollCommand, .175, -.175);
     SetReference(rollController_DEF, rollCommand);

@@ -53,17 +53,17 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   // Limit(derError,  pgm_read_float_near(&(derivativeLimits[controller])), -pgm_read_float_near(&(derivativeLimits[controller])));
   
   // Calculate All Controller Terms
-  pTerm = gains[controller][pGain]*error;  // Proportional Controller Term
+  pTerm = pgm_read_float(&gains[controller][pGain])*error;  // Proportional Controller Term
   
   //hal.console->printf_P(PSTR("\n pTerm: %f \n"), pTerm);
 
-  iTerm = gains[controller][iGain]*intErrors[controller]; // Integral Controller Term
+  iTerm = pgm_read_float(&gains[controller][iGain])*intErrors[controller]; // Integral Controller Term
 
   //hal.console->printf_P(PSTR("\n iTerm: %f \n"), iTerm);
 
   Limit(iTerm, pgm_read_float(&integralTermLimits[controller]), -pgm_read_float(&integralTermLimits[controller]));  // Limit the integral controller
   
-  //dTerm = gains[controller][dGain]*derError;  // Derivative Term
+  //dTerm = pgm_read_float(&gains[controller][dGain])*derError;  // Derivative Term
 
   //hal.console->printf_P(PSTR("\n dTerm: %f \n"), dTerm);
 
@@ -250,8 +250,8 @@ float ScheduleThrottleTrim(float airspeedCommand)
  */
 void ScheduleHeadingGain(float airspeedCommand)
 {
-	gains[headingController_DEF][pGain] = .5 + .4*(airspeedCommand - pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]))/(pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]) - pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]));
-	gains[headingController_DEF][iGain] = .003 + .0035*(airspeedCommand - pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]))/(pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]) - pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]));
+	//pgm_read_float(&gains[headingController_DEF][pGain]) = .5 + .4*(airspeedCommand - pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]))/(pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]) - pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]));
+	//pgm_read_float(&gains[headingController_DEF][iGain]) = .003 + .0035*(airspeedCommand - pgm_read_float(&referenceLimits[airspeedController_DEF][minimum_DEF]))/(pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]) - pgm_read_float(&referenceLimits[airspeedController_DEF][maximum_DEF]));
 }
 
 /* blah

@@ -125,14 +125,14 @@ static const float PROGMEM derivativeTermLimits[] = {
 #define dGain 2
 #define numGains 3
 
-static float gains [numControllers][numGains] = {
-                                          {25.0, .5, 0.0}, /* roll controller p, i, d */
-                                          {40.0, 1.0, 0.0}, /* pitch controller p, i, d */
-                                          {0.0, 0.0, 0.0},  /* rudder controller p, i, d */
-                                          {0.15, 0.009, 0.0},  /* altitude controller p, i, d */                                        
-                                          {12.0, 0.05, 0.0},  /* airspeed controller p, i, d */
-										  {1.2, 0.007, 0.0},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
-										  {1.0, 0.01, 0.0}    /* ground speed controller p, i, d */
+static const float PROGMEM gains [numControllers][numGains] = {
+                                          {25.0f, .5f, 0.0f}, /* roll controller p, i, d */
+                                          {40.0f, 1.0f, 0.0f}, /* pitch controller p, i, d */
+                                          {0.0f, 0.0f, 0.0f},  /* rudder controller p, i, d */
+                                          {0.15f, 0.009f, 0.0f},  /* altitude controller p, i, d */                                        
+                                          {12.0f, 0.05f, 0.0f},  /* airspeed controller p, i, d */
+										  {0.7f, 0.007f, 0.0f},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
+										  {1.0f, 0.01f, 0.0f}    /* ground speed controller p, i, d */
                                          };
 
 /*------------------------------------- Trim States ------------------------------------------------*/
