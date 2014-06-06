@@ -109,7 +109,7 @@ static float GetNavAirspeed() {
   // Set constant airspeed
   float ASCommand = 11.0;
   if (phase_flag == 1) {
-	  ASCommand = 12.0;
+	  ASCommand = 11.0;
   }
   else if (phase_flag == 2) {
 	  ASCommand = v_phase2;

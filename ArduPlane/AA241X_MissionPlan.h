@@ -11,6 +11,7 @@
 /**** Phase-1: Spiral ****/
 // Initialize spiral
 static void InitPhase1Spiral() {
+  /*
   // Initialize G_inc
   uint8_t i,j,k;
   for (i=0; i<Ntargets; i++) {
@@ -23,6 +24,7 @@ static void InitPhase1Spiral() {
 
   // Initialize iorder
   iorder = 0;
+  */
 
   // Snapshot parameters
   no_snap = 0;

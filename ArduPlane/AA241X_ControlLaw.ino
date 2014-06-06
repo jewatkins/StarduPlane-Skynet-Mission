@@ -341,7 +341,23 @@ static void AA241X_AUTO_FastLoop(void)
         // Set airspeed reference
         airspeedCommand = MAX_CLIMB_AIRSPEED;
         SetReference(airspeedController_DEF, airspeedCommand);
-/*
+
+		/********* Jerry's stuff *******************/
+		// Initialize G_inc
+		uint8_t i,j,k;
+		for (i=0; i<Ntargets; i++) {
+			for (j=0; j<Ndim; j++) {
+				for (k=0; k<nG; k++) {
+					G_inc[i][j][k] = 0.0;
+				}
+			}
+		}
+
+		// Initialize iorder
+		iorder = 0;
+		/********* Jerry's stuff *******************/
+
+		/*
         // Schedule the heading gains based on max climb conditions
         gains[headingController_DEF][pGain] = .5;
         gains[headingController_DEF][pGain] = .008;
@@ -628,7 +644,12 @@ static void AA241X_AUTO_MediumLoop(void)
 
     // Determine the roll command from the heading controller
     float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 
-    Limit(rollCommand, pgm_read_float(&referenceLimits[rollController_DEF][maximum_DEF]), pgm_read_float(&referenceLimits[rollController_DEF][minimum_DEF]));
+	if(phase_flag == 2)
+	{
+		Limit(rollCommand, .261, -.261);
+	}else{
+		Limit(rollCommand, pgm_read_float(&referenceLimits[rollController_DEF][maximum_DEF]), pgm_read_float(&referenceLimits[rollController_DEF][minimum_DEF]));
+	}
     SetReference(rollController_DEF, headingControllerOut);
 
     // Pitch trim scheduling
