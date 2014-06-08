@@ -22,6 +22,7 @@
 #define GLIDE                9
 #define ALTITUDE_TEST        10
 #define BANKED_ALTITUDE_TEST 11
+#define ALTITUDE_HOLD        12
 static uint16_t controlMode = ROLL_STABILIZE_MODE;
 
 /*----------------------------------------- Phase of Flight -------------------------------------------------*/
@@ -186,6 +187,22 @@ static void AA241X_AUTO_FastLoop(void)
 	  // Keep wings at commanded bank angle
 	  float rollCommand = (TEST_ROLL/180.0)*PI;
 	  SetReference(rollController_DEF, rollCommand);
+    }
+	else if(FLIGHT_MODE > 11.5 && FLIGHT_MODE < 12.5)
+    {
+      controlMode = ALTITUDE_HOLD;
+
+	  // Set airspeed
+	  airspeedCommand = TEST_AIRSPEED;
+	  SetReference(airspeedController_DEF, airspeedCommand);
+
+	  // Keep at commanded bank angle
+	  float rollCommand = (TEST_ROLL/180.0)*PI;
+	  SetReference(rollController_DEF, rollCommand);
+
+	  // Set current altitude as altitude holding level
+	  float altitude = -Z_position_Baro;
+	  SetReference(altitudeController_DEF, altitude);
     }
   }
 
@@ -501,7 +518,26 @@ static void AA241X_AUTO_FastLoop(void)
 	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
 	  //Limit(rollControllerOut, referenceLimits[rollController_DEF][maximum_DEF], referenceLimits[rollController_DEF][minimum_DEF]);
   }
+  else if(controlMode == ALTITUDE_HOLD)
+  {
+      // Airspeed Control
+      airspeedControllerOut = StepController(airspeedController_DEF, Air_speed, delta_t);
+      airspeedControllerOut += ScheduleThrottleTrim(airspeedCommand); // Add the trim depending on the desired airspeed
 
+      // Pitch trim scheduling
+      float pitchTrim = SchedulePitchTrim((TEST_ROLL/180.0)*PI, airspeedCommand);
+
+      // Pitch Angle Control
+	  float altitude = -Z_position_Baro;
+      float pitchDeviation = StepController(altitudeController_DEF, altitude, delta_t);
+	  SetReference(pitchController_DEF, (pitchTrim + pitchDeviation));	  
+	  
+	  // Pitch Angle control
+	  pitchControllerOut = StepController(pitchController_DEF, pitch, delta_t);
+
+	  // Roll Angle control
+	  rollControllerOut = StepController(rollController_DEF, roll, delta_t);
+  }
   // Aileron Servo Command Out
   if(controlMode == ROLL_STABILIZE_MODE 
     || controlMode == STABILIZE_MODE
@@ -513,7 +549,8 @@ static void AA241X_AUTO_FastLoop(void)
     || controlMode == MAX_CLIMB
     || controlMode == GLIDE
 	|| controlMode == ALTITUDE_TEST
-	|| controlMode == BANKED_ALTITUDE_TEST)
+	|| controlMode == BANKED_ALTITUDE_TEST
+	|| controlMode == ALTITUDE_HOLD)
   {
     float rollOut    = RC_Roll_Trim + rollControllerOut;
     Limit(rollOut, rollMax_DEF, rollMin_DEF);
@@ -533,7 +570,8 @@ static void AA241X_AUTO_FastLoop(void)
     || controlMode == MAX_CLIMB
     || controlMode == GLIDE
 	|| controlMode == ALTITUDE_TEST
-	|| controlMode == BANKED_ALTITUDE_TEST	)
+	|| controlMode == BANKED_ALTITUDE_TEST
+	|| controlMode == ALTITUDE_HOLD)
   {
     float pitchOut   = RC_Pitch_Trim + pitchControllerOut;
     Limit(pitchOut, pitchMax_DEF, pitchMin_DEF);

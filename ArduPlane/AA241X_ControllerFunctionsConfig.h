@@ -129,7 +129,7 @@ static const float PROGMEM gains [numControllers][numGains] = {
                                           {25.0f, .5f, 0.0f}, /* roll controller p, i, d */
                                           {40.0f, 1.0f, 0.0f}, /* pitch controller p, i, d */
                                           {0.0f, 0.0f, 0.0f},  /* rudder controller p, i, d */
-                                          {0.15f, 0.009f, 0.0f},  /* altitude controller p, i, d */                                        
+                                          {0.1f, 0.0f, 0.0f}, //{0.15f, 0.009f, 0.0f},  /* altitude controller p, i, d */                                        
                                           {12.0f, 0.05f, 0.0f},  /* airspeed controller p, i, d */
 										  {0.7f, 0.007f, 0.0f},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
 										  {1.0f, 0.01f, 0.0f}    /* ground speed controller p, i, d */
