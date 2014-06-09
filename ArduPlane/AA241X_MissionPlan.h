@@ -7,6 +7,7 @@
 #include "AA241X_Phase2_Waypoint.h"
 #include "AA241X_parseSnapshot.h"
 #include "AA241X_MissionPlan_Parameters.h"
+#include "AA241X_skynetSort.h"
 
 /**** Phase-1: Spiral ****/
 // Initialize spiral
@@ -270,6 +271,14 @@ static void InitPhase2() {
   
   // Set battery energy limit for first target (Joules)
   energy_limit = mission_energy_consumed + (ENERGY_LIMIT - mission_energy_consumed)/Ntargets;
+
+  float x_uav[3];
+  x_uav[0] = X_position;
+  x_uav[1] = Y_position;
+  x_uav[2] = 115;
+  float t_rem = (ENERGY_LIMIT - mission_energy_consumed)/0.5;
+  
+  skynetSort( x_uav,  v_phase2, t_rem, order);
   
   // Set target order iterator
   iorder = 0;
