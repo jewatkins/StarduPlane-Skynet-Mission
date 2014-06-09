@@ -53,7 +53,7 @@ static const float PROGMEM outputLimits[] = {
 											40.0f, // percent of elevator servo
 											20.0f, // percent of rudder servo
 											0.21f,  // altitude controller ~10 degrees 
-											35.0f, // throttle deviation maximum
+											45.0f, // throttle deviation maximum
 											0.872f, // heading angle deviation maximum ~50 degrees
 											3.0f   // airspeed maximum deviation (for ground speed controller)
 										    };
@@ -84,7 +84,7 @@ static const float PROGMEM integralLimits[] = {
 											  1.0f, /* pitch controller */
 											  1.0f, /* rudder controller */
 											  0.05f, /* altitude controller */
-											  5.0f, /* airspeed controller  */
+											  15.0f, /* airspeed controller  */
 											  0.05f, /* heading controller  */
 											  0.5f /* ground speed controller */
 											  };
@@ -94,8 +94,8 @@ static const float PROGMEM derivativeLimits[] = {
 											   3.0f, /* pitch controller (% rc out) */
 											   3.0f, /* rudder controller (% rc out) */
 											   0.05f, /* altitude controller (radians - 2.86 degrees) */
-											   3.0f, /* airspeed controller (meters/second) */
-											   0.05f, /* heading controller (radians - 2.86 degrees) */
+											   10.0f, /* airspeed controller (meters/second) */
+											   0.52f, /* heading controller (radians - 2.86 degrees) */
 											   0.5f /* ground speed controller (meters/second) */
 											    };
 
@@ -104,7 +104,7 @@ static const float PROGMEM integralTermLimits[] = {
 											   5.0f, /* pitch controller percent elevator */
 											   5.0f, /* rudder controller percent rudder */
 											   0.01f, /* altitude controller pitch angle (.57 degrees) */
-											   5.0f, /* airspeed controller percent throttle */
+											   15.0f, /* airspeed controller percent throttle */
 											   0.052f, /* heading controller (3 degrees)  */
 											   0.5f /* ground speed controller (m/s) */
 											      };
@@ -114,8 +114,8 @@ static const float PROGMEM derivativeTermLimits[] = {
 											   5.0f, /* pitch controller */
 											   5.0f, /* rudder controller */
 											   1.0f, /* altitude controller */
-											   5.0f, /* airspeed controller */
-											   2.0f, /* heading controller */
+											   10.0f, /* airspeed controller */
+											   0.52f, /* heading controller */
 											   5.0f /* ground speed controller */
 											  };
 
@@ -129,9 +129,9 @@ static const float PROGMEM gains [numControllers][numGains] = {
                                           {25.0f, .5f, 0.0f}, /* roll controller p, i, d */
                                           {40.0f, 1.0f, 0.0f}, /* pitch controller p, i, d */
                                           {0.0f, 0.0f, 0.0f},  /* rudder controller p, i, d */
-                                          {0.1f, 0.0f, 0.0f}, //{0.15f, 0.009f, 0.0f},  /* altitude controller p, i, d */                                        
-                                          {12.0f, 0.05f, 0.0f},  /* airspeed controller p, i, d */
-										  {0.7f, 0.007f, 0.0f},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
+                                          {0.15f, 0.009f, 0.0f}, //{0.15f, 0.009f, 0.0f},  /* altitude controller p, i, d */                                        
+										  {40.0f, 1.0f, 6.0f}, //{12.0f, 0.05f, 0.0f},  /* airspeed controller p, i, d */
+										  {0.7f, 0.007f, 0.6f},   /* heading controller p, i, d */ //{1.9, 0.002, 0.0},  for the quadratic
 										  {1.0f, 0.01f, 0.0f}    /* ground speed controller p, i, d */
                                          };
 

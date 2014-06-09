@@ -13,7 +13,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   float command = 0.0;
   float pTerm = 0.0;
   float iTerm = 0.0;
-  //float dTerm = 0.0;
+  float dTerm = 0.0;
 
   float error = references[controller] - measured;
 
@@ -42,7 +42,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   Limit(intErrors[controller], pgm_read_float(&integralLimits[controller]), -pgm_read_float(&integralLimits[controller]));
 
   // Calculate derivative error
-  // float derError = (error - prevErrors[controller])/delta_t;
+  float derError = (error - prevErrors[controller])/delta_t;
 
   //hal.console->printf_P(PSTR("\n derError: %f \n"), derError);
 
@@ -50,7 +50,7 @@ float StepController(unsigned int controller, float measured, float &delta_t)
   prevErrors[controller] = error;
 
   // Put a saturation limit on the derivative error
-  // Limit(derError,  pgm_read_float_near(&(derivativeLimits[controller])), -pgm_read_float_near(&(derivativeLimits[controller])));
+  Limit(derError,  pgm_read_float_near(&(derivativeLimits[controller])), -pgm_read_float_near(&(derivativeLimits[controller])));
   
   // Calculate All Controller Terms
   pTerm = pgm_read_float(&gains[controller][pGain])*error;  // Proportional Controller Term
@@ -63,11 +63,11 @@ float StepController(unsigned int controller, float measured, float &delta_t)
 
   Limit(iTerm, pgm_read_float(&integralTermLimits[controller]), -pgm_read_float(&integralTermLimits[controller]));  // Limit the integral controller
   
-  //dTerm = pgm_read_float(&gains[controller][dGain])*derError;  // Derivative Term
+  dTerm = pgm_read_float(&gains[controller][dGain])*derError;  // Derivative Term
 
   //hal.console->printf_P(PSTR("\n dTerm: %f \n"), dTerm);
 
-  //Limit(dTerm, pgm_read_float_near(&(derivativeTermLimits[controller])), -pgm_read_float_near(&(derivativeTermLimits[controller]))); // Limit the derivative controller
+  Limit(dTerm, pgm_read_float_near(&(derivativeTermLimits[controller])), -pgm_read_float_near(&(derivativeTermLimits[controller]))); // Limit the derivative controller
   
   /* Sum all terms */
   command = pTerm + iTerm /*+ dTerm*/;

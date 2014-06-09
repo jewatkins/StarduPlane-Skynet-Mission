@@ -602,7 +602,8 @@ static void AA241X_AUTO_FastLoop(void)
     || controlMode == MAX_CLIMB
     || controlMode == GLIDE
 	|| controlMode == ALTITUDE_TEST
-	|| controlMode == BANKED_ALTITUDE_TEST)
+	|| controlMode == BANKED_ALTITUDE_TEST
+	|| controlMode == ALTITUDE_HOLD)
   {
     float throttleOut = airspeedControllerOut;
     Limit(throttleOut, throttleMax_DEF, throttleMin_DEF);
