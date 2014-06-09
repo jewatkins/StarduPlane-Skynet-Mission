@@ -46,7 +46,7 @@ static char phaseOfFlight = CLIMBING; // Waiting to start mission
 #define SIGHTING_ALTITUDE 115.0f
 #define MAX_CLIMB_AIRSPEED 15.0f
 #define SIGHTING_GROUND_SPEED 10.5f
-#define NOMINAL_AIRSPEED 10.0f
+#define NOMINAL_AIRSPEED 11.0f
 #define MAX_CLIMB_PITCH 0.38f  // 22 degrees
 #define MAX_CLIMB_ROLL 0.1744f // 10 degrees
 #define GLIDE_PITCH 0.122f
@@ -669,17 +669,27 @@ static void AA241X_AUTO_MediumLoop(void)
 	SetReference(headingController_DEF, headingCommand);
     float headingControllerOut = StepController(headingController_DEF, ground_course, delta_t);
     Limit(headingControllerOut, pgm_read_float(&referenceLimits[rollController_DEF][maximum_DEF]), pgm_read_float(&referenceLimits[rollController_DEF][minimum_DEF]));
-
+	/*
 	// Settings to track ground speed
-    //float groundSpeedCommand = GetNavAirspeed();
-	//SetReference(groundSpeedController_DEF, groundSpeedCommand);
-    //airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
+	if(phase_flag == 1)
+	{
+		float groundSpeedCommand = 11.0; //GetNavAirspeed();
+		SetReference(groundSpeedController_DEF, groundSpeedCommand);
+		airspeedCommand = NOMINAL_AIRSPEED + StepController(groundSpeedController_DEF, ground_speed, delta_t);
 	
-	// Discretize the airspeedCommand to allow the controller to work
-	//DiscretizeAirspeedCommand(airspeedCommand);
-    //Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
-    //airspeedCommand = 9.0;
-    //SetReference(airspeedController_DEF, airspeedCommand);
+		// Discretize the airspeedCommand to allow the controller to work
+		DiscretizeAirspeedCommand(airspeedCommand);
+		//Limit(airspeedCommand, referenceLimits[airspeedController_DEF][maximum_DEF], referenceLimits[airspeedController_DEF][minimum_DEF]);
+		//airspeedCommand = 9.0;
+		SetReference(airspeedController_DEF, airspeedCommand);
+	}else if(phase_flag == 2)
+	{
+		// phase 2 airspeed
+		SetReference(airspeedController_DEF, 9.25);
+	}else if(phase_flag == 3)
+	{
+		SetReference(airspeedController_DEF, 9.5);
+	}*/
 
     // Determine the roll command from the heading controller
     float rollCommand = StepController(headingController_DEF, ground_course, delta_t); 

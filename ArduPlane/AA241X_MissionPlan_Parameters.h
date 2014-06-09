@@ -29,7 +29,7 @@ static float energy_limit = 0.0f;  // Battery energy limit for next target
 #define beta             0.75
 #define ts               3.0
 #define v_phase2         9.25
-#define n_Inc_lim        16
+#define n_Inc_lim        15
 #define n_Exc_lim        0
 #define n_region_lim     10
 

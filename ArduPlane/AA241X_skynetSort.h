@@ -8,6 +8,7 @@
 #include <math.h>
 #include "AA241X_regionIntCirc.h"
 #include "AA241X_sortPoly.h"
+#include "AA241X_MissionPlan_Parameters.h"
 
 #define fB 30.0
 #define fT 60.0
@@ -39,7 +40,7 @@ float area_triangle(float x1[2], float x2[2], float x3[2]){
 }
 
 // Evaluates the area of a convex polygon given its coordinates
-float polyArea(uint8_t n_poly, float poly[n_poly][2]){
+float polyArea(uint8_t n_poly, float poly[][2]){
     
     sortPoly(n_poly, poly);
     
@@ -223,7 +224,7 @@ void skynetSort(float x_uav[3], float v, float t_rem, uint8_t order[4]){
     float l[6], min_l;
     uint8_t i_opt, ind1, ind2;
 
-    min_l = 0;
+    min_l = 2000;
     for (i=0; i<6; i++){
     	l[i] = 0;
     	for (j=0; j<3; j++){

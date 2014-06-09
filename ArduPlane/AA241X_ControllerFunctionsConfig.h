@@ -76,7 +76,7 @@ static const float PROGMEM referenceLimits[numControllers][minMax] = {
                                    {120.0f /* 120 meters */, 0.0f /* 0 meters */ },  /* altitude controller */
                                    {13.5f /* 13.5 m/s max */, 8.5f /* 8.5 m/s min */}, /* airspeed controller */
                                    {6.30f /* 2 PI max */, -0.1f /* -0.1 min */}, /* heading controller */
-								   {3.0f /* 3 m/s max */, -3.0f /* -3.0 m/s min */} /* ground speed controller */ 
+								   {3.0f /* 3 m/s max */, -2.0f /* -3.0 m/s min */} /* ground speed controller */ 
                                   };
 
 static const float PROGMEM integralLimits[] = {
